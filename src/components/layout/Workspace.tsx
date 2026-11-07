@@ -7,12 +7,13 @@ import { ComparisonSlider } from '../common/ComparisonSlider';
 import { GatedFeatureCard } from '../auth/GatedFeatureCard';
 import { ControlRack } from './ControlRack';
 import { BatchDrawer } from './BatchDrawer';
-import { Lock, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Lock, ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
 
 export const Workspace: React.FC = () => {
   const { images, activeImage, activeUtilityId, setActiveUtilityId, toastMessage, dismissToast } = useSession();
   const { user, isUtilityUnlocked } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<UtilityCategory | 'all'>('all');
+  const [showMobileControls, setShowMobileControls] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
@@ -177,9 +178,34 @@ export const Workspace: React.FC = () => {
           )}
         </main>
 
-        {/* Right Utility Configuration Rack (Only shown when an image is loaded) */}
+        {/* Right Utility Configuration Rack (Desktop fixed sidebar) */}
         {images.length > 0 && isUnlocked && <ControlRack />}
       </div>
+
+      {/* Mobile Floating Controls Button */}
+      {images.length > 0 && isUnlocked && (
+        <div className="md:hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+          <button
+            onClick={() => setShowMobileControls(true)}
+            className="px-5 py-2.5 rounded-full bg-gradient-to-r from-neutral-900 via-violet-950 to-neutral-900 text-white font-semibold text-xs shadow-xl shadow-neutral-950/40 flex items-center gap-2 border border-violet-400/40 cursor-pointer active:scale-95 transition"
+          >
+            <Sliders className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Adjust Parameters</span>
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Slide-Up Controls Sheet */}
+      {images.length > 0 && isUnlocked && showMobileControls && (
+        <div 
+          className="md:hidden fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setShowMobileControls(false)}
+        >
+          <div className="w-full" onClick={(e) => e.stopPropagation()}>
+            <ControlRack isMobileDrawer={true} onCloseMobile={() => setShowMobileControls(false)} />
+          </div>
+        </div>
+      )}
 
       {/* Bottom Batch Image Queue Drawer (Only shown when images exist) */}
       {images.length > 0 && <BatchDrawer />}

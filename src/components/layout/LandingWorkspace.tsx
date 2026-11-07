@@ -331,20 +331,20 @@ export const LandingWorkspace: React.FC = () => {
         </div>
 
         {/* 4 Feature Studio Highlights */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-neutral-300 transition">
-            <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-800 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-amber-600" />
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-amber-300 hover:shadow-md hover:shadow-amber-500/5 transition group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/60 text-amber-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Zap className="w-5 h-5 text-amber-600" />
             </div>
-            <h3 className="text-sm font-bold text-neutral-900">MozJPEG & OxiPNG</h3>
+            <h3 className="text-sm font-bold text-neutral-900">MozJPEG &amp; OxiPNG</h3>
             <p className="text-xs text-neutral-500 leading-relaxed">
               Industry-standard WASM codecs with interactive side-by-side Before/After diff sliders.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-neutral-300 transition">
-            <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-800 flex items-center justify-center">
-              <Cpu className="w-4 h-4 text-purple-600" />
+          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-violet-300 hover:shadow-md hover:shadow-violet-500/5 transition group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200/60 text-violet-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Cpu className="w-5 h-5 text-violet-600" />
             </div>
             <h3 className="text-sm font-bold text-neutral-900">WebGPU Neural AI</h3>
             <p className="text-xs text-neutral-500 leading-relaxed">
@@ -352,19 +352,19 @@ export const LandingWorkspace: React.FC = () => {
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-neutral-300 transition">
-            <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-800 flex items-center justify-center">
-              <FileCode2 className="w-4 h-4 text-sky-600" />
+          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-cyan-300 hover:shadow-md hover:shadow-cyan-500/5 transition group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-50 to-sky-50 border border-cyan-200/60 text-cyan-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <FileCode2 className="w-5 h-5 text-cyan-600" />
             </div>
-            <h3 className="text-sm font-bold text-neutral-900">SVG & Vectorizer</h3>
+            <h3 className="text-sm font-bold text-neutral-900">SVG &amp; Vectorizer</h3>
             <p className="text-xs text-neutral-500 leading-relaxed">
               Convert PNGs to crisp SVG vectors, and render complex vector drawings up to 16,384px print formats.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-neutral-300 transition">
-            <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-800 flex items-center justify-center">
-              <Camera className="w-4 h-4 text-rose-600" />
+          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-rose-300 hover:shadow-md hover:shadow-rose-500/5 transition group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-200/60 text-rose-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Camera className="w-5 h-5 text-rose-600" />
             </div>
             <h3 className="text-sm font-bold text-neutral-900">Camera RAW Studio</h3>
             <p className="text-xs text-neutral-500 leading-relaxed">
@@ -384,7 +384,7 @@ export const LandingWorkspace: React.FC = () => {
             </div>
 
             {/* Category Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
               {[
                 { id: 'all', label: 'All 25' },
                 { id: 'optimize', label: 'Optimize' },
@@ -396,10 +396,10 @@ export const LandingWorkspace: React.FC = () => {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedFilter(cat.id as any)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer shrink-0 ${
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer shrink-0 ${
                     selectedFilter === cat.id
-                      ? 'bg-neutral-900 text-white'
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                      ? 'bg-neutral-900 text-white shadow-xs'
+                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80 hover:text-neutral-900'
                   }`}
                 >
                   {cat.label}
@@ -409,7 +409,7 @@ export const LandingWorkspace: React.FC = () => {
           </div>
 
           {/* Utility Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3.5">
             {filteredUtilities.map((u) => {
               const isLocked = u.isCompetitorPaid && !user;
               return (
@@ -423,7 +423,7 @@ export const LandingWorkspace: React.FC = () => {
                       fileInputRef.current?.click();
                     }
                   }}
-                  className="p-4 rounded-2xl bg-white hover:bg-neutral-50/90 border border-neutral-200/80 hover:border-neutral-300 transition cursor-pointer flex flex-col justify-between group shadow-2xs hover:shadow-xs"
+                  className="p-4 rounded-2xl bg-white hover:bg-neutral-50/90 border border-neutral-200/80 hover:border-violet-300 hover:shadow-md hover:shadow-violet-500/5 transition cursor-pointer flex flex-col justify-between group shadow-2xs"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -436,13 +436,13 @@ export const LandingWorkspace: React.FC = () => {
                           <span>Free Pro</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200/60">
                           <CheckCircle2 className="w-2.5 h-2.5" />
                           <span>Local</span>
                         </span>
                       )}
                     </div>
-                    <h3 className="text-xs font-bold text-neutral-900 group-hover:text-black">
+                    <h3 className="text-xs font-bold text-neutral-900 group-hover:text-violet-950 transition-colors">
                       {u.name}
                     </h3>
                     <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
@@ -452,7 +452,7 @@ export const LandingWorkspace: React.FC = () => {
 
                   <div className="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between text-[10px] text-neutral-400">
                     <span className="font-mono">{u.supportsBatch ? 'Batch Capable' : 'Single Studio'}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-900 group-hover:translate-x-1 transition duration-150" />
+                    <ArrowRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-violet-600 group-hover:translate-x-1 transition duration-150" />
                   </div>
                 </div>
               );

@@ -122,6 +122,15 @@ export const ResizeControls: React.FC = () => {
         </div>
       )}
 
+      {/* Direct Apply Button */}
+      <button
+        onClick={() => executeActiveUtility({ width, height })}
+        className="w-full py-2.5 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <Maximize2 className="w-3.5 h-3.5" />
+        <span>Resize to {width} × {height} px</span>
+      </button>
+
       {/* Common Presets */}
       <div>
         <label className="block text-[11px] font-semibold text-neutral-600 mb-1.5">Common Resolution Presets</label>

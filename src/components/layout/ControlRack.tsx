@@ -3,7 +3,7 @@ import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { UTILITIES } from '../../types/utility';
 import { formatBytes } from '../../utils/formatters';
-import { Play, Download } from 'lucide-react';
+import { Play, Download, X, Sliders } from 'lucide-react';
 
 // Modular Utility Controls
 import { ResizeControls } from '../utilities/ResizeControls';
@@ -23,13 +23,21 @@ import { CollageControls } from '../utilities/CollageControls';
 import { CameraRawControls } from '../utilities/CameraRawControls';
 import { AiSuiteControls } from '../utilities/AiSuiteControls';
 
-export const ControlRack: React.FC = () => {
+interface ControlRackProps {
+  isMobileDrawer?: boolean;
+  onCloseMobile?: () => void;
+}
+
+export const ControlRack: React.FC<ControlRackProps> = ({
+  isMobileDrawer = false,
+  onCloseMobile,
+}) => {
   const { activeImage, activeUtilityId, executeActiveUtility, downloadImage, sendToUtility, isProcessing } = useSession();
   const { isUtilityUnlocked } = useAuth();
 
   if (!activeImage) {
     return (
-      <aside className="w-84 h-full bg-white border-l border-neutral-200/80 p-6 flex flex-col items-center justify-center text-center">
+      <aside className="w-full md:w-84 h-full bg-white border-l border-neutral-200/80 p-6 flex flex-col items-center justify-center text-center">
         <p className="text-xs text-neutral-400">Select or drop an image to configure utility parameters.</p>
       </aside>
     );
@@ -90,14 +98,35 @@ export const ControlRack: React.FC = () => {
     }
   };
 
+  const containerClasses = isMobileDrawer
+    ? "w-full max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col justify-between overflow-y-auto border-t border-neutral-200 animate-in slide-in-from-bottom duration-200"
+    : "hidden md:flex w-84 h-full bg-white border-l border-neutral-200/80 flex-col justify-between overflow-y-auto";
+
   return (
-    <aside className="w-84 h-full bg-white border-l border-neutral-200/80 flex flex-col justify-between overflow-y-auto">
+    <aside className={containerClasses}>
       {/* Top Section: Active Tool Parameters */}
-      <div className="p-6 space-y-6">
+      <div className="p-5 sm:p-6 space-y-5">
+        {/* Mobile Pull Handle & Close Header */}
+        {isMobileDrawer && (
+          <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+            <div className="flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-violet-600" />
+              <span className="text-xs font-bold text-neutral-900">Adjust Settings</span>
+            </div>
+            <button
+              onClick={onCloseMobile}
+              className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition cursor-pointer"
+              aria-label="Close mobile controls"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
         <div>
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Active Utility</span>
-            <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className="text-[10px] font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200/60">
               Local Sandbox
             </span>
           </div>
@@ -116,15 +145,23 @@ export const ControlRack: React.FC = () => {
       </div>
 
       {/* Bottom Action Rack & "Send To..." Workflow Bus */}
-      <div className="p-6 border-t border-neutral-200/80 bg-neutral-50/50 space-y-3">
+      <div className="p-5 sm:p-6 border-t border-neutral-200/80 bg-neutral-50/50 space-y-3">
         {/* Process Button */}
         <button
-          onClick={() => executeActiveUtility({})}
+          onClick={() => {
+            executeActiveUtility({});
+            if (isMobileDrawer && onCloseMobile) {
+              // On mobile, keep drawer or let user inspect result
+            }
+          }}
           disabled={isProcessing}
-          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-neutral-900 via-violet-950 to-neutral-900 hover:from-violet-900 hover:to-indigo-900 text-white font-semibold text-xs transition shadow-sm hover:shadow-md hover:shadow-violet-500/10 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-neutral-900 via-violet-950 to-neutral-900 hover:from-violet-900 hover:to-indigo-900 text-white font-semibold text-xs transition shadow-sm hover:shadow-md hover:shadow-violet-500/10 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
         >
           {isProcessing ? (
-            <span>Computing in Worker...</span>
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+              <span>Processing in Sandbox...</span>
+            </span>
           ) : (
             <>
               <Play className="w-3.5 h-3.5 fill-current" />
@@ -137,9 +174,9 @@ export const ControlRack: React.FC = () => {
         {activeImage.processedBlob && (
           <button
             onClick={() => downloadImage(activeImage.id)}
-            className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs transition shadow-sm hover:shadow-md hover:shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-4 h-4" />
             <span>Download Result ({formatBytes(activeImage.processedSize!)})</span>
           </button>
         )}
@@ -153,25 +190,25 @@ export const ControlRack: React.FC = () => {
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={() => sendToUtility('watermark')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:bg-neutral-100 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-violet-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
               >
                 &rarr; Watermark
               </button>
               <button
                 onClick={() => sendToUtility('avatar-crop')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:bg-neutral-100 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-violet-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
               >
                 &rarr; Circular Crop
               </button>
               <button
                 onClick={() => sendToUtility('batch-resize')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:bg-neutral-100 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-violet-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
               >
                 &rarr; Batch Resize
               </button>
               <button
                 onClick={() => sendToUtility('social-presets')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:bg-neutral-100 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-violet-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
               >
                 &rarr; Social Preset
               </button>
