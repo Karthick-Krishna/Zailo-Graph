@@ -1,7 +1,7 @@
-# Imazy — Product Requirements Document (PRD)
+# Imazora — Product Requirements Document (PRD)
 
 **Document Version:** 1.0.0  
-**Target Domain:** `imazy.zorquelz.com`  
+**Target Domain:** `Imazora.zorquelz.com`  
 **Brand Identity:** Zorquelz  
 **Tagline:** *"Your images. Your workflow. Your control."*  
 **Status:** Approved Architecture Draft  
@@ -10,12 +10,12 @@
 
 ## 1. Executive Summary & Product Philosophy
 
-Imazy is a professional-grade, privacy-first, web-native image utility workspace developed under Zorquelz. It consolidates 25 disparate image conversion, enhancement, vectorization, redaction, and generative/enhancement AI workflows into a cohesive, non-destructive desktop and mobile workspace.
+Imazora is a professional-grade, privacy-first, web-native image utility workspace developed under Zorquelz. It consolidates 25 disparate image conversion, enhancement, vectorization, redaction, and generative/enhancement AI workflows into a cohesive, non-destructive desktop and mobile workspace.
 
 ### Core Tenets
 1. **Zero-Knowledge Privacy by Default:** User images never leave the local browser runtime unless the user explicitly opts into a high-compute cloud fallback model.
-2. **Free Pro Power via Free Account:** Everything on Imazy is 100% free with zero paywalls, credit cards, or subscriptions. Competitor-paid features (AI background removal, 4x upscaling, inpainting, colorization, vectorization, Camera RAW studio) and enterprise batch limits are fully unlocked simply by logging in.
-3. **Guest Tier with Strict Protective Limits:** Anonymous guests can use Imazy immediately without logging in, but operate under strict limits on file size, batch size, and access to standard raster utilities only.
+2. **Free Pro Power via Free Account:** Everything on Imazora is 100% free with zero paywalls, credit cards, or subscriptions. Competitor-paid features (AI background removal, 4x upscaling, inpainting, colorization, vectorization, Camera RAW studio) and enterprise batch limits are fully unlocked simply by logging in.
+3. **Guest Tier with Strict Protective Limits:** Anonymous guests can use Imazora immediately without logging in, but operate under strict limits on file size, batch size, and access to standard raster utilities only.
 4. **Connected Workflows:** Output from any tool can instantly pipe into another tool (e.g., *RAW to JPG* &rarr; *Background Removal* &rarr; *Social Preset* &rarr; *Compression*) without redundant disk roundtrips.
 5. **Deterministic & Transparent:** Clear indication of local WASM/WebGPU execution versus cloud execution, exact file size savings, and raw metadata inspection before saving.
 6. **Architectural Resilience:** Explicit memory budgets (handling up to 50 MB raw/high-res files for logged-in users) with proactive crash-prevention and graceful degradation.
@@ -24,7 +24,7 @@ Imazy is a professional-grade, privacy-first, web-native image utility workspace
 
 ## 2. Access Tiers: Anonymous Guest vs. Free Registered User
 
-Imazy offers two operational tiers. Both tiers are completely free of financial cost, subscriptions, or credit card requirements.
+Imazora offers two operational tiers. Both tiers are completely free of financial cost, subscriptions, or credit card requirements.
 
 | Capability / Resource | Anonymous Guest (No Login) | Free Registered User (Logged In) |
 | :--- | :--- | :--- |
@@ -255,7 +255,7 @@ flowchart TD
 
 In traditional web image tools, users upload an image, run a crop, download a file to desktop, navigate to a compression tool, re-upload the cropped file, and repeat. 
 
-Imazy introduces an **In-Memory Session Pipeline**:
+Imazora introduces an **In-Memory Session Pipeline**:
 
 ```mermaid
 stateDiagram-v2

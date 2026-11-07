@@ -1,7 +1,7 @@
-# Imazy — Technical Architecture Blueprint
+# Imazora — Technical Architecture Blueprint
 
 **Document Version:** 1.0.0  
-**Target Domain:** `imazy.zorquelz.com`  
+**Target Domain:** `Imazora.zorquelz.com`  
 **Architectural Model:** Local-First Hybrid Architecture  
 **Status:** Approved Engineering Blueprint  
 
@@ -9,11 +9,11 @@
 
 ## 1. High-Level System Architecture
 
-Imazy is designed as a **client-dominated local-first web platform**. Over 80% of all operations execute entirely within the client's browser engine using WebAssembly (WASM), Web Workers, and WebGPU. High-compute generative AI operations and heavy RAW demosaicing implement a **hybrid execution model**: they run locally by default where client hardware permits, with an explicit, opt-in ephemeral cloud worker fallback.
+Imazora is designed as a **client-dominated local-first web platform**. Over 80% of all operations execute entirely within the client's browser engine using WebAssembly (WASM), Web Workers, and WebGPU. High-compute generative AI operations and heavy RAW demosaicing implement a **hybrid execution model**: they run locally by default where client hardware permits, with an explicit, opt-in ephemeral cloud worker fallback.
 
 ```mermaid
 flowchart TB
-    subgraph Client["Client Browser Runtime (imazy.zorquelz.com)"]
+    subgraph Client["Client Browser Runtime (Imazora.zorquelz.com)"]
         UI["Main UI Thread (React 19 + Vite)<br/>Light-Theme Canvas & Tool Controls"]
         Bus["Session VFS & Workflow Bus<br/>In-Memory DAG + OPFS Swap"]
         WorkerPool["Worker Orchestration Pool<br/>Comlink / Actor Queue"]
@@ -90,7 +90,7 @@ flowchart LR
 
 ## 3. Authentication, Entitlements & Quota Enforcement Engine
 
-Imazy balances open accessibility with resource sustainability by implementing an in-browser **Entitlement & Quota Engine**. Anonymous guests can freely perform core image tasks with zero friction, while competitor-paid features (AI tools, vectorization, RAW conversion, 50MB files, 50-image batching) require a **100% free account login**.
+Imazora balances open accessibility with resource sustainability by implementing an in-browser **Entitlement & Quota Engine**. Anonymous guests can freely perform core image tasks with zero friction, while competitor-paid features (AI tools, vectorization, RAW conversion, 50MB files, 50-image batching) require a **100% free account login**.
 
 ```mermaid
 flowchart TD
@@ -114,7 +114,7 @@ flowchart TD
 2. **Batch Queue Controller:** The `WorkerPoolManager` enforces a hard cap of 3 tasks for anonymous guests. Queuing a 4th file halts the queue and prompts the user to log in for free.
 3. **Utility Route Guard:** Navigation to competitor-paid utilities (`ai-bg-removal`, `ai-upscale-4x`, `ai-inpainting`, `ai-colorization`, `vectorize-svg`, `camera-raw`, `svg-high-res-16x`) checks `useAuth().isAuthenticated`. For guests, a clean showcase card appears with sample before/after comparisons and a 1-click free registration prompt.
 4. **Export Resolution Clamper:** The export serializer clamps guest raster outputs to max $1920 \times 1080\text{ px}$. Logged-in users export at native 100% unconstrained resolution (up to 8K / 96 MP).
-5. **Cloud Fallback Gatekeeper:** The ephemeral cloud worker edge router (`api.imazy.zorquelz.com`) strictly verifies the signed user JWT. Anonymous requests to GPU compute routes are rejected with `401 Unauthorized` to prevent malicious DDoS exploitation of GPU resources.
+5. **Cloud Fallback Gatekeeper:** The ephemeral cloud worker edge router (`api.Imazora.zorquelz.com`) strictly verifies the signed user JWT. Anonymous requests to GPU compute routes are rejected with `401 Unauthorized` to prevent malicious DDoS exploitation of GPU resources.
 
 ---
 
@@ -147,7 +147,7 @@ The application utilizes a dedicated **Worker Pool Manager** to ensure the main 
 
 ## 5. In-Memory Session Pipeline & Workflow Bus
 
-To achieve the "connected workflow" requirement without repeated uploads, Imazy implements an in-memory **Session Virtual File System (VFS)** based on a Directed Acyclic Graph (DAG).
+To achieve the "connected workflow" requirement without repeated uploads, Imazora implements an in-memory **Session Virtual File System (VFS)** based on a Directed Acyclic Graph (DAG).
 
 ```mermaid
 graph LR
@@ -167,7 +167,7 @@ Each node in the session DAG contains:
 - `previewBitmap`: Low-resolution ($512\text{ px}$) `ImageBitmap` kept in memory for instant UI rendering.
 - `metadata`: Extracted EXIF/color space metadata preserved across transformations.
 
-When a user selects **"Send to Background Removal"** from the RAW conversion tool, Imazy simply passes the `nodeId` reference. No network call, disk download, or re-upload occurs.
+When a user selects **"Send to Background Removal"** from the RAW conversion tool, Imazora simply passes the `nodeId` reference. No network call, disk download, or re-upload occurs.
 
 ---
 
@@ -236,13 +236,13 @@ sequenceDiagram
 ### Service Worker & PWA Capabilities
 - All core application assets, WASM binaries, and UI code are cached using a `Cache-First` strategy via the Service Worker.
 - All 20 pure-local utilities remain **100% operational offline** (airplane mode, zero connectivity).
-- The PWA manifests support file associations: users can right-click an image in their desktop OS file manager and select *"Open with Imazy"*.
+- The PWA manifests support file associations: users can right-click an image in their desktop OS file manager and select *"Open with Imazora"*.
 
 ---
 
 ## 9. Cross-Origin Isolation & High-Performance Buffers
 
-High-throughput multi-threaded WebAssembly and WebGPU require high-precision timers and `SharedArrayBuffer` support. To unlock this in modern browsers, Imazy enforces strict Cross-Origin Isolation headers:
+High-throughput multi-threaded WebAssembly and WebGPU require high-precision timers and `SharedArrayBuffer` support. To unlock this in modern browsers, Imazora enforces strict Cross-Origin Isolation headers:
 
 ```http
 Cross-Origin-Opener-Policy: same-origin

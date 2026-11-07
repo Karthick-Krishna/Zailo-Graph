@@ -42,3 +42,4 @@ coverage/
 # Large model binaries / downloaded test fixtures
 public/models/*.onnx
 test-fixtures/raw-samples/
+

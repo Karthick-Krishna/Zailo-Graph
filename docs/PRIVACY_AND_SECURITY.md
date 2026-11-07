@@ -1,7 +1,7 @@
-# Imazy — Privacy Architecture & Security Blueprint
+# Imazora — Privacy Architecture & Security Blueprint
 
 **Document Version:** 1.0.0  
-**Target Domain:** `imazy.zorquelz.com`  
+**Target Domain:** `Imazora.zorquelz.com`  
 **Security Model:** Zero-Knowledge Client-Side Sandbox with Ephemeral Opt-In Fallback  
 **Status:** Approved Security Document  
 
@@ -9,9 +9,9 @@
 
 ## 1. Executive Privacy Charter
 
-At Imazy (a Zorquelz platform), user privacy is not an afterthought or a marketing claim—it is the foundational architectural constraint dictating every technical decision.
+At Imazora (a Zorquelz platform), user privacy is not an afterthought or a marketing claim—it is the foundational architectural constraint dictating every technical decision.
 
-### The Five Inviolable Privacy Laws of Imazy
+### The Five Inviolable Privacy Laws of Imazora
 1. **Local-First Zero-Knowledge Sandbox:** All image operations execute entirely within the user's browser runtime by default. No image bytes, thumbnails, filenames, or metadata are ever transmitted over the network without explicit, affirmative user action.
 2. **Affirmative Cloud Consent:** Cloud processing is never triggered automatically or silently. If a user's hardware cannot execute a model locally, the system requests per-task affirmative consent explaining exactly what data will leave their device.
 3. **Stateless Ephemerality:** When cloud compute is utilized, image bytes exist exclusively in volatile RAM buffers. No user files are ever written to disk, databases, object stores, or persistent caches.
@@ -33,7 +33,7 @@ flowchart TD
         T6["T6: Man-in-the-Middle Cloud Interception"]
     end
 
-    subgraph Mitigations["Imazy Architectural Defenses"]
+    subgraph Mitigations["Imazora Architectural Defenses"]
         M1["DOMPurify + Strict XML Depth Parser"]
         M2["Pre-allocation Bounds & Dimension Clamping"]
         M3["Sandboxed Web Workers + Safe Rust/WASM Bounds"]
@@ -85,7 +85,7 @@ When local hardware cannot sustain an operation (e.g. lack of WebGPU support for
 sequenceDiagram
     autonumber
     actor User as User
-    participant App as Imazy Frontend
+    participant App as Imazora Frontend
     participant Modal as Consent Modal
     participant Worker as Ephemeral GPU Worker
     
@@ -110,7 +110,7 @@ sequenceDiagram
 
 ### Consent Modal Specifications:
 - **Default State:** The checkbox is unchecked by default.
-- **Transparency:** The dialog clearly displays the destination endpoint (`api.imazy.zorquelz.com`), the encryption standard (TLS 1.3), and states: *"This file will be processed in volatile memory and permanently discarded immediately upon completion. It is never saved to disk or used for AI training."*
+- **Transparency:** The dialog clearly displays the destination endpoint (`api.Imazora.zorquelz.com`), the encryption standard (TLS 1.3), and states: *"This file will be processed in volatile memory and permanently discarded immediately upon completion. It is never saved to disk or used for AI training."*
 - **Granularity:** Users can grant consent for "This image only" or "This session only". Consent expires automatically upon closing the tab.
 
 ---
@@ -129,7 +129,7 @@ For operations utilizing the cloud fallback, the infrastructure adheres to stric
 
 ## 5. Content Security Policy (CSP) & Isolation Headers
 
-Imazy enforces modern, strict browser headers configured via Cloudflare Pages `_headers`:
+Imazora enforces modern, strict browser headers configured via Cloudflare Pages `_headers`:
 
 ### Content Security Policy (CSP)
 ```http
@@ -139,7 +139,7 @@ Content-Security-Policy:
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://*.tile.openstreetmap.org;
     font-src 'self';
-    connect-src 'self' https://api.imazy.zorquelz.com;
+    connect-src 'self' https://api.Imazora.zorquelz.com;
     worker-src 'self' blob:;
     object-src 'none';
     base-uri 'none';
@@ -152,7 +152,7 @@ Content-Security-Policy:
 - `'wasm-unsafe-eval'`: Strictly required to allow WebAssembly JIT compilation while prohibiting unsafe JavaScript `eval()`.
 - `worker-src 'self' blob:`: Permits spawning Web Workers from local Vite module chunks and blob URLs.
 - `object-src 'none'`: Eliminates obsolete Flash/Java plugin exploit vectors.
-- `frame-ancestors 'none'`: Prevents clickjacking attacks by forbidding framing of Imazy within third-party `<iframe>` tags.
+- `frame-ancestors 'none'`: Prevents clickjacking attacks by forbidding framing of Imazora within third-party `<iframe>` tags.
 
 ### Cross-Origin Isolation Headers
 ```http
@@ -168,9 +168,9 @@ Enforcing `COOP` and `COEP` provides:
 
 ## 6. User Account Privacy & Zero-Profile Policy
 
-To unlock competitor-paid utilities (AI models, vectorization, RAW studio, 50MB files, and 50-item batches) for free, users create a free Imazy account. We enforce strict data minimization:
+To unlock competitor-paid utilities (AI models, vectorization, RAW studio, 50MB files, and 50-item batches) for free, users create a free Imazora account. We enforce strict data minimization:
 
-1. **Zero Financial Data:** No credit card, billing address, or payment details are ever requested or stored. Imazy is completely free.
+1. **Zero Financial Data:** No credit card, billing address, or payment details are ever requested or stored. Imazora is completely free.
 2. **Minimalist Identity:** Accounts use passwordless magic links or standard PKCE OAuth (Google / GitHub). Only the verified email address and account creation timestamp are retained.
 3. **Decoupled Processing:** User image operations are never correlated or logged against their user account profile. The server has zero knowledge of which images any specific user account has processed.
 4. **Instant Self-Serve Deletion:** Users can permanently delete their account with a single click, completely removing their email and authentication records from the authentication database.

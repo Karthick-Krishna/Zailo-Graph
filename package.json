@@ -1,18 +1,24 @@
 {
-  "name": "imazy",
+  "name": "Imazora",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "description": "Your images. Your workflow. Your control. Privacy-first web-native image utility workspace.",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "keywords": [
+    "image-utility",
+    "image-processing",
+    "wasm",
+    "webgpu",
+    "privacy-first",
+    "local-first",
+    "zorquelz"
+  ],
+  "author": "Zorquelz",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",
     "@types/node": "^26.6.6",
@@ -20,8 +26,8 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.1",
     "tailwindcss": "^4.3.5",
-    "typescript": "^7.0.2",
-    "vite": "^8.3.6"
+    "typescript": "^5.7.3",
+    "vite": "^6.2.1"
   },
   "dependencies": {
     "clsx": "^2.1.1",
