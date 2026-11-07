@@ -31,3 +31,4 @@ export async function convertHeicToRaster(
     throw new Error(`Failed to decode HEIC image: ${err?.message || 'Unknown codec error'}`);
   }
 }
+
