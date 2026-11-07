@@ -1,0 +1,313 @@
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useSession } from '../../context/SessionContext';
+import { useAuth } from '../../context/AuthContext';
+import { UTILITIES, UtilityDefinition, UtilityCategory } from '../../types/utility';
+import {
+  Sparkles,
+  Maximize2,
+  FileDown,
+  Smartphone,
+  Repeat,
+  FileCode2,
+  PenTool,
+  Zap,
+  Eraser,
+  Sliders,
+  Crop,
+  Share2,
+  Stamp,
+  LayoutGrid,
+  Palette,
+  IdCard,
+  SunMedium,
+  Wand2,
+  FileSearch,
+  ShieldCheck,
+  EyeOff,
+  AppWindow,
+  Binary,
+  FileCode,
+  Camera,
+  Lock,
+  Search,
+  X,
+  PanelLeftClose,
+  PanelLeft,
+  ChevronDown,
+  Layers
+} from 'lucide-react';
+
+const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
+  Sparkles,
+  Maximize2,
+  FileDown,
+  Smartphone,
+  Repeat,
+  FileCode2,
+  PenTool,
+  Zap,
+  Eraser,
+  Sliders,
+  Crop,
+  Share2,
+  Stamp,
+  LayoutGrid,
+  Palette,
+  IdCard,
+  SunMedium,
+  Wand2,
+  FileSearch,
+  ShieldCheck,
+  EyeOff,
+  AppWindow,
+  Binary,
+  FileCode,
+  Camera,
+};
+
+const CATEGORIES: Array<{ id: UtilityCategory | 'all'; label: string }> = [
+  { id: 'all', label: 'All Tools' },
+  { id: 'recipes', label: 'Recipes' },
+  { id: 'optimize', label: 'Optimize' },
+  { id: 'convert', label: 'Convert' },
+  { id: 'ai', label: 'AI Suite' },
+  { id: 'edit', label: 'Edit & Crop' },
+  { id: 'metadata', label: 'Metadata' },
+];
+
+interface ToolSidebarProps {
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+}
+
+export const ToolSidebar: React.FC<ToolSidebarProps> = ({
+  isCollapsed = false,
+  onToggleCollapse,
+}) => {
+  const { activeUtilityId, setActiveUtilityId } = useSession();
+  const { user, isUtilityUnlocked } = useAuth();
+  const [selectedCategory, setSelectedCategory] = useState<UtilityCategory | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus search input on keyboard shortcut '/' or '⌘K'
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+
+      if (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Filter tools by category and search query
+  const filteredUtilities = useMemo(() => {
+    return UTILITIES.filter(u => {
+      const matchesCategory = selectedCategory === 'all' || u.category === selectedCategory;
+      const matchesSearch = !searchQuery.trim() ||
+        u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.inputFormats.some(f => f.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        u.outputFormats.some(f => f.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesCategory && matchesSearch;
+    });
+  }, [selectedCategory, searchQuery]);
+
+  // Group utilities by category when viewing 'All' and no search query active
+  const groupedUtilities = useMemo(() => {
+    if (selectedCategory !== 'all' || searchQuery.trim()) return null;
+
+    const groups: Record<string, UtilityDefinition[]> = {
+      '1-Click Automation': UTILITIES.filter(u => u.category === 'recipes'),
+      'Optimize & Compress': UTILITIES.filter(u => u.category === 'optimize'),
+      'Convert & Vectorize': UTILITIES.filter(u => u.category === 'convert'),
+      'AI Neural Suite': UTILITIES.filter(u => u.category === 'ai'),
+      'Creative Studio & Crop': UTILITIES.filter(u => u.category === 'edit' || u.category === 'social'),
+      'Privacy & Metadata': UTILITIES.filter(u => u.category === 'metadata'),
+    };
+    return groups;
+  }, [selectedCategory, searchQuery]);
+
+  const renderToolButton = (u: UtilityDefinition) => {
+    const isSelected = u.id === activeUtilityId;
+    const isLocked = u.isCompetitorPaid && !user;
+    const IconComponent = ICON_MAP[u.icon] || Sparkles;
+
+    if (isCollapsed) {
+      return (
+        <button
+          key={u.id}
+          onClick={() => setActiveUtilityId(u.id)}
+          className={`relative w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer group mb-1.5 ${
+            isSelected
+              ? 'bg-neutral-900 text-white shadow-xs'
+              : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100'
+          }`}
+          title={`${u.name} — ${u.description}`}
+        >
+          <IconComponent className="w-4 h-4 shrink-0" />
+          {isLocked && (
+            <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center border border-amber-200">
+              <Lock className="w-2 h-2" />
+            </span>
+          )}
+        </button>
+      );
+    }
+
+    return (
+      <button
+        key={u.id}
+        onClick={() => setActiveUtilityId(u.id)}
+        className={`w-full px-3 py-2 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between group mb-1 ${
+          isSelected
+            ? 'bg-neutral-900 text-white font-semibold shadow-xs'
+            : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100/80 font-medium'
+        }`}
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? 'text-cyan-400' : 'text-neutral-500 group-hover:text-neutral-800'}`} />
+          <span className="text-xs truncate tracking-tight">{u.name}</span>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {u.badge && !isSelected && (
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-500 border border-neutral-200/60 uppercase">
+              {u.badge}
+            </span>
+          )}
+          {isLocked && (
+            <Lock className={`w-3 h-3 ${isSelected ? 'text-amber-400' : 'text-neutral-400'}`} />
+          )}
+        </div>
+      </button>
+    );
+  };
+
+  return (
+    <aside
+      className={`h-full bg-white border-r border-neutral-200/90 flex flex-col shrink-0 select-none transition-all duration-200 z-20 ${
+        isCollapsed ? 'w-16 items-center py-3' : 'w-64 sm:w-72'
+      }`}
+    >
+      {/* Sidebar Header: Brand & Collapse Toggle */}
+      <div className={`p-3.5 border-b border-neutral-200/80 flex items-center ${isCollapsed ? 'justify-center w-full' : 'justify-between'}`}>
+        {!isCollapsed && (
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-neutral-700" />
+            <span className="text-xs font-bold text-neutral-900 tracking-tight">Toolbox</span>
+            <span className="text-[10px] font-mono text-neutral-400 px-1.5 py-0.2 rounded bg-neutral-100 border border-neutral-200/60 font-semibold">
+              26
+            </span>
+          </div>
+        )}
+
+        {onToggleCollapse && (
+          <button
+            onClick={onToggleCollapse}
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition cursor-pointer border border-transparent hover:border-neutral-200"
+            title={isCollapsed ? 'Expand Toolbox Sidebar' : 'Collapse Toolbox to Rail'}
+            aria-label="Toggle toolbox sidebar"
+          >
+            {isCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          </button>
+        )}
+      </div>
+
+      {/* Search Input (When Expanded) */}
+      {!isCollapsed && (
+        <div className="p-3 border-b border-neutral-100">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search 26 tools... (/)"
+              className="w-full pl-8 pr-7 py-1.5 text-xs bg-neutral-50 hover:bg-neutral-100/80 focus:bg-white focus:ring-1 focus:ring-neutral-400 focus:outline-none rounded-xl border border-neutral-200 text-neutral-800 placeholder:text-neutral-400 transition"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+
+          {/* Category Filter Pills (When no active search) */}
+          {!searchQuery && (
+            <div className="flex items-center gap-1 overflow-x-auto pt-2 pb-0.5 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
+              {CATEGORIES.map(cat => {
+                const isCatSelected = selectedCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`px-2 py-0.8 rounded-md text-[10px] font-medium whitespace-nowrap transition cursor-pointer ${
+                      isCatSelected
+                        ? 'bg-neutral-900 text-white font-semibold'
+                        : 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/70'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tool List Container */}
+      <div className={`flex-1 overflow-y-auto px-2.5 py-3 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
+        {filteredUtilities.length === 0 ? (
+          <div className="p-4 text-center">
+            <p className="text-xs text-neutral-400">No tools match "{searchQuery}"</p>
+            <button
+              onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+              className="mt-2 text-[11px] font-semibold text-neutral-800 hover:underline cursor-pointer"
+            >
+              Reset Filters
+            </button>
+          </div>
+        ) : groupedUtilities ? (
+          // Grouped Categories view
+          Object.entries(groupedUtilities).map(([groupTitle, tools]) => {
+            if (tools.length === 0) return null;
+            return (
+              <div key={groupTitle} className="mb-4">
+                <div className="px-2 mb-1.5 text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">
+                  {groupTitle}
+                </div>
+                {tools.map(u => renderToolButton(u))}
+              </div>
+            );
+          })
+        ) : (
+          // Filtered / Searched flat list
+          filteredUtilities.map(u => renderToolButton(u))
+        )}
+      </div>
+
+      {/* Bottom Pro / System Status Banner (When expanded) */}
+      {!isCollapsed && (
+        <div className="p-3 border-t border-neutral-200/80 bg-neutral-50/60">
+          <div className="flex items-center justify-between text-[11px] text-neutral-500">
+            <span className="font-medium text-neutral-700">100% Private Processing</span>
+            <span className="text-[10px] font-mono text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60">
+              Client WASM
+            </span>
+          </div>
+        </div>
+      )}
+    </aside>
+  );
+};
