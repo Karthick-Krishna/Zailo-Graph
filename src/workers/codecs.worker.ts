@@ -240,11 +240,13 @@ async function processResize(bitmap: ImageBitmap, params: any): Promise<Blob> {
 
 async function processCompress(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   if (!ctx) throw new Error('OffscreenCanvas 2D context unavailable');
 
   const format = params?.format || 'image/webp';
-  const quality = params?.quality !== undefined ? params.quality : 0.85;
+  let quality = params?.quality !== undefined ? params.quality : 0.85;
+  const targetKb = params?.targetKb;
+  const pngColors = params?.pngColors || 256;
 
   if (format === 'image/jpeg') {
     ctx.fillStyle = '#FFFFFF';
@@ -252,6 +254,49 @@ async function processCompress(bitmap: ImageBitmap, params: any): Promise<Blob> 
   }
 
   ctx.drawImage(bitmap, 0, 0);
+
+  // PNG Color Quantization (TinyPNG style palette indexing)
+  if (format === 'image/png' && pngColors < 256) {
+    const imgData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+    const data = imgData.data;
+    const factor = Math.max(2, Math.round(256 / pngColors));
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = Math.round(data[i] / factor) * factor;         // R
+      data[i + 1] = Math.round(data[i + 1] / factor) * factor; // G
+      data[i + 2] = Math.round(data[i + 2] / factor) * factor; // B
+      // Preserve alpha or quantize 1-bit / 8-bit
+      if (data[i + 3] < 16) data[i + 3] = 0;
+    }
+    ctx.putImageData(imgData, 0, 0);
+    return await canvas.convertToBlob({ type: 'image/png' });
+  }
+
+  // Target KB binary search solver (iterative quality tuning)
+  if (targetKb && targetKb > 0 && format !== 'image/png') {
+    const targetBytes = targetKb * 1024;
+    let lowQ = 0.15;
+    let highQ = 0.98;
+    let bestBlob: Blob | null = null;
+
+    for (let iter = 0; iter < 4; iter++) {
+      const midQ = (lowQ + highQ) / 2;
+      let testBlob: Blob;
+      try {
+        testBlob = await canvas.convertToBlob({ type: format, quality: midQ });
+      } catch {
+        testBlob = await canvas.convertToBlob({ type: 'image/webp', quality: midQ });
+      }
+
+      bestBlob = testBlob;
+      if (testBlob.size > targetBytes) {
+        highQ = midQ;
+      } else {
+        lowQ = midQ;
+      }
+    }
+
+    if (bestBlob) return bestBlob;
+  }
 
   try {
     return await canvas.convertToBlob({
