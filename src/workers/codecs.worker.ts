@@ -127,6 +127,9 @@ self.onmessage = async (e: MessageEvent) => {
       case 'collage':
         resultBlob = await processCollage(imageBitmap, params);
         break;
+      case 'camera_raw':
+        resultBlob = await processCameraRaw(imageBitmap, params);
+        break;
       default:
         throw new Error(`Unsupported worker task: ${type}`);
     }
@@ -151,21 +154,25 @@ self.onmessage = async (e: MessageEvent) => {
 /* UTILITY IMPLEMENTATIONS                                                   */
 /* ========================================================================= */
 
-async function processResize(bitmap: ImageBitmap, params: ResizeParams): Promise<Blob> {
+async function processResize(bitmap: ImageBitmap, params: any): Promise<Blob> {
   let targetW = bitmap.width;
   let targetH = bitmap.height;
 
-  if (params.scalePercent) {
+  if (params?.scaleMultiplier) {
+    const mult = params.scaleMultiplier;
+    targetW = Math.max(1, Math.round(bitmap.width * mult));
+    targetH = Math.max(1, Math.round(bitmap.height * mult));
+  } else if (params?.scalePercent) {
     const factor = params.scalePercent / 100;
     targetW = Math.max(1, Math.round(bitmap.width * factor));
     targetH = Math.max(1, Math.round(bitmap.height * factor));
-  } else if (params.width && params.height) {
+  } else if (params?.width && params?.height) {
     targetW = params.width;
     targetH = params.height;
-  } else if (params.width) {
+  } else if (params?.width) {
     targetW = params.width;
     targetH = Math.round((bitmap.height * targetW) / bitmap.width);
-  } else if (params.height) {
+  } else if (params?.height) {
     targetH = params.height;
     targetW = Math.round((bitmap.width * targetH) / bitmap.height);
   }
@@ -181,12 +188,15 @@ async function processResize(bitmap: ImageBitmap, params: ResizeParams): Promise
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 
-async function processCompress(bitmap: ImageBitmap, params: CompressParams): Promise<Blob> {
+async function processCompress(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('OffscreenCanvas 2D context unavailable');
 
-  if (params.format === 'image/jpeg') {
+  const format = params?.format || 'image/jpeg';
+  const quality = params?.quality !== undefined ? params.quality : 0.85;
+
+  if (format === 'image/jpeg') {
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, bitmap.width, bitmap.height);
   }
@@ -194,13 +204,18 @@ async function processCompress(bitmap: ImageBitmap, params: CompressParams): Pro
   ctx.drawImage(bitmap, 0, 0);
 
   return await canvas.convertToBlob({
-    type: params.format,
-    quality: params.quality,
+    type: format,
+    quality: quality,
   });
 }
 
-async function processCrop(bitmap: ImageBitmap, params: CropParams): Promise<Blob> {
-  const { x, y, width, height, isCircle } = params;
+async function processCrop(bitmap: ImageBitmap, params: any): Promise<Blob> {
+  const isCircle = params?.isCircle || false;
+  const width = params?.width || Math.min(bitmap.width, bitmap.height);
+  const height = params?.height || (isCircle ? width : Math.min(bitmap.width, bitmap.height));
+  const x = params?.x !== undefined ? params.x : Math.max(0, Math.round((bitmap.width - width) / 2));
+  const y = params?.y !== undefined ? params.y : Math.max(0, Math.round((bitmap.height - height) / 2));
+
   const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('OffscreenCanvas 2D context unavailable');
@@ -217,14 +232,19 @@ async function processCrop(bitmap: ImageBitmap, params: CropParams): Promise<Blo
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 
-async function processWatermark(bitmap: ImageBitmap, params: WatermarkParams): Promise<Blob> {
+async function processWatermark(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('OffscreenCanvas 2D context unavailable');
 
   ctx.drawImage(bitmap, 0, 0);
 
-  const { text, fontSize, opacity, color, position, rotation } = params;
+  const text = params?.text || 'Imazora';
+  const fontSize = params?.fontSize || Math.max(16, Math.round(bitmap.width * 0.04));
+  const opacity = params?.opacity !== undefined ? params.opacity : 0.7;
+  const color = params?.color || '#FFFFFF';
+  const position = params?.position || 'bottom-right';
+  const rotation = params?.rotation || 0;
 
   ctx.save();
   ctx.globalAlpha = opacity;
@@ -288,18 +308,22 @@ async function processWatermark(bitmap: ImageBitmap, params: WatermarkParams): P
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 
-async function processFilter(bitmap: ImageBitmap, params: FilterParams): Promise<Blob> {
+async function processFilter(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('OffscreenCanvas 2D context unavailable');
 
+  const brightness = params?.brightness !== undefined ? params.brightness : 1;
+  const contrast = params?.contrast !== undefined ? params.contrast : 1;
+  const saturation = params?.saturation !== undefined ? params.saturation : 1;
+
   const filterStrings: string[] = [];
-  if (params.brightness !== 1) filterStrings.push(`brightness(${params.brightness})`);
-  if (params.contrast !== 1) filterStrings.push(`contrast(${params.contrast})`);
-  if (params.saturation !== 1) filterStrings.push(`saturate(${params.saturation})`);
-  if (params.grayscale) filterStrings.push('grayscale(100%)');
-  if (params.sepia) filterStrings.push('sepia(100%)');
-  if (params.invert) filterStrings.push('invert(100%)');
+  if (brightness !== 1) filterStrings.push(`brightness(${brightness})`);
+  if (contrast !== 1) filterStrings.push(`contrast(${contrast})`);
+  if (saturation !== 1) filterStrings.push(`saturate(${saturation})`);
+  if (params?.grayscale) filterStrings.push('grayscale(100%)');
+  if (params?.sepia) filterStrings.push('sepia(100%)');
+  if (params?.invert) filterStrings.push('invert(100%)');
 
   if (filterStrings.length > 0) {
     ctx.filter = filterStrings.join(' ');
@@ -307,7 +331,7 @@ async function processFilter(bitmap: ImageBitmap, params: FilterParams): Promise
 
   ctx.drawImage(bitmap, 0, 0);
 
-  if (params.sharpen && params.sharpen > 0) {
+  if (params?.sharpen && params.sharpen > 0) {
     const imgData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
     applySharpen(imgData, params.sharpen);
     ctx.putImageData(imgData, 0, 0);
@@ -316,8 +340,12 @@ async function processFilter(bitmap: ImageBitmap, params: FilterParams): Promise
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 
-async function processSocialPreset(bitmap: ImageBitmap, params: SocialPresetParams): Promise<Blob> {
-  const { presetWidth, presetHeight, fillMode, fillColor } = params;
+async function processSocialPreset(bitmap: ImageBitmap, params: any): Promise<Blob> {
+  const presetWidth = params?.presetWidth || 1080;
+  const presetHeight = params?.presetHeight || 1080;
+  const fillMode = params?.fillMode || 'blur';
+  const fillColor = params?.fillColor || '#FAFAFA';
+
   const canvas = new OffscreenCanvas(presetWidth, presetHeight);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('OffscreenCanvas context unavailable');
@@ -329,7 +357,7 @@ async function processSocialPreset(bitmap: ImageBitmap, params: SocialPresetPara
     ctx.drawImage(bitmap, -40, -40, presetWidth + 80, presetHeight + 80);
     ctx.restore();
   } else {
-    ctx.fillStyle = fillColor || '#FAFAFA';
+    ctx.fillStyle = fillColor;
     ctx.fillRect(0, 0, presetWidth, presetHeight);
   }
 
@@ -345,17 +373,22 @@ async function processSocialPreset(bitmap: ImageBitmap, params: SocialPresetPara
   return await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.92 });
 }
 
-async function processPassportPhoto(bitmap: ImageBitmap, params: PassportParams): Promise<Blob> {
-  // Standard 300 DPI passport crop (e.g. 2x2 inches = 600x600 px)
-  const pxW = Math.round((params.targetWidthMm / 25.4) * 300);
-  const pxH = Math.round((params.targetHeightMm / 25.4) * 300);
+async function processPassportPhoto(bitmap: ImageBitmap, params: any): Promise<Blob> {
+  const targetWidthMm = params?.targetWidthMm || 51;
+  const targetHeightMm = params?.targetHeightMm || 51;
+  const sheetMode = params?.sheetMode || 'single';
+  const whitenedBackground = params?.whitenedBackground !== undefined ? params.whitenedBackground : true;
 
-  if (params.sheetMode === 'single') {
+  // Standard 300 DPI passport crop (e.g. 2x2 inches = 600x600 px)
+  const pxW = Math.round((targetWidthMm / 25.4) * 300);
+  const pxH = Math.round((targetHeightMm / 25.4) * 300);
+
+  if (sheetMode === 'single') {
     const canvas = new OffscreenCanvas(pxW, pxH);
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas context unavailable');
 
-    if (params.whitenedBackground) {
+    if (whitenedBackground) {
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, pxW, pxH);
     }
@@ -481,14 +514,26 @@ async function generatePaletteCard(bitmap: ImageBitmap, palette: any[]): Promise
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 
-async function processPrivacyRedact(bitmap: ImageBitmap, params: RedactParams): Promise<Blob> {
+async function processPrivacyRedact(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas context unavailable');
 
   ctx.drawImage(bitmap, 0, 0);
 
-  for (const reg of params.regions) {
+  const regions = params?.regions && params.regions.length > 0
+    ? params.regions
+    : [
+        {
+          x: Math.round(bitmap.width * 0.25),
+          y: Math.round(bitmap.height * 0.35),
+          width: Math.round(bitmap.width * 0.5),
+          height: Math.round(bitmap.height * 0.3),
+          mode: 'blur',
+        },
+      ];
+
+  for (const reg of regions) {
     if (reg.mode === 'blackout') {
       ctx.fillStyle = '#000000';
       ctx.fillRect(reg.x, reg.y, reg.width, reg.height);
@@ -728,4 +773,26 @@ function applySharpen(imageData: ImageData, strength: number) {
       }
     }
   }
+}
+
+async function processCameraRaw(bitmap: ImageBitmap, params: any): Promise<Blob> {
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('OffscreenCanvas context unavailable');
+
+  // Apply RAW exposure EV and color temperature corrections
+  const ev = params?.exposureEv || 0;
+  const temp = params?.temperature || 5500;
+  
+  // Calculate exposure multiplier
+  const brightness = Math.max(0.2, 1 + ev * 0.35);
+  // Calculate white balance warmth/cool shift
+  const tempOffset = (temp - 5500) / 4000;
+  const sepia = tempOffset > 0 ? Math.min(0.4, tempOffset * 0.3) : 0;
+  const hueRotate = tempOffset < 0 ? Math.max(-25, tempOffset * 20) : 0;
+
+  ctx.filter = `brightness(${brightness}) sepia(${sepia * 100}%) hue-rotate(${hueRotate}deg) contrast(1.05)`;
+  ctx.drawImage(bitmap, 0, 0);
+
+  return await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.95 });
 }

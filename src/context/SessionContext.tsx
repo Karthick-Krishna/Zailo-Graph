@@ -242,7 +242,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     try {
       // Direct handling for lossless EXIF metadata stripping
-      if (activeUtilityId === 'exif-remover') {
+      if (activeUtilityId === 'exif-remover' || (activeUtilityId === 'exif-viewer' && params?.stripMetadata)) {
         const strippedBlob = await stripJpegMetadataLossless(activeImage.blob);
         const processedUrl = URL.createObjectURL(strippedBlob);
         setImages(prev => prev.map(img => {
@@ -261,6 +261,26 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
           return img;
         }));
         setToastMessage('Losslessly stripped EXIF metadata markers.');
+        setIsProcessing(false);
+        return;
+      }
+
+      // Direct handling for EXIF viewer inspection
+      if (activeUtilityId === 'exif-viewer') {
+        setToastMessage('EXIF metadata parsed and available in parameter panel.');
+        setIsProcessing(false);
+        return;
+      }
+
+      // Direct handling for Image to Base64
+      if (activeUtilityId === 'image-to-base64') {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const b64 = reader.result as string;
+          navigator.clipboard.writeText(b64);
+          setToastMessage('Base64 Data URI copied to clipboard!');
+        };
+        reader.readAsDataURL(activeImage.blob);
         setIsProcessing(false);
         return;
       }
@@ -306,6 +326,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       else if (activeUtilityId === 'ai-colorization') taskType = 'ai_colorization';
       else if (activeUtilityId === 'png-to-svg') taskType = 'vectorize';
       else if (activeUtilityId === 'collage-maker') taskType = 'collage';
+      else if (activeUtilityId === 'camera-raw') taskType = 'camera_raw';
 
       const bitmap = await createImageBitmap(activeImage.blob);
       const taskId = 'task_' + Math.random().toString(36).substring(2, 9);
