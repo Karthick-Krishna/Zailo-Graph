@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { UTILITIES, UtilityCategory } from '../../types/utility';
@@ -7,12 +7,13 @@ import { ComparisonSlider } from '../common/ComparisonSlider';
 import { GatedFeatureCard } from '../auth/GatedFeatureCard';
 import { ControlRack } from './ControlRack';
 import { BatchDrawer } from './BatchDrawer';
-import { Lock } from 'lucide-react';
+import { Lock, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
 export const Workspace: React.FC = () => {
   const { images, activeImage, activeUtilityId, setActiveUtilityId, toastMessage, dismissToast } = useSession();
   const { user, isUtilityUnlocked } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<UtilityCategory | 'all'>('all');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
   const isUnlocked = isUtilityUnlocked(activeUtilityId);
@@ -20,6 +21,23 @@ export const Workspace: React.FC = () => {
   const filteredUtilities = selectedCategory === 'all' 
     ? UTILITIES 
     : UTILITIES.filter(u => u.category === selectedCategory);
+
+  const scrollNavbar = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -260 : 260;
+      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const handleToolSelect = (utilityId: string, event: React.MouseEvent<HTMLButtonElement>) => {
+    setActiveUtilityId(utilityId);
+    // Smoothly animate and center the clicked item horizontally
+    event.currentTarget.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  };
 
   return (
     <div className="flex-1 flex flex-col h-[calc(100vh-56px)] overflow-hidden">
@@ -33,10 +51,10 @@ export const Workspace: React.FC = () => {
         </div>
       )}
 
-      {/* Top Utility Selector Bar (Only displayed or condensed when workspace is active) */}
-      <div className="w-full bg-[#FAFAFA] border-b border-neutral-200/80 px-6 py-2 flex items-center gap-3 overflow-x-auto shrink-0 select-none">
-        {/* Category Filter */}
-        <div className="flex items-center gap-1 pr-3 border-r border-neutral-200 shrink-0">
+      {/* Horizontal Tool Selector Bar */}
+      <nav className="w-full bg-white border-b border-neutral-200/90 px-4 py-2.5 flex items-center gap-3 shrink-0 select-none shadow-xs z-20 relative">
+        {/* Category Filter Segmented Control */}
+        <div className="flex items-center gap-1 p-0.5 bg-neutral-100 rounded-xl shrink-0 border border-neutral-200/60">
           {[
             { id: 'all', label: 'All 25' },
             { id: 'optimize', label: 'Optimize' },
@@ -44,23 +62,43 @@ export const Workspace: React.FC = () => {
             { id: 'ai', label: 'AI Suite' },
             { id: 'edit', label: 'Edit & Crop' },
             { id: 'metadata', label: 'Metadata' },
-          ].map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id as any)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition cursor-pointer ${
-                selectedCategory === cat.id
-                  ? 'bg-neutral-900 text-white'
-                  : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+          ].map(cat => {
+            const isCatSelected = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id as any)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                  isCatSelected
+                    ? 'bg-neutral-900 text-white shadow-xs scale-[1.02]'
+                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/70'
+                }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Utility Items Scrubber */}
-        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+        {/* Divider */}
+        <div className="h-6 w-[1px] bg-neutral-200 shrink-0"></div>
+
+        {/* Left Scroll Arrow */}
+        <button
+          onClick={() => scrollNavbar('left')}
+          className="p-1 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition cursor-pointer shrink-0 hidden sm:flex items-center justify-center"
+          title="Scroll tools left"
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        {/* Horizontal Utility Items Scrubber with Smooth Auto-Scroll & Animation */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex-1 flex items-center gap-2 overflow-x-auto py-1 scroll-smooth no-scrollbar"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
           {filteredUtilities.map(u => {
             const isSelected = u.id === activeUtilityId;
             const isToolLocked = u.isCompetitorPaid && !user;
@@ -68,22 +106,49 @@ export const Workspace: React.FC = () => {
             return (
               <button
                 key={u.id}
-                onClick={() => setActiveUtilityId(u.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                onClick={(e) => handleToolSelect(u.id, e)}
+                className={`relative px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2 shrink-0 cursor-pointer transform active:scale-95 ${
                   isSelected
-                    ? 'bg-white text-neutral-900 border border-violet-300 shadow-xs ring-1 ring-violet-500/10'
-                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/50 border border-transparent'
+                    ? 'bg-neutral-900 text-white shadow-md shadow-neutral-900/20 scale-[1.03] ring-2 ring-violet-500/50'
+                    : 'bg-neutral-50 hover:bg-neutral-100 text-neutral-700 hover:text-neutral-900 border border-neutral-200/70 hover:border-neutral-300'
                 }`}
               >
+                {/* Animated Glowing Active Indicator Dot */}
+                {isSelected && (
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-gradient-to-r from-violet-400 to-cyan-400"></span>
+                  </span>
+                )}
+
                 <span>{u.name}</span>
+
                 {isToolLocked && (
-                  <Lock className="w-3 h-3 text-neutral-400 shrink-0" />
+                  <Lock className={`w-3 h-3 shrink-0 ${isSelected ? 'text-amber-400' : 'text-neutral-400'}`} />
                 )}
               </button>
             );
           })}
         </div>
-      </div>
+
+        {/* Right Scroll Arrow */}
+        <button
+          onClick={() => scrollNavbar('right')}
+          className="p-1 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition cursor-pointer shrink-0 hidden sm:flex items-center justify-center"
+          title="Scroll tools right"
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+
+        {/* Live Active Tool Feedback Badge */}
+        <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-neutral-200 shrink-0">
+          <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">Active:</span>
+          <span className="text-xs font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-md border border-violet-200/60 truncate max-w-[150px]">
+            {activeUtility.name}
+          </span>
+        </div>
+      </nav>
 
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { ImageItem } from '../types/image';
 import { useAuth } from './AuthContext';
-import { parseImageMetadata } from '../utils/exif';
+import { parseImageMetadata, stripJpegMetadataLossless } from '../utils/exif';
 import { extractEmbeddedRawPreview } from '../utils/rawExtractor';
 import { convertHeicToRaster } from '../utils/heic';
 import { saveToOPFS, deleteFromOPFS, clearOPFSWorkspace } from '../utils/opfs';

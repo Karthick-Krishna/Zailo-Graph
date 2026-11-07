@@ -127,3 +127,4 @@ export const ImazoraLogo: React.FC<ImazoraLogoProps> = ({
     </div>
   );
 };
+
