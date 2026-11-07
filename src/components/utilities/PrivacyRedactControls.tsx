@@ -12,7 +12,7 @@ interface RedactBox {
 }
 
 export const PrivacyRedactControls: React.FC = () => {
-  const { activeImage, executeActiveUtility } = useSession();
+  const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
 
   const [mode, setMode] = useState<'pixelate' | 'blur' | 'blackout'>('pixelate');
   const [regions, setRegions] = useState<RedactBox[]>([
@@ -22,7 +22,7 @@ export const PrivacyRedactControls: React.FC = () => {
   if (!activeImage) return null;
 
   const handleApply = (activeRegions = regions) => {
-    executeActiveUtility({
+    const params = {
       regions: activeRegions.map(r => ({
         x: r.x,
         y: r.y,
@@ -30,7 +30,9 @@ export const PrivacyRedactControls: React.FC = () => {
         height: r.height,
         mode: r.mode,
       })),
-    });
+    };
+    setCurrentParams(params);
+    executeActiveUtility(params);
   };
 
   const addRegion = () => {

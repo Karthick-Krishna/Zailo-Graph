@@ -3,7 +3,7 @@ import { useSession } from '../../context/SessionContext';
 import { Stamp, Grid, Move } from 'lucide-react';
 
 export const WatermarkControls: React.FC = () => {
-  const { executeActiveUtility } = useSession();
+  const { executeActiveUtility, setCurrentParams } = useSession();
 
   const [text, setText] = useState('© Imazora by Zorquelz');
   const [fontSize, setFontSize] = useState(28);
@@ -13,14 +13,16 @@ export const WatermarkControls: React.FC = () => {
   const [rotation, setRotation] = useState(0);
 
   const handleApply = (newPos = position, newText = text, newSize = fontSize, newOpacity = opacity, newColor = color, newRot = rotation) => {
-    executeActiveUtility({
+    const params = {
       text: newText,
       fontSize: newSize,
       opacity: newOpacity,
       color: newColor,
       position: newPos,
       rotation: newRot,
-    });
+    };
+    setCurrentParams(params);
+    executeActiveUtility(params);
   };
 
   return (

@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { FileCode2, PenTool, Sparkles, Download, Copy, Check, Eye } from 'lucide-react';
 
 export const SvgControls: React.FC = () => {
-  const { activeImage, activeUtilityId, executeActiveUtility } = useSession();
+  const { activeImage, activeUtilityId, executeActiveUtility, setCurrentParams } = useSession();
   const { user, openAuthModal } = useAuth();
 
   // SVG to High-Res PNG state (Utility 06)
@@ -30,11 +30,13 @@ export const SvgControls: React.FC = () => {
       return;
     }
 
-    executeActiveUtility({
+    const params = {
       scaleMultiplier: mult,
       dpi,
       transparentBackground: trans,
-    });
+    };
+    setCurrentParams(params);
+    executeActiveUtility(params);
   };
 
   const handleVectorize = () => {
@@ -44,11 +46,13 @@ export const SvgControls: React.FC = () => {
     }
 
     // Execute vector tracing
-    executeActiveUtility({
+    const params = {
       mode: vectorMode,
       colorCount,
       filterSpeckle,
-    });
+    };
+    setCurrentParams(params);
+    executeActiveUtility(params);
 
     // Generate sample SVG representation
     const sampleSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${activeImage.width || 800} ${activeImage.height || 600}">

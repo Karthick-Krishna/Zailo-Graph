@@ -582,52 +582,80 @@ async function processAiBackgroundRemoval(bitmap: ImageBitmap, params: any): Pro
   ctx.drawImage(bitmap, 0, 0);
   const imgData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
   const data = imgData.data;
+  const w = bitmap.width;
+  const h = bitmap.height;
 
-  // Sample corner background colors (top-left, top-right, bottom-left, bottom-right)
-  const samplePoints = [
-    0,
-    (bitmap.width - 1) * 4,
-    ((bitmap.height - 1) * bitmap.width) * 4,
-    ((bitmap.height - 1) * bitmap.width + (bitmap.width - 1)) * 4
-  ];
+  // Sample perimeter pixels to identify dominant background color
+  let bgR = 0, bgG = 0, bgB = 0, sampleCount = 0;
+  const step = Math.max(1, Math.round(Math.min(w, h) / 100));
 
-  let bgR = 0, bgG = 0, bgB = 0;
-  samplePoints.forEach(p => {
-    bgR += data[p];
-    bgG += data[p + 1];
-    bgB += data[p + 2];
-  });
-  bgR /= 4; bgG /= 4; bgB /= 4;
+  // Top and bottom borders
+  for (let x = 0; x < w; x += step) {
+    const topIdx = x * 4;
+    const botIdx = ((h - 1) * w + x) * 4;
+    bgR += data[topIdx] + data[botIdx];
+    bgG += data[topIdx + 1] + data[botIdx + 1];
+    bgB += data[topIdx + 2] + data[botIdx + 2];
+    sampleCount += 2;
+  }
+  // Left and right borders
+  for (let y = 0; y < h; y += step) {
+    const leftIdx = (y * w) * 4;
+    const rightIdx = (y * w + (w - 1)) * 4;
+    bgR += data[leftIdx] + data[rightIdx];
+    bgG += data[leftIdx + 1] + data[rightIdx + 1];
+    bgB += data[leftIdx + 2] + data[rightIdx + 2];
+    sampleCount += 2;
+  }
 
-  const threshold = 55;
-  const feather = params?.bgFeather || 20;
+  bgR = Math.round(bgR / sampleCount);
+  bgG = Math.round(bgG / sampleCount);
+  bgB = Math.round(bgB / sampleCount);
 
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
+  const threshold = 68;
+  const feather = params?.bgFeather || 25;
+  const centerX = w / 2;
+  const centerY = h / 2;
+  const maxRadius = Math.sqrt(centerX * centerX + centerY * centerY);
 
-    const dist = Math.sqrt(
-      (r - bgR) * (r - bgR) +
-      (g - bgG) * (g - bgG) +
-      (b - bgB) * (b - bgB)
-    );
+  for (let y = 0; y < h; y++) {
+    const rowOffset = y * w;
+    for (let x = 0; x < w; x++) {
+      const idx = (rowOffset + x) * 4;
+      const r = data[idx];
+      const g = data[idx + 1];
+      const b = data[idx + 2];
 
-    if (dist < threshold) {
-      data[i + 3] = 0; // Cutout transparent
-    } else if (dist < threshold + feather) {
-      data[i + 3] = Math.round(((dist - threshold) / feather) * 255);
+      // Color distance from background
+      const colorDist = Math.sqrt(
+        (r - bgR) * (r - bgR) +
+        (g - bgG) * (g - bgG) +
+        (b - bgB) * (b - bgB)
+      );
+
+      // Distance from center (foreground bias)
+      const distFromCenter = Math.sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+      const centerFactor = (distFromCenter / maxRadius) * 35; // outer edges are more likely background
+
+      const effectiveThreshold = threshold + centerFactor;
+
+      if (colorDist < effectiveThreshold - feather) {
+        data[idx + 3] = 0; // Fully transparent
+      } else if (colorDist < effectiveThreshold) {
+        const factor = (colorDist - (effectiveThreshold - feather)) / feather;
+        data[idx + 3] = Math.round(Math.max(0, Math.min(255, factor * 255)));
+      }
     }
   }
 
   ctx.putImageData(imgData, 0, 0);
 
   if (params?.bgMode === 'white') {
-    const whiteCanvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const whiteCanvas = new OffscreenCanvas(w, h);
     const whiteCtx = whiteCanvas.getContext('2d');
     if (whiteCtx) {
       whiteCtx.fillStyle = '#FFFFFF';
-      whiteCtx.fillRect(0, 0, bitmap.width, bitmap.height);
+      whiteCtx.fillRect(0, 0, w, h);
       whiteCtx.drawImage(canvas, 0, 0);
       return await whiteCanvas.convertToBlob({ type: 'image/jpeg', quality: 0.95 });
     }
@@ -642,85 +670,193 @@ async function processAiUpscale(bitmap: ImageBitmap, params: any): Promise<Blob>
   const targetH = bitmap.height * scale;
 
   const canvas = new OffscreenCanvas(targetW, targetH);
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   if (!ctx) throw new Error('Canvas context unavailable');
 
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(bitmap, 0, 0, targetW, targetH);
 
-  // Neural sharpness & clarity enhancement pass
-  ctx.filter = 'contrast(1.08) saturate(1.04)';
-  ctx.drawImage(canvas, 0, 0);
+  // Super-Resolution detail enhancement pass
+  const imgData = ctx.getImageData(0, 0, targetW, targetH);
+  const data = imgData.data;
+  const src = new Uint8ClampedArray(data);
 
+  // High-pass micro-contrast sharpening
+  const boost = 0.45;
+  const step = targetW > 3000 ? 2 : 1;
+
+  for (let y = 1; y < targetH - 1; y += step) {
+    const rowOffset = y * targetW;
+    for (let x = 1; x < targetW - 1; x += step) {
+      const idx = (rowOffset + x) * 4;
+      for (let c = 0; c < 3; c++) {
+        const center = src[idx + c];
+        const top = src[((y - 1) * targetW + x) * 4 + c];
+        const bot = src[((y + 1) * targetW + x) * 4 + c];
+        const left = src[(rowOffset + (x - 1)) * 4 + c];
+        const right = src[(rowOffset + (x + 1)) * 4 + c];
+        const highPass = center * 5 - (top + bot + left + right);
+        const sharpened = center + (highPass - center) * boost;
+        data[idx + c] = Math.max(0, Math.min(255, sharpened));
+      }
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 
 async function processAiInpainting(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   if (!ctx) throw new Error('Canvas context unavailable');
 
   ctx.drawImage(bitmap, 0, 0);
 
-  const patchW = Math.round(bitmap.width * 0.15);
-  const patchH = Math.round(bitmap.height * 0.15);
+  const patchW = Math.round(bitmap.width * 0.22);
+  const patchH = Math.round(bitmap.height * 0.22);
   const patchX = Math.round((bitmap.width - patchW) / 2);
   const patchY = Math.round((bitmap.height - patchH) / 2);
 
-  ctx.drawImage(
-    bitmap,
-    Math.max(0, patchX - patchW),
-    patchY,
-    patchW,
-    patchH,
-    patchX,
-    patchY,
-    patchW,
-    patchH
-  );
+  const imgData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+  const data = imgData.data;
+  const w = bitmap.width;
 
+  // Sample surrounding border colors
+  let topR = 0, topG = 0, topB = 0;
+  let botR = 0, botG = 0, botB = 0;
+  let leftR = 0, leftG = 0, leftB = 0;
+  let rightR = 0, rightG = 0, rightB = 0;
+
+  for (let x = 0; x < patchW; x++) {
+    const tIdx = ((patchY - 1) * w + (patchX + x)) * 4;
+    const bIdx = ((patchY + patchH + 1) * w + (patchX + x)) * 4;
+    topR += data[tIdx]; topG += data[tIdx + 1]; topB += data[tIdx + 2];
+    botR += data[bIdx]; botG += data[bIdx + 1]; botB += data[bIdx + 2];
+  }
+  for (let y = 0; y < patchH; y++) {
+    const lIdx = ((patchY + y) * w + (patchX - 1)) * 4;
+    const rIdx = ((patchY + y) * w + (patchX + patchW + 1)) * 4;
+    leftR += data[lIdx]; leftG += data[lIdx + 1]; leftB += data[lIdx + 2];
+    rightR += data[rIdx]; rightG += data[rIdx + 1]; rightB += data[rIdx + 2];
+  }
+
+  topR /= patchW; topG /= patchW; topB /= patchW;
+  botR /= patchW; botG /= patchW; botB /= patchW;
+  leftR /= patchH; leftG /= patchH; leftB /= patchH;
+  rightR /= patchH; rightG /= patchH; rightB /= patchH;
+
+  // Smooth Poisson bilinear reconstruction
+  for (let py = 0; py < patchH; py++) {
+    const ty = py / patchH;
+    for (let px = 0; px < patchW; px++) {
+      const tx = px / patchW;
+      const idx = ((patchY + py) * w + (patchX + px)) * 4;
+
+      const rH = leftR * (1 - tx) + rightR * tx;
+      const rV = topR * (1 - ty) + botR * ty;
+      const gH = leftG * (1 - tx) + rightG * tx;
+      const gV = topG * (1 - ty) + botG * ty;
+      const bH = leftB * (1 - tx) + rightB * tx;
+      const bV = topB * (1 - ty) + botB * ty;
+
+      data[idx] = Math.round((rH + rV) / 2);
+      data[idx + 1] = Math.round((gH + gV) / 2);
+      data[idx + 2] = Math.round((bH + bV) / 2);
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 
 async function processAiColorization(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   if (!ctx) throw new Error('Canvas context unavailable');
 
   ctx.drawImage(bitmap, 0, 0);
+  const imgData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+  const data = imgData.data;
+  const w = bitmap.width;
+  const h = bitmap.height;
 
-  ctx.globalCompositeOperation = 'color';
-  const grad = ctx.createLinearGradient(0, 0, bitmap.width, bitmap.height);
-  if (params?.colorTone === 'warm') {
-    grad.addColorStop(0, '#F59E0B');
-    grad.addColorStop(0.5, '#EC4899');
-    grad.addColorStop(1, '#3B82F6');
-  } else if (params?.colorTone === 'cool') {
-    grad.addColorStop(0, '#06B6D4');
-    grad.addColorStop(0.6, '#6366F1');
-    grad.addColorStop(1, '#8B5CF6');
-  } else {
-    grad.addColorStop(0, '#FBBF24');
-    grad.addColorStop(0.4, '#FB7185');
-    grad.addColorStop(0.8, '#38BDF8');
-    grad.addColorStop(1, '#10B981');
+  const tone = params?.colorTone || 'neutral';
+  const intensity = (params?.colorIntensity || 85) / 100;
+
+  for (let y = 0; y < h; y++) {
+    const yRatio = y / h; // 0 (top) to 1 (bottom)
+    for (let x = 0; x < w; x++) {
+      const idx = (y * w + x) * 4;
+      const r = data[idx];
+      const g = data[idx + 1];
+      const b = data[idx + 2];
+
+      // Luminance Y
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      // Target semantic color based on vertical zone and luminance
+      let targetR = lum, targetG = lum, targetB = lum;
+
+      if (yRatio < 0.35) {
+        // Sky / atmosphere: gentle cyan / blue
+        targetR = lum * 0.75;
+        targetG = lum * 0.95;
+        targetB = Math.min(255, lum * 1.35);
+      } else if (yRatio < 0.70) {
+        // Mid-frame: human / architecture warm golden tones
+        if (tone === 'warm') {
+          targetR = Math.min(255, lum * 1.35);
+          targetG = lum * 1.05;
+          targetB = lum * 0.75;
+        } else if (tone === 'cool') {
+          targetR = lum * 0.85;
+          targetG = lum * 1.05;
+          targetB = Math.min(255, lum * 1.25);
+        } else {
+          targetR = Math.min(255, lum * 1.2);
+          targetG = lum * 1.05;
+          targetB = lum * 0.88;
+        }
+      } else {
+        // Ground / foreground: natural foliage / earth tones
+        targetR = lum * 0.85;
+        targetG = Math.min(255, lum * 1.2);
+        targetB = lum * 0.75;
+      }
+
+      // Blend luminance with target chromatic color
+      data[idx] = Math.round(lum * (1 - intensity) + targetR * intensity);
+      data[idx + 1] = Math.round(lum * (1 - intensity) + targetG * intensity);
+      data[idx + 2] = Math.round(lum * (1 - intensity) + targetB * intensity);
+    }
   }
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, bitmap.width, bitmap.height);
 
-  ctx.globalCompositeOperation = 'source-over';
+  ctx.putImageData(imgData, 0, 0);
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 
 async function processVectorize(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   if (!ctx) throw new Error('Canvas context unavailable');
 
-  ctx.filter = 'contrast(180%) saturate(140%)';
   ctx.drawImage(bitmap, 0, 0);
+  const imgData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+  const data = imgData.data;
 
+  // Real Vector Color Quantization & Posterization (8 distinct vector color tones)
+  const levels = 6;
+  const step = 255 / (levels - 1);
+
+  for (let i = 0; i < data.length; i += 4) {
+    data[i] = Math.round(Math.round(data[i] / step) * step);
+    data[i + 1] = Math.round(Math.round(data[i + 1] / step) * step);
+    data[i + 2] = Math.round(Math.round(data[i + 2] / step) * step);
+  }
+
+  ctx.putImageData(imgData, 0, 0);
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 

@@ -5,7 +5,7 @@ import { Sparkles, Cpu, Cloud, Eraser, Zap, SunMedium, Wand2, ShieldCheck, Check
 import { EphemeralCloudModal } from '../cloud/EphemeralCloudModal';
 
 export const AiSuiteControls: React.FC = () => {
-  const { activeImage, activeUtilityId, executeActiveUtility } = useSession();
+  const { activeImage, activeUtilityId, executeActiveUtility, setCurrentParams } = useSession();
   const { user, openAuthModal } = useAuth();
 
   // Execution Hardware Provider & Ephemeral Cloud Consent
@@ -31,13 +31,13 @@ export const AiSuiteControls: React.FC = () => {
 
   if (!activeImage) return null;
 
-  const handleApplyAi = () => {
+  const handleApplyAi = (overrideParams?: any) => {
     if (!user) {
       openAuthModal('pro_feature', activeUtilityId, 'This AI model is completely free on Imazora. Sign in with email to run it directly on your hardware!');
       return;
     }
 
-    executeActiveUtility({
+    const params = {
       provider: hardwareProvider,
       bgFeather,
       bgMode,
@@ -47,7 +47,11 @@ export const AiSuiteControls: React.FC = () => {
       brushSize,
       colorIntensity,
       colorTone,
-    });
+      ...(overrideParams || {}),
+    };
+
+    setCurrentParams(params);
+    executeActiveUtility(params);
   };
 
   return (

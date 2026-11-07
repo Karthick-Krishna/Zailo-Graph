@@ -18,18 +18,20 @@ const STANDARDS: PassportStandard[] = [
 ];
 
 export const PassportPhotoControls: React.FC = () => {
-  const { executeActiveUtility } = useSession();
+  const { executeActiveUtility, setCurrentParams } = useSession();
   const [activeStandard, setActiveStandard] = useState<PassportStandard>(STANDARDS[0]);
   const [sheetMode, setSheetMode] = useState<'single' | '4x6_grid'>('4x6_grid');
   const [whitenBg, setWhitenBg] = useState<boolean>(true);
 
   const handleApply = (standard = activeStandard, mode = sheetMode, whiten = whitenBg) => {
-    executeActiveUtility({
+    const params = {
       targetWidthMm: standard.widthMm,
       targetHeightMm: standard.heightMm,
       sheetMode: mode,
       whitenedBackground: whiten,
-    });
+    };
+    setCurrentParams(params);
+    executeActiveUtility(params);
   };
 
   return (

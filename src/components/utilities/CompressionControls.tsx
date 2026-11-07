@@ -4,7 +4,7 @@ import { formatBytes, calculateSavings } from '../../utils/formatters';
 import { Zap, CheckCircle2 } from 'lucide-react';
 
 export const CompressionControls: React.FC = () => {
-  const { activeImage, executeActiveUtility } = useSession();
+  const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
 
   const [format, setFormat] = useState<'image/webp' | 'image/jpeg' | 'image/png'>('image/webp');
   const [quality, setQuality] = useState<number>(0.85);
@@ -12,10 +12,12 @@ export const CompressionControls: React.FC = () => {
   if (!activeImage) return null;
 
   const handleApply = (newFormat = format, newQuality = quality) => {
-    executeActiveUtility({
+    const params = {
       format: newFormat,
       quality: newQuality,
-    });
+    };
+    setCurrentParams(params);
+    executeActiveUtility(params);
   };
 
   const savings = activeImage.processedSize 

@@ -3,7 +3,7 @@ import { useSession } from '../../context/SessionContext';
 import { Lock, Unlock, Percent, Maximize2 } from 'lucide-react';
 
 export const ResizeControls: React.FC = () => {
-  const { activeImage, executeActiveUtility } = useSession();
+  const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
 
   const [width, setWidth] = useState<number>(activeImage?.width || 1920);
   const [height, setHeight] = useState<number>(activeImage?.height || 1080);
@@ -15,28 +15,41 @@ export const ResizeControls: React.FC = () => {
 
   const handleWidthChange = (val: number) => {
     setWidth(val);
+    let newH = height;
     if (lockAspect && activeImage.width > 0) {
-      setHeight(Math.round((activeImage.height * val) / activeImage.width));
+      newH = Math.round((activeImage.height * val) / activeImage.width);
+      setHeight(newH);
     }
+    setCurrentParams({ width: val, height: newH });
+    executeActiveUtility({ width: val, height: newH });
   };
 
   const handleHeightChange = (val: number) => {
     setHeight(val);
+    let newW = width;
     if (lockAspect && activeImage.height > 0) {
-      setWidth(Math.round((activeImage.width * val) / activeImage.height));
+      newW = Math.round((activeImage.width * val) / activeImage.height);
+      setWidth(newW);
     }
+    setCurrentParams({ width: newW, height: val });
+    executeActiveUtility({ width: newW, height: val });
   };
 
   const handleScaleChange = (percent: number) => {
     setScalePercent(percent);
-    setWidth(Math.round((activeImage.width * percent) / 100));
-    setHeight(Math.round((activeImage.height * percent) / 100));
+    const newW = Math.round((activeImage.width * percent) / 100);
+    const newH = Math.round((activeImage.height * percent) / 100);
+    setWidth(newW);
+    setHeight(newH);
+    setCurrentParams({ scalePercent: percent, width: newW, height: newH });
+    executeActiveUtility({ scalePercent: percent, width: newW, height: newH });
   };
 
   const applyPreset = (presetW: number, presetH: number) => {
     setWidth(presetW);
     setHeight(presetH);
     setMode('exact');
+    setCurrentParams({ width: presetW, height: presetH });
     executeActiveUtility({ width: presetW, height: presetH });
   };
 

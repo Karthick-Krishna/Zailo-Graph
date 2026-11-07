@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Camera, Zap, Sliders, Shield, SunMedium } from 'lucide-react';
 
 export const CameraRawControls: React.FC = () => {
-  const { activeImage, executeActiveUtility } = useSession();
+  const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
   const { user, openAuthModal } = useAuth();
 
   const [engineMode, setEngineMode] = useState<'fast_preview' | 'sensor_demosaic'>('fast_preview');
@@ -21,13 +21,16 @@ export const CameraRawControls: React.FC = () => {
       return;
     }
 
-    executeActiveUtility({
+    const params = {
       engineMode: mode,
       exposureEv: ev,
       temperature: temp,
       tint,
       highlightRecovery,
-    });
+    };
+
+    setCurrentParams(params);
+    executeActiveUtility(params);
   };
 
   return (

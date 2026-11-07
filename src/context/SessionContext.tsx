@@ -13,6 +13,7 @@ interface SessionContextType {
   activeUtilityId: string;
   isProcessing: boolean;
   toastMessage: string | null;
+  currentParams: any;
   
   // Actions
   addImages: (files: File[]) => Promise<void>;
@@ -20,8 +21,9 @@ interface SessionContextType {
   clearWorkspace: () => void;
   setActiveImageId: (id: string) => void;
   setActiveUtilityId: (utilityId: string) => void;
+  setCurrentParams: (params: any) => void;
   sendToUtility: (targetUtilityId: string, imageId?: string) => void;
-  executeActiveUtility: (params: any) => Promise<void>;
+  executeActiveUtility: (params?: any) => Promise<void>;
   downloadImage: (imageId: string) => void;
   dismissToast: () => void;
 }
@@ -33,9 +35,22 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [images, setImages] = useState<ImageItem[]>([]);
   const [activeImageId, setActiveImageId] = useState<string | null>(null);
   const [activeUtilityId, setActiveUtilityId] = useState<string>('compression');
+  const [currentParams, setCurrentParams] = useState<any>({});
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [worker, setWorker] = useState<Worker | null>(null);
+
+  // Prevent accidental tab close when images exist
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (images.length > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [images.length]);
 
   // Initialize Codecs Web Worker
   useEffect(() => {
@@ -229,7 +244,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setToastMessage(`Switched to ${targetUtilityId.replace(/-/g, ' ')} with current result.`);
   }, [activeImageId, isUtilityUnlocked, openAuthModal]);
 
-  const executeActiveUtility = useCallback(async (params: any) => {
+  const executeActiveUtility = useCallback(async (params?: any) => {
     if (!activeImage || !worker) return;
 
     if (!isUtilityUnlocked(activeUtilityId)) {
@@ -237,12 +252,14 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return;
     }
 
+    const effectiveParams = { ...(currentParams || {}), ...(params || {}) };
+
     setIsProcessing(true);
     setImages(prev => prev.map(img => img.id === activeImage.id ? { ...img, status: 'processing', progress: 10 } : img));
 
     try {
       // Direct handling for lossless EXIF metadata stripping
-      if (activeUtilityId === 'exif-remover' || (activeUtilityId === 'exif-viewer' && params?.stripMetadata)) {
+      if (activeUtilityId === 'exif-remover' || (activeUtilityId === 'exif-viewer' && effectiveParams?.stripMetadata)) {
         const strippedBlob = await stripJpegMetadataLossless(activeImage.blob);
         const processedUrl = URL.createObjectURL(strippedBlob);
         setImages(prev => prev.map(img => {
@@ -253,6 +270,8 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
               processedBlob: strippedBlob,
               processedUrl,
               processedSize: strippedBlob.size,
+              processedWidth: img.width,
+              processedHeight: img.height,
               status: 'done',
               progress: 100,
               lastUtilityApplied: 'exif-remover',
@@ -287,8 +306,13 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       // Direct handling for HEIC decoder
       if (activeUtilityId === 'heic-converter') {
-        const converted = await convertHeicToRaster(activeImage.blob, params);
+        const converted = await convertHeicToRaster(activeImage.blob, effectiveParams);
         const processedUrl = URL.createObjectURL(converted);
+        const bitmap = await createImageBitmap(converted);
+        const pW = bitmap.width;
+        const pH = bitmap.height;
+        bitmap.close();
+
         setImages(prev => prev.map(img => {
           if (img.id === activeImage.id) {
             if (img.processedUrl) URL.revokeObjectURL(img.processedUrl);
@@ -297,6 +321,8 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
               processedBlob: converted,
               processedUrl,
               processedSize: converted.size,
+              processedWidth: pW,
+              processedHeight: pH,
               status: 'done',
               progress: 100,
               lastUtilityApplied: 'heic-converter',
@@ -356,13 +382,25 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
           taskId,
           type: taskType,
           imageBitmap: bitmap,
-          params,
+          params: effectiveParams,
         },
         [bitmap] // Zero-copy transfer
       );
 
       const result = await promise;
       const processedUrl = URL.createObjectURL(result.blob);
+
+      // Measure real processed dimensions
+      let pWidth = activeImage.width;
+      let pHeight = activeImage.height;
+      try {
+        const resBitmap = await createImageBitmap(result.blob);
+        pWidth = resBitmap.width;
+        pHeight = resBitmap.height;
+        resBitmap.close();
+      } catch (err) {
+        // fallback
+      }
 
       setImages(prev => prev.map(img => {
         if (img.id === activeImage.id) {
@@ -372,6 +410,8 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             processedBlob: result.blob,
             processedUrl,
             processedSize: result.size,
+            processedWidth: pWidth,
+            processedHeight: pHeight,
             status: 'done',
             progress: 100,
             lastUtilityApplied: activeUtilityId,
@@ -385,7 +425,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsProcessing(false);
     }
-  }, [activeImage, activeUtilityId, worker, isUtilityUnlocked, openAuthModal]);
+  }, [activeImage, activeUtilityId, currentParams, worker, isUtilityUnlocked, openAuthModal]);
 
   const downloadImage = useCallback((imageId: string) => {
     const item = images.find(img => img.id === imageId);
@@ -414,11 +454,13 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         activeUtilityId,
         isProcessing,
         toastMessage,
+        currentParams,
         addImages,
         removeImage,
         clearWorkspace,
         setActiveImageId,
         setActiveUtilityId,
+        setCurrentParams,
         sendToUtility,
         executeActiveUtility,
         downloadImage,

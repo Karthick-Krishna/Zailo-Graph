@@ -149,7 +149,7 @@ export const ControlRack: React.FC<ControlRackProps> = ({
         {/* Process Button */}
         <button
           onClick={() => {
-            executeActiveUtility({});
+            executeActiveUtility();
             if (isMobileDrawer && onCloseMobile) {
               // On mobile, keep drawer or let user inspect result
             }

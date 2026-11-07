@@ -3,7 +3,7 @@ import { useSession } from '../../context/SessionContext';
 import { RotateCw, FlipHorizontal, FlipVertical, Circle, Square } from 'lucide-react';
 
 export const CropControls: React.FC = () => {
-  const { activeImage, executeActiveUtility } = useSession();
+  const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
   const [isCircle, setIsCircle] = useState(false);
   const [aspectPreset, setAspectPreset] = useState<'1:1' | '4:5' | '16:9' | '9:16' | 'free'>('1:1');
 
@@ -31,13 +31,15 @@ export const CropControls: React.FC = () => {
     const startX = Math.max(0, Math.round((activeImage.width - targetW) / 2));
     const startY = Math.max(0, Math.round((activeImage.height - targetH) / 2));
 
-    executeActiveUtility({
+    const params = {
       x: startX,
       y: startY,
       width: targetW,
       height: targetH,
       isCircle: circle,
-    });
+    };
+    setCurrentParams(params);
+    executeActiveUtility(params);
   };
 
   return (

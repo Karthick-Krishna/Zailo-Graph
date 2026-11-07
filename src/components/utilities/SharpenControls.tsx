@@ -3,7 +3,7 @@ import { useSession } from '../../context/SessionContext';
 import { Sliders, Sun, Eye, Sparkles } from 'lucide-react';
 
 export const SharpenControls: React.FC = () => {
-  const { executeActiveUtility } = useSession();
+  const { executeActiveUtility, setCurrentParams } = useSession();
 
   const [sharpen, setSharpen] = useState<number>(1.5);
   const [brightness, setBrightness] = useState<number>(1.0);
@@ -22,7 +22,7 @@ export const SharpenControls: React.FC = () => {
     sep = sepia,
     inv = invert
   ) => {
-    executeActiveUtility({
+    const params = {
       sharpen: s,
       brightness: b,
       contrast: c,
@@ -30,7 +30,9 @@ export const SharpenControls: React.FC = () => {
       grayscale: gray,
       sepia: sep,
       invert: inv,
-    });
+    };
+    setCurrentParams(params);
+    executeActiveUtility(params);
   };
 
   const resetAll = () => {

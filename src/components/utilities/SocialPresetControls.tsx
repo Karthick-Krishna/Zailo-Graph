@@ -23,17 +23,19 @@ const SOCIAL_PRESETS: PresetItem[] = [
 ];
 
 export const SocialPresetControls: React.FC = () => {
-  const { executeActiveUtility } = useSession();
+  const { executeActiveUtility, setCurrentParams } = useSession();
   const [activePreset, setActivePreset] = useState<PresetItem>(SOCIAL_PRESETS[0]);
   const [fillMode, setFillMode] = useState<'blur' | 'color'>('blur');
 
   const handleApply = (preset = activePreset, fill = fillMode) => {
-    executeActiveUtility({
+    const params = {
       presetWidth: preset.width,
       presetHeight: preset.height,
       fillMode: fill,
       fillColor: '#FAFAFA',
-    });
+    };
+    setCurrentParams(params);
+    executeActiveUtility(params);
   };
 
   return (
