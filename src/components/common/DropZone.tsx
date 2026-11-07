@@ -72,8 +72,8 @@ export const DropZone: React.FC = () => {
       {/* Quiet details strip */}
       <div className="flex flex-wrap items-center justify-center gap-2 pt-4 border-t border-neutral-100 w-full text-[11px] text-neutral-500">
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-50 border border-neutral-200/60">
-          <Shield className="w-3 h-3 text-neutral-400" />
-          <span>Local browser sandbox</span>
+          <Shield className="w-3 h-3 text-violet-500" />
+          <span>100% Private Processing</span>
         </div>
 
         {!user ? (

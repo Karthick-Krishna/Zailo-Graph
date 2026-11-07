@@ -25,7 +25,7 @@ export const Header: React.FC = () => {
           <div className="flex items-center gap-1.5 text-neutral-600">
             <span className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 animate-pulse"></span>
             <Shield className="w-3.5 h-3.5 text-violet-600" />
-            <span className="font-medium">Local Browser Sandbox</span>
+            <span className="font-medium text-neutral-700">100% Private • Zero Cloud Uploads</span>
           </div>
 
           {images.length > 0 && (

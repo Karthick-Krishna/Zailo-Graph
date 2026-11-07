@@ -241,24 +241,89 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setImages(prev => prev.map(img => img.id === activeImage.id ? { ...img, status: 'processing', progress: 10 } : img));
 
     try {
+      // Direct handling for lossless EXIF metadata stripping
+      if (activeUtilityId === 'exif-remover') {
+        const strippedBlob = await stripJpegMetadataLossless(activeImage.blob);
+        const processedUrl = URL.createObjectURL(strippedBlob);
+        setImages(prev => prev.map(img => {
+          if (img.id === activeImage.id) {
+            if (img.processedUrl) URL.revokeObjectURL(img.processedUrl);
+            return {
+              ...img,
+              processedBlob: strippedBlob,
+              processedUrl,
+              processedSize: strippedBlob.size,
+              status: 'done',
+              progress: 100,
+              lastUtilityApplied: 'exif-remover',
+            };
+          }
+          return img;
+        }));
+        setToastMessage('Losslessly stripped EXIF metadata markers.');
+        setIsProcessing(false);
+        return;
+      }
+
+      // Direct handling for HEIC decoder
+      if (activeUtilityId === 'heic-converter') {
+        const converted = await convertHeicToRaster(activeImage.blob, params);
+        const processedUrl = URL.createObjectURL(converted);
+        setImages(prev => prev.map(img => {
+          if (img.id === activeImage.id) {
+            if (img.processedUrl) URL.revokeObjectURL(img.processedUrl);
+            return {
+              ...img,
+              processedBlob: converted,
+              processedUrl,
+              processedSize: converted.size,
+              status: 'done',
+              progress: 100,
+              lastUtilityApplied: 'heic-converter',
+            };
+          }
+          return img;
+        }));
+        setToastMessage('Converted HEIC to raster format.');
+        setIsProcessing(false);
+        return;
+      }
+
       // Map utility to worker task
       let taskType = 'compress';
-      if (activeUtilityId === 'batch-resize') taskType = 'resize';
+      if (activeUtilityId === 'batch-resize' || activeUtilityId === 'svg-to-png') taskType = 'resize';
       else if (activeUtilityId === 'avatar-crop') taskType = 'crop';
       else if (activeUtilityId === 'watermark') taskType = 'watermark';
       else if (activeUtilityId === 'sharpen-enhance') taskType = 'filter';
+      else if (activeUtilityId === 'social-presets') taskType = 'social_preset';
+      else if (activeUtilityId === 'passport-photo') taskType = 'passport_photo';
+      else if (activeUtilityId === 'color-palette') taskType = 'extract_palette';
+      else if (activeUtilityId === 'privacy-redact') taskType = 'privacy_redact';
+      else if (activeUtilityId === 'favicon-studio') taskType = 'favicon_pack';
+      else if (activeUtilityId === 'ai-bg-removal') taskType = 'ai_bg_removal';
+      else if (activeUtilityId === 'ai-upscale') taskType = 'ai_upscale';
+      else if (activeUtilityId === 'ai-inpainting') taskType = 'ai_inpainting';
+      else if (activeUtilityId === 'ai-colorization') taskType = 'ai_colorization';
+      else if (activeUtilityId === 'png-to-svg') taskType = 'vectorize';
+      else if (activeUtilityId === 'collage-maker') taskType = 'collage';
 
       const bitmap = await createImageBitmap(activeImage.blob);
       const taskId = 'task_' + Math.random().toString(36).substring(2, 9);
 
       const promise = new Promise<{ blob: Blob; size: number }>((resolve, reject) => {
+        const timer = setTimeout(() => {
+          worker.removeEventListener('message', handler);
+          reject(new Error('Processing timed out. Please try a smaller file or standard settings.'));
+        }, 5000);
+
         const handler = (e: MessageEvent) => {
           if (e.data.taskId === taskId) {
+            clearTimeout(timer);
             worker.removeEventListener('message', handler);
             if (e.data.success) {
               resolve({ blob: e.data.blob, size: e.data.size });
             } else {
-              reject(new Error(e.data.error));
+              reject(new Error(e.data.error || 'Worker execution failed'));
             }
           }
         };

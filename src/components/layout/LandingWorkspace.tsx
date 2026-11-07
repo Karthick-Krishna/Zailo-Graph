@@ -230,7 +230,7 @@ export const LandingWorkspace: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200/80 text-neutral-800 text-xs font-semibold shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 animate-pulse"></span>
             <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
-            <span>100% Client-Side Sandbox • Zero Server Uploads • Built by Zorquelz</span>
+            <span>100% Private • High-Speed Processing • Built by Zorquelz</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.08]">

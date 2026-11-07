@@ -126,8 +126,8 @@ export const ControlRack: React.FC<ControlRackProps> = ({
         <div>
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Active Utility</span>
-            <span className="text-[10px] font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200/60">
-              Local Sandbox
+            <span className="text-[10px] font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200/60 uppercase">
+              {activeUtility.category}
             </span>
           </div>
           <h3 className="text-base font-bold text-neutral-900 tracking-tight">
