@@ -256,3 +256,4 @@ export const AiSuiteControls: React.FC = () => {
     </div>
   );
 };
+
