@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { Sparkles, Cpu, Cloud, Eraser, Zap, SunMedium, Wand2, ShieldCheck, Check } from 'lucide-react';
+import { EphemeralCloudModal } from '../cloud/EphemeralCloudModal';
 
 export const AiSuiteControls: React.FC = () => {
   const { activeImage, activeUtilityId, executeActiveUtility } = useSession();
   const { user, openAuthModal } = useAuth();
 
-  // Execution Hardware Provider
+  // Execution Hardware Provider & Ephemeral Cloud Consent
   const [hardwareProvider, setHardwareProvider] = useState<'webgpu' | 'cloud'>('webgpu');
+  const [showCloudConsentModal, setShowCloudConsentModal] = useState(false);
+  const [hasCloudConsent, setHasCloudConsent] = useState(false);
 
   // Background Removal State (Utility 09)
   const [bgFeather, setBgFeather] = useState<number>(2);
@@ -69,7 +72,13 @@ export const AiSuiteControls: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setHardwareProvider('cloud')}
+            onClick={() => {
+              if (!hasCloudConsent) {
+                setShowCloudConsentModal(true);
+              } else {
+                setHardwareProvider('cloud');
+              }
+            }}
             className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
               hardwareProvider === 'cloud'
                 ? 'border-neutral-900 bg-neutral-50 ring-1 ring-neutral-900/10'
@@ -253,6 +262,25 @@ export const AiSuiteControls: React.FC = () => {
         <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
         <span>Quantized ONNX models are cached locally in your browser storage. Zero inference data is shared.</span>
       </div>
+
+      {/* Ephemeral Cloud Consent Dialog */}
+      <EphemeralCloudModal
+        isOpen={showCloudConsentModal}
+        onClose={() => setShowCloudConsentModal(false)}
+        onConfirmConsent={() => {
+          setHasCloudConsent(true);
+          setHardwareProvider('cloud');
+        }}
+        targetTaskName={
+          activeUtilityId === 'ai-bg-removal'
+            ? 'AI Background Removal'
+            : activeUtilityId === 'ai-upscale'
+            ? '4× Super-Resolution'
+            : activeUtilityId === 'ai-inpainting'
+            ? 'AI Object Inpainting'
+            : 'AI Colorization'
+        }
+      />
     </div>
   );
 };

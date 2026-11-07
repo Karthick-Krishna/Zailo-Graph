@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSession } from '../../context/SessionContext';
 import { ImazoraLogo } from '../common/ImazoraLogo';
-import { Shield, Trash2, LogOut, ChevronDown } from 'lucide-react';
+import { Shield, Trash2, LogOut, ChevronDown, Keyboard } from 'lucide-react';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onOpenShortcuts?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
   const { user, logout, openAuthModal } = useAuth();
   const { images, clearWorkspace } = useSession();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -40,6 +44,19 @@ export const Header: React.FC = () => {
 
         {/* Right: Actions & Account */}
         <div className="flex items-center gap-2">
+          {onOpenShortcuts && (
+            <button
+              onClick={onOpenShortcuts}
+              className="px-2.5 py-1.5 rounded-lg border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-100 text-xs font-mono text-neutral-600 hover:text-neutral-900 transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              title="Keyboard Shortcuts (?)"
+              aria-label="Toggle keyboard shortcuts"
+            >
+              <Keyboard className="w-3.5 h-3.5 text-violet-500" />
+              <span className="hidden lg:inline text-[11px] font-semibold">Shortcuts</span>
+              <kbd className="hidden sm:inline px-1 py-0.2 rounded bg-neutral-100 border border-neutral-200 text-[10px] text-neutral-500">?</kbd>
+            </button>
+          )}
+
           {images.length > 0 && (
             <button
               onClick={clearWorkspace}

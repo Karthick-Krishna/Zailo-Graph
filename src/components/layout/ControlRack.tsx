@@ -160,7 +160,7 @@ export const ControlRack: React.FC<ControlRackProps> = ({
           {isProcessing ? (
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-              <span>Processing in Sandbox...</span>
+              <span>Processing locally...</span>
             </span>
           ) : (
             <>

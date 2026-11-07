@@ -1,23 +1,97 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
-import { SessionProvider } from './context/SessionContext';
+import { SessionProvider, useSession } from './context/SessionContext';
 import { Header } from './components/layout/Header';
 import { Workspace } from './components/layout/Workspace';
 import { AuthModal } from './components/auth/AuthModal';
+import { ShortcutsModal } from './components/common/ShortcutsModal';
+
+const AppContent: React.FC = () => {
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const { images, activeImage, executeActiveUtility, downloadImage, clearWorkspace, setActiveUtilityId } = useSession();
+
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is currently typing inside an input or textarea
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return;
+      }
+
+      // '?' or 'Shift + /' toggles Shortcuts HUD
+      if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
+        e.preventDefault();
+        setIsShortcutsOpen(prev => !prev);
+        return;
+      }
+
+      // 'Escape' closes Shortcuts HUD
+      if (e.key === 'Escape') {
+        setIsShortcutsOpen(false);
+        return;
+      }
+
+      // Cmd/Ctrl + Enter: Execute active utility
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (activeImage) {
+          executeActiveUtility({});
+        }
+        return;
+      }
+
+      // Cmd/Ctrl + D: Download current processed image
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        if (activeImage) {
+          downloadImage(activeImage.id);
+        }
+        return;
+      }
+
+      // Cmd/Ctrl + Backspace / Delete: Clear workspace
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'Backspace' || e.key === 'Delete')) {
+        e.preventDefault();
+        if (images.length > 0) {
+          clearWorkspace();
+        }
+        return;
+      }
+
+      // 1-6 quick switch between main tool groups when not modifier-held
+      if (!e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (e.key === '1') setActiveUtilityId('compression');
+        else if (e.key === '2') setActiveUtilityId('batch-resize');
+        else if (e.key === '3') setActiveUtilityId('ai-bg-removal');
+        else if (e.key === '4') setActiveUtilityId('avatar-crop');
+        else if (e.key === '5') setActiveUtilityId('exif-viewer');
+        else if (e.key === '6') setActiveUtilityId('camera-raw');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [images, activeImage, executeActiveUtility, downloadImage, clearWorkspace, setActiveUtilityId]);
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-[#09090B]">
+      <Header onOpenShortcuts={() => setIsShortcutsOpen(true)} />
+      <Workspace />
+      <AuthModal />
+      <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+    </div>
+  );
+};
 
 export const App: React.FC = () => {
   return (
     <AuthProvider>
       <SessionProvider>
-        <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-[#09090B]">
-          <Header />
-          <Workspace />
-          <AuthModal />
-        </div>
+        <AppContent />
       </SessionProvider>
     </AuthProvider>
   );
 };
 
 export default App;
-

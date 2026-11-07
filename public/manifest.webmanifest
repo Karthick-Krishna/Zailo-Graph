@@ -1,0 +1,43 @@
+{
+  "name": "Imazora — High-Velocity Image Studio",
+  "short_name": "Imazora",
+  "description": "Privacy-first, web-native image utility platform by Zorquelz. 100% free with local hardware acceleration.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FAFAFA",
+  "theme_color": "#09090B",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/imazora-hero-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/",
+      "name": "Image Files",
+      "accept": {
+        "image/jpeg": [".jpg", ".jpeg"],
+        "image/png": [".png"],
+        "image/webp": [".webp"],
+        "image/svg+xml": [".svg"],
+        "image/heic": [".heic", ".heif"],
+        "image/x-canon-cr2": [".cr2"],
+        "image/x-canon-cr3": [".cr3"],
+        "image/x-nikon-nef": [".nef"],
+        "image/x-sony-arw": [".arw"],
+        "image/x-adobe-dng": [".dng"]
+      }
+    }
+  ],
+  "categories": ["photo", "productivity", "utilities"]
+}
