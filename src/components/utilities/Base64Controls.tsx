@@ -130,3 +130,4 @@ export const Base64Controls: React.FC = () => {
     </div>
   );
 };
+

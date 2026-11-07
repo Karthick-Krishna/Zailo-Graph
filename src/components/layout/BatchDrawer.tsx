@@ -1,13 +1,15 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { formatBytes } from '../../utils/formatters';
-import { Plus, Check, Loader2, Download, Trash2 } from 'lucide-react';
+import { Plus, Check, Loader2, Download, Trash2, Archive } from 'lucide-react';
+import JSZip from 'jszip';
 
 export const BatchDrawer: React.FC = () => {
   const { images, activeImageId, setActiveImageId, removeImage, addImages, downloadImage } = useSession();
   const { tier, entitlements, openAuthModal } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isZipping, setIsZipping] = useState(false);
 
   if (images.length === 0) return null;
 
@@ -20,10 +22,38 @@ export const BatchDrawer: React.FC = () => {
     }
   };
 
-  const handleBatchDownload = () => {
-    images.forEach(img => {
-      downloadImage(img.id);
-    });
+  const handleBatchDownload = async () => {
+    if (images.length === 1) {
+      downloadImage(images[0].id);
+      return;
+    }
+
+    setIsZipping(true);
+    try {
+      const zip = new JSZip();
+
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        const blob = img.processedBlob || img.blob;
+        const ext = blob.type === 'image/jpeg' ? 'jpg' : blob.type === 'image/webp' ? 'webp' : 'png';
+        const baseName = img.name.replace(/\.[^/.]+$/, '');
+        zip.file(`${baseName}_imazora_${i + 1}.${ext}`, blob);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `imazora_batch_export_${images.length}_images.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Batch zip download failed:', err);
+    } finally {
+      setIsZipping(false);
+    }
   };
 
   return (
@@ -33,7 +63,7 @@ export const BatchDrawer: React.FC = () => {
         ref={fileInputRef}
         type="file"
         multiple
-        accept="image/*"
+        accept="image/*,.heic,.heif,.cr2,.cr3,.nef,.arw,.dng,.svg"
         onChange={handleAddMore}
         className="hidden"
       />
@@ -117,10 +147,22 @@ export const BatchDrawer: React.FC = () => {
 
         <button
           onClick={handleBatchDownload}
-          className="py-2 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold flex items-center gap-2 transition shadow-sm cursor-pointer"
+          disabled={isZipping}
+          className="py-2.5 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold flex items-center gap-2 transition shadow-sm cursor-pointer disabled:opacity-50"
         >
-          <Download className="w-4 h-4" />
-          <span>Save All ({images.length})</span>
+          {isZipping ? (
+            <span>Archiving ZIP...</span>
+          ) : images.length > 1 ? (
+            <>
+              <Archive className="w-4 h-4" />
+              <span>Download All as .ZIP ({images.length})</span>
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4" />
+              <span>Download Image</span>
+            </>
+          )}
         </button>
       </div>
     </div>

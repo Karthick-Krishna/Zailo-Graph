@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { ImageItem } from '../types/image';
 import { useAuth } from './AuthContext';
 import { parseImageMetadata } from '../utils/exif';
+import { extractEmbeddedRawPreview } from '../utils/rawExtractor';
 import { saveToOPFS, deleteFromOPFS, clearOPFSWorkspace } from '../utils/opfs';
 
 interface SessionContextType {
@@ -76,8 +77,19 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         continue;
       }
 
+      let activeFile: Blob = file;
+      const lowerName = file.name.toLowerCase();
+      const isRaw = lowerName.endsWith('.cr2') || lowerName.endsWith('.cr3') || lowerName.endsWith('.nef') || lowerName.endsWith('.arw') || lowerName.endsWith('.dng') || lowerName.endsWith('.orf');
+
+      if (isRaw) {
+        const rawPreview = await extractEmbeddedRawPreview(file);
+        if (rawPreview) {
+          activeFile = rawPreview;
+        }
+      }
+
       const id = 'img_' + Math.random().toString(36).substring(2, 9);
-      const url = URL.createObjectURL(file);
+      const url = URL.createObjectURL(activeFile);
 
       // Extract metadata (EXIF/GPS)
       const metadata = await parseImageMetadata(file);
@@ -88,7 +100,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       let height = metadata.height || 0;
 
       try {
-        const bitmap = await createImageBitmap(file);
+        const bitmap = await createImageBitmap(activeFile);
         width = bitmap.width;
         height = bitmap.height;
 

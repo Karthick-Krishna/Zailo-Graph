@@ -3,7 +3,7 @@ import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { UTILITIES } from '../../types/utility';
 import { formatBytes } from '../../utils/formatters';
-import { Play, Download, Sparkles } from 'lucide-react';
+import { Play, Download } from 'lucide-react';
 
 // Modular Utility Controls
 import { ResizeControls } from '../utilities/ResizeControls';
@@ -18,6 +18,10 @@ import { ExifControls } from '../utilities/ExifControls';
 import { PrivacyRedactControls } from '../utilities/PrivacyRedactControls';
 import { FaviconStudioControls } from '../utilities/FaviconStudioControls';
 import { Base64Controls } from '../utilities/Base64Controls';
+import { SvgControls } from '../utilities/SvgControls';
+import { CollageControls } from '../utilities/CollageControls';
+import { CameraRawControls } from '../utilities/CameraRawControls';
+import { AiSuiteControls } from '../utilities/AiSuiteControls';
 
 export const ControlRack: React.FC = () => {
   const { activeImage, activeUtilityId, executeActiveUtility, downloadImage, sendToUtility, isProcessing } = useSession();
@@ -65,6 +69,18 @@ export const ControlRack: React.FC = () => {
       case 'image-to-base64':
       case 'base64-to-image':
         return <Base64Controls />;
+      case 'svg-to-png':
+      case 'png-to-svg':
+        return <SvgControls />;
+      case 'collage-maker':
+        return <CollageControls />;
+      case 'camera-raw':
+        return <CameraRawControls />;
+      case 'ai-bg-removal':
+      case 'ai-upscale':
+      case 'ai-inpainting':
+      case 'ai-colorization':
+        return <AiSuiteControls />;
       default:
         return (
           <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 text-center">
