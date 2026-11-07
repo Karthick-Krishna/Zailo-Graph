@@ -5,7 +5,7 @@ import { FileCode2, PenTool, Sparkles, Download, Copy, Check, Eye } from 'lucide
 
 export const SvgControls: React.FC = () => {
   const { activeImage, activeUtilityId, executeActiveUtility } = useSession();
-  const { tier, openAuthModal } = useAuth();
+  const { user, openAuthModal } = useAuth();
 
   // SVG to High-Res PNG state (Utility 06)
   const [scaleMultiplier, setScaleMultiplier] = useState<number>(2);
@@ -24,9 +24,9 @@ export const SvgControls: React.FC = () => {
   const isVectorize = activeUtilityId === 'png-to-svg';
 
   const handleRasterizeSvg = (mult = scaleMultiplier, dpi = targetDpi, trans = transparentBg) => {
-    // Check if guest attempts >2x
-    if (mult > 2 && tier === 'guest') {
-      openAuthModal('pro_feature', 'svg-to-png', '16× High-Resolution print rendering is a free Pro feature. Log in for free to render up to 16,000px!');
+    // Check if user attempts >2x without signing in
+    if (mult > 2 && !user) {
+      openAuthModal('pro_feature', 'svg-to-png', '16× High-Resolution print rendering is completely free. Sign in with email to render up to 16,000px!');
       return;
     }
 
@@ -38,8 +38,8 @@ export const SvgControls: React.FC = () => {
   };
 
   const handleVectorize = () => {
-    if (tier === 'guest') {
-      openAuthModal('pro_feature', 'png-to-svg', 'PNG to SVG Vectorization is a free Pro feature. Log in for free to trace full-color vector paths!');
+    if (!user) {
+      openAuthModal('pro_feature', 'png-to-svg', 'PNG to SVG Vectorization is completely free. Sign in with email to trace full-color vector paths!');
       return;
     }
 
@@ -93,7 +93,7 @@ export const SvgControls: React.FC = () => {
                   }`}
                 >
                   <span>{item.label}</span>
-                  {item.isPro && tier === 'guest' && (
+                  {item.isPro && !user && (
                     <span className="text-[9px] text-amber-600 font-bold">Pro Free</span>
                   )}
                 </button>

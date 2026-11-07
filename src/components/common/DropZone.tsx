@@ -5,7 +5,7 @@ import { UploadCloud, Shield, ArrowRight } from 'lucide-react';
 
 export const DropZone: React.FC = () => {
   const { addImages } = useSession();
-  const { tier, openAuthModal } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,7 +76,7 @@ export const DropZone: React.FC = () => {
           <span>Local browser sandbox</span>
         </div>
 
-        {tier === 'guest' ? (
+        {!user ? (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -84,14 +84,12 @@ export const DropZone: React.FC = () => {
             }}
             className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-neutral-50 hover:bg-neutral-100 border border-neutral-200/60 text-neutral-700 transition cursor-pointer"
           >
-            <span>Guest limit: 10 MB</span>
-            <span className="text-neutral-300">•</span>
-            <span className="font-medium text-neutral-900">Unlock 50 MB</span>
+            <span className="font-medium text-neutral-900">Sign in for 50 MB files</span>
             <ArrowRight className="w-3 h-3 text-neutral-400 ml-0.5" />
           </button>
         ) : (
           <div className="px-2.5 py-1 rounded-md bg-neutral-50 border border-neutral-200/60 text-neutral-800 font-medium">
-            Pro: 50 MB files / 50 batch active
+            50 MB high-res active
           </div>
         )}
       </div>

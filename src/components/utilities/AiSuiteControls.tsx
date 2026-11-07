@@ -5,7 +5,7 @@ import { Sparkles, Cpu, Cloud, Eraser, Zap, SunMedium, Wand2, ShieldCheck, Check
 
 export const AiSuiteControls: React.FC = () => {
   const { activeImage, activeUtilityId, executeActiveUtility } = useSession();
-  const { tier, openAuthModal } = useAuth();
+  const { user, openAuthModal } = useAuth();
 
   // Execution Hardware Provider
   const [hardwareProvider, setHardwareProvider] = useState<'webgpu' | 'cloud'>('webgpu');
@@ -29,8 +29,8 @@ export const AiSuiteControls: React.FC = () => {
   if (!activeImage) return null;
 
   const handleApplyAi = () => {
-    if (tier === 'guest') {
-      openAuthModal('pro_feature', activeUtilityId, 'This AI model is completely free on Imazora. Create a free account to run it directly on your hardware!');
+    if (!user) {
+      openAuthModal('pro_feature', activeUtilityId, 'This AI model is completely free on Imazora. Sign in with email to run it directly on your hardware!');
       return;
     }
 

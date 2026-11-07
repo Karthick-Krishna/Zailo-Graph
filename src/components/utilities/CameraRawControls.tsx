@@ -5,7 +5,7 @@ import { Camera, Zap, Sliders, Shield, SunMedium } from 'lucide-react';
 
 export const CameraRawControls: React.FC = () => {
   const { activeImage, executeActiveUtility } = useSession();
-  const { tier, openAuthModal } = useAuth();
+  const { user, openAuthModal } = useAuth();
 
   const [engineMode, setEngineMode] = useState<'fast_preview' | 'sensor_demosaic'>('fast_preview');
   const [exposureEv, setExposureEv] = useState<number>(0);
@@ -16,8 +16,8 @@ export const CameraRawControls: React.FC = () => {
   if (!activeImage) return null;
 
   const handleApply = (mode = engineMode, ev = exposureEv, temp = temperature) => {
-    if (tier === 'guest') {
-      openAuthModal('pro_feature', 'camera-raw', 'Camera RAW Studio is a free Pro feature. Log in for free to process Canon CR2/CR3, Nikon NEF, Sony ARW, and Adobe DNG files!');
+    if (!user) {
+      openAuthModal('pro_feature', 'camera-raw', 'Camera RAW Studio is completely free on Imazora. Sign in with email to process Canon CR2/CR3, Nikon NEF, Sony ARW, and Adobe DNG files!');
       return;
     }
 

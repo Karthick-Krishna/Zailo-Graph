@@ -52,16 +52,15 @@ export const Header: React.FC = () => {
             </button>
           )}
 
-          {tier === 'guest' ? (
-            <button
-              onClick={() => openAuthModal('manual')}
-              className="px-3 py-1.5 rounded-lg border border-neutral-300 hover:border-neutral-900 hover:bg-white text-neutral-800 text-xs font-medium transition cursor-pointer flex items-center gap-2"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-              <span>Guest (10MB)</span>
-              <span className="text-neutral-300">|</span>
-              <span className="text-neutral-900 font-semibold">Sign in free</span>
-            </button>
+          {!user ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => openAuthModal('manual')}
+                className="px-3.5 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition cursor-pointer flex items-center gap-2 shadow-xs"
+              >
+                <span>Sign In / Sign Up</span>
+              </button>
+            </div>
           ) : (
             <div className="relative">
               <button

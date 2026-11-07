@@ -11,7 +11,7 @@ import { Lock } from 'lucide-react';
 
 export const Workspace: React.FC = () => {
   const { images, activeImage, activeUtilityId, setActiveUtilityId, toastMessage, dismissToast } = useSession();
-  const { tier, isUtilityUnlocked } = useAuth();
+  const { user, isUtilityUnlocked } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<UtilityCategory | 'all'>('all');
 
   const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
@@ -63,7 +63,7 @@ export const Workspace: React.FC = () => {
         <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
           {filteredUtilities.map(u => {
             const isSelected = u.id === activeUtilityId;
-            const isToolLocked = u.isCompetitorPaid && tier === 'guest';
+            const isToolLocked = u.isCompetitorPaid && !user;
 
             return (
               <button

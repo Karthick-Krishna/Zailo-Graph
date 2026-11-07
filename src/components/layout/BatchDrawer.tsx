@@ -7,7 +7,7 @@ import JSZip from 'jszip';
 
 export const BatchDrawer: React.FC = () => {
   const { images, activeImageId, setActiveImageId, removeImage, addImages, downloadImage } = useSession();
-  const { tier, entitlements, openAuthModal } = useAuth();
+  const { user, entitlements, openAuthModal } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isZipping, setIsZipping] = useState(false);
 
@@ -120,7 +120,7 @@ export const BatchDrawer: React.FC = () => {
         {/* Add More Button */}
         <button
           onClick={() => {
-            if (tier === 'guest' && images.length >= entitlements.maxBatchQueue) {
+            if (!user && images.length >= entitlements.maxBatchQueue) {
               openAuthModal('batch_limit');
             } else {
               fileInputRef.current?.click();

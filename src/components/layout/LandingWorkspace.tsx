@@ -27,7 +27,7 @@ import {
 
 export const LandingWorkspace: React.FC = () => {
   const { addImages, setActiveUtilityId } = useSession();
-  const { tier, openAuthModal } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<UtilityCategory | 'all'>('all');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -393,7 +393,7 @@ export const LandingWorkspace: React.FC = () => {
           {/* Utility Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
             {filteredUtilities.map((u) => {
-              const isLocked = u.isCompetitorPaid && tier === 'guest';
+              const isLocked = u.isCompetitorPaid && !user;
               return (
                 <div
                   key={u.id}

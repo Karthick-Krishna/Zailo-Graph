@@ -2,14 +2,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserTier, Entitlements, AuthModalState, AuthModalReason } from '../types/auth';
 import { UTILITIES } from '../types/utility';
 
-const GUEST_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const ANONYMOUS_MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 MB
 const REGISTERED_MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
-const GUEST_MAX_BATCH = 3;
+const ANONYMOUS_MAX_BATCH = 5;
 const REGISTERED_MAX_BATCH = 50;
 
-const GUEST_ENTITLEMENTS: Entitlements = {
-  maxFileSize: GUEST_MAX_FILE_SIZE,
-  maxBatchQueue: GUEST_MAX_BATCH,
+const ANONYMOUS_ENTITLEMENTS: Entitlements = {
+  maxFileSize: ANONYMOUS_MAX_FILE_SIZE,
+  maxBatchQueue: ANONYMOUS_MAX_BATCH,
   maxExportResolution: { width: 1920, height: 1080 },
   gatedUtilities: UTILITIES.filter(u => u.isCompetitorPaid).map(u => u.id),
   hasCloudAccess: false,
@@ -31,11 +31,11 @@ interface AuthContextType {
   entitlements: Entitlements;
   isAuthenticated: boolean;
   authModal: AuthModalState;
+  recentEmails: string[];
   
   // Actions
-  loginWithDemo: (email?: string) => void;
-  loginWithMagicLink: (email: string) => Promise<boolean>;
-  loginWithOAuth: (provider: 'google' | 'github') => Promise<void>;
+  signInWithEmail: (email: string) => void;
+  signUpWithEmail: (email: string) => void;
   logout: () => void;
   openAuthModal: (reason: AuthModalReason, targetUtilityId?: string, customMessage?: string) => void;
   closeAuthModal: () => void;
@@ -49,6 +49,13 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'imazora_user_session';
+const RECENT_EMAILS_KEY = 'imazora_recent_emails';
+
+const DEFAULT_RECENT_EMAILS = [
+  'creator@zorquelz.com',
+  'studio@photography.com',
+  'designer@imazora.com',
+];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
@@ -60,13 +67,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
+  const [recentEmails, setRecentEmails] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem(RECENT_EMAILS_KEY);
+      return stored ? JSON.parse(stored) : DEFAULT_RECENT_EMAILS;
+    } catch {
+      return DEFAULT_RECENT_EMAILS;
+    }
+  });
+
   const [authModal, setAuthModal] = useState<AuthModalState>({
     isOpen: false,
     reason: 'manual',
   });
 
   const tier: UserTier = user ? 'free_registered' : 'guest';
-  const entitlements = tier === 'free_registered' ? REGISTERED_ENTITLEMENTS : GUEST_ENTITLEMENTS;
+  const entitlements = user ? REGISTERED_ENTITLEMENTS : ANONYMOUS_ENTITLEMENTS;
 
   useEffect(() => {
     if (user) {
@@ -89,26 +105,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAuthModal(prev => ({ ...prev, isOpen: false }));
   };
 
-  const loginWithDemo = (email = 'creator@zorquelz.com') => {
+  const registerEmailSession = (email: string) => {
+    const trimmed = email.trim().toLowerCase();
     const newUser: User = {
       id: 'usr_' + Math.random().toString(36).substring(2, 9),
-      email,
-      name: email.split('@')[0],
+      email: trimmed,
+      name: trimmed.split('@')[0],
       createdAt: new Date().toISOString(),
       tier: 'free_registered',
     };
     setUser(newUser);
+
+    // Save to recent emails list for instant 1-click re-login
+    setRecentEmails(prev => {
+      const updated = [trimmed, ...prev.filter(e => e !== trimmed)].slice(0, 5);
+      localStorage.setItem(RECENT_EMAILS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+
     closeAuthModal();
   };
 
-  const loginWithMagicLink = async (email: string): Promise<boolean> => {
-    // In production, this dispatches via Supabase Auth / Zorquelz auth endpoint
-    loginWithDemo(email);
-    return true;
+  const signInWithEmail = (email: string) => {
+    registerEmailSession(email);
   };
 
-  const loginWithOAuth = async (provider: 'google' | 'github'): Promise<void> => {
-    loginWithDemo(`user.${provider}@zorquelz.com`);
+  const signUpWithEmail = (email: string) => {
+    registerEmailSession(email);
   };
 
   const logout = () => {
@@ -121,8 +144,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return {
         allowed: false,
         maxAllowed: max,
-        message: tier === 'guest'
-          ? `Guest files are limited to 10 MB (${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB dropped). Log in for free to process files up to 50 MB!`
+        message: !user
+          ? `File exceeds size limit (${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB). Sign in with email for free to process files up to 50 MB!`
           : `File exceeds the 50 MB limit (${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB).`,
       };
     }
@@ -137,8 +160,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         allowed: false,
         maxAllowed: max,
         allowedCount: 0,
-        message: tier === 'guest'
-          ? `Guest batch queue limit reached (max ${max} images). Log in for free to process up to 50 images simultaneously!`
+        message: !user
+          ? `Batch queue limit reached (${max} images). Sign in with email for free to process up to 50 images concurrently!`
           : `Maximum batch queue capacity reached (50 images).`,
       };
     }
@@ -147,14 +170,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       allowed: allowedCount === addingCount,
       maxAllowed: max,
       allowedCount,
-      message: allowedCount < addingCount && tier === 'guest'
-        ? `Queued ${allowedCount} images. (Guest limit is ${max}). Log in for free to queue up to 50 images simultaneously!`
+      message: allowedCount < addingCount && !user
+        ? `Queued ${allowedCount} images. Sign in with email for free to queue up to 50 images concurrently!`
         : undefined,
     };
   };
 
   const isUtilityUnlocked = (utilityId: string) => {
-    if (tier === 'free_registered') return true;
+    if (user) return true;
     return !entitlements.gatedUtilities.includes(utilityId);
   };
 
@@ -166,9 +189,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         entitlements,
         isAuthenticated: !!user,
         authModal,
-        loginWithDemo,
-        loginWithMagicLink,
-        loginWithOAuth,
+        recentEmails,
+        signInWithEmail,
+        signUpWithEmail,
         logout,
         openAuthModal,
         closeAuthModal,
@@ -189,4 +212,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
