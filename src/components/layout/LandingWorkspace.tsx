@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { UTILITIES, UtilityCategory } from '../../types/utility';
+import { ImazoraLogo } from '../common/ImazoraLogo';
 import { 
   UploadCloud, 
   ShieldCheck, 
@@ -213,27 +214,44 @@ export const LandingWorkspace: React.FC = () => {
       />
 
       {/* Main Container */}
-      <div className="w-full max-w-5xl flex flex-col items-center space-y-10">
+      <div className="w-full max-w-5xl flex flex-col items-center space-y-10 relative">
+        {/* Subtle Ambient Violet & Cyan Rim Glow from Logo */}
+        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-96 h-56 bg-gradient-to-r from-violet-600/15 via-indigo-600/10 to-cyan-500/15 blur-3xl pointer-events-none rounded-full"></div>
 
         {/* Hero Banner Header */}
-        <div className="text-center space-y-4 max-w-3xl">
+        <div className="text-center space-y-5 max-w-3xl relative z-10 flex flex-col items-center">
+          {/* Logo Brand Emblem with Subtle Glow */}
+          <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            <div className="absolute -inset-2 bg-gradient-to-r from-violet-600/20 to-cyan-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition duration-300"></div>
+            <ImazoraLogo size="lg" showText={false} className="relative drop-shadow-md" />
+          </div>
+
           {/* Privacy Trust Pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200/80 text-neutral-800 text-xs font-semibold shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 animate-pulse"></span>
+            <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
             <span>100% Client-Side Sandbox • Zero Server Uploads • Built by Zorquelz</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.08]">
-            The High-Velocity <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-neutral-900 via-neutral-700 to-neutral-900 bg-clip-text text-transparent">
-              Browser Image Studio
+            Your images. Your workflow. <br className="hidden sm:inline" />
+            <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+              Your control.
             </span>
           </h1>
 
+          {/* Brand Tagline Accent */}
+          <div className="flex items-center justify-center gap-3 w-full max-w-md pt-0.5">
+            <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-violet-300"></div>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-neutral-400 uppercase">
+              THE BROWSER IMAGE STUDIO
+            </span>
+            <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-cyan-300"></div>
+          </div>
+
           <p className="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed">
             Compress, vectorize, crop, colorize, and enhance images with WebAssembly and WebGPU. 
-            All 25 tools run strictly on your machine — zero network lag, zero subscriptions, zero ads.
+            All 25 tools run strictly in your browser — zero cloud latency, zero subscriptions, zero ads.
           </p>
         </div>
 
@@ -243,22 +261,22 @@ export const LandingWorkspace: React.FC = () => {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`relative w-full rounded-3xl border-2 border-dashed p-10 sm:p-12 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center text-center group bg-white shadow-sm ${
+          className={`relative w-full rounded-3xl border-2 border-dashed p-10 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white shadow-sm ${
             isDragOver
-              ? 'border-neutral-900 bg-neutral-50 scale-[1.01] shadow-xl'
-              : 'border-neutral-300 hover:border-neutral-400 hover:shadow-md'
+              ? 'border-violet-600 bg-violet-50/30 scale-[1.01] shadow-xl shadow-violet-500/10'
+              : 'border-neutral-300 hover:border-violet-400 hover:shadow-lg hover:shadow-violet-500/5'
           }`}
         >
           {/* Subtle Ambient Radial Highlight */}
-          <div className="absolute inset-0 bg-radial from-neutral-100/50 via-transparent to-transparent opacity-60 pointer-events-none rounded-3xl"></div>
+          <div className="absolute inset-0 bg-radial from-violet-50/40 via-transparent to-transparent opacity-70 pointer-events-none rounded-3xl"></div>
 
-          {/* Central Cloud Icon */}
-          <div className="w-16 h-16 rounded-2xl bg-neutral-100 text-neutral-800 flex items-center justify-center mb-5 group-hover:bg-neutral-900 group-hover:text-white transition duration-200 shadow-xs">
+          {/* Central Cloud Icon with Logo Tint */}
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neutral-100 to-neutral-50 text-neutral-800 flex items-center justify-center mb-5 group-hover:from-violet-600 group-hover:to-cyan-600 group-hover:text-white transition duration-300 shadow-xs border border-neutral-200/60 group-hover:border-transparent">
             <UploadCloud className="w-8 h-8" />
           </div>
 
           <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
-            Drop your images here, or <span className="underline decoration-neutral-300 underline-offset-4 group-hover:decoration-neutral-900 transition">browse files</span>
+            Drop your images here, or <span className="underline decoration-violet-300 underline-offset-4 group-hover:decoration-violet-600 transition">browse files</span>
           </h2>
           <p className="text-xs text-neutral-500 max-w-md mb-6 leading-relaxed">
             Drag single files or an entire batch. Supports high-res JPEG, PNG, WebP, SVG, Apple HEIC, and Camera RAW (Canon CR2/CR3, Nikon NEF, Sony ARW, Adobe DNG).

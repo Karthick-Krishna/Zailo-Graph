@@ -71,7 +71,7 @@ export const Workspace: React.FC = () => {
                 onClick={() => setActiveUtilityId(u.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
                   isSelected
-                    ? 'bg-white text-neutral-900 border border-neutral-300 shadow-xs'
+                    ? 'bg-white text-neutral-900 border border-violet-300 shadow-xs ring-1 ring-violet-500/10'
                     : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/50 border border-transparent'
                 }`}
               >

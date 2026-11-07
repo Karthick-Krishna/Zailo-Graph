@@ -12,6 +12,11 @@
     color: #09090B;
     overflow-x: hidden;
   }
+
+  ::selection {
+    background-color: #8B5CF6;
+    color: #FFFFFF;
+  }
 }
 
 /* Custom scrollbars for tool racks & queue drawers */

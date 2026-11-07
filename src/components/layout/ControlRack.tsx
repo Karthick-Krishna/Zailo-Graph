@@ -121,7 +121,7 @@ export const ControlRack: React.FC = () => {
         <button
           onClick={() => executeActiveUtility({})}
           disabled={isProcessing}
-          className="w-full py-3 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-neutral-900 via-violet-950 to-neutral-900 hover:from-violet-900 hover:to-indigo-900 text-white font-semibold text-xs transition shadow-sm hover:shadow-md hover:shadow-violet-500/10 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
         >
           {isProcessing ? (
             <span>Computing in Worker...</span>
