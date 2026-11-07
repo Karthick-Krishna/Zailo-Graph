@@ -4,7 +4,19 @@ import { useAuth } from './AuthContext';
 import { parseImageMetadata, stripJpegMetadataLossless } from '../utils/exif';
 import { extractEmbeddedRawPreview } from '../utils/rawExtractor';
 import { convertHeicToRaster } from '../utils/heic';
-import { saveToOPFS, deleteFromOPFS, clearOPFSWorkspace } from '../utils/opfs';
+import { saveToOPFS, readFromOPFS, deleteFromOPFS, clearOPFSWorkspace } from '../utils/opfs';
+
+const OPFS_SESSION_MANIFEST_KEY = 'zailograph_recent_session_manifest';
+
+interface SavedSessionItem {
+  id: string;
+  name: string;
+  size: number;
+  width: number;
+  height: number;
+  mimeType: string;
+  savedAt: number;
+}
 
 interface SessionContextType {
   images: ImageItem[];
@@ -14,11 +26,14 @@ interface SessionContextType {
   isProcessing: boolean;
   toastMessage: string | null;
   currentParams: any;
+  savedSessionCount: number;
   
   // Actions
   addImages: (files: File[]) => Promise<void>;
   removeImage: (id: string) => void;
   clearWorkspace: () => void;
+  restoreSavedSession: () => Promise<void>;
+  clearSavedSession: () => void;
   setActiveImageId: (id: string) => void;
   setActiveUtilityId: (utilityId: string) => void;
   setCurrentParams: (params: any) => void;
@@ -34,11 +49,22 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { validateFileSize, validateBatchCount, isUtilityUnlocked, openAuthModal } = useAuth();
   const [images, setImages] = useState<ImageItem[]>([]);
   const [activeImageId, setActiveImageId] = useState<string | null>(null);
-  const [activeUtilityId, setActiveUtilityId] = useState<string>('compression');
+  const [activeUtilityId, setActiveUtilityId] = useState<string>('workflow-recipes');
   const [currentParams, setCurrentParams] = useState<any>({});
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [worker, setWorker] = useState<Worker | null>(null);
+
+  const [savedSessionCount, setSavedSessionCount] = useState<number>(() => {
+    try {
+      const stored = localStorage.getItem(OPFS_SESSION_MANIFEST_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return Array.isArray(parsed) ? parsed.length : 0;
+      }
+    } catch {}
+    return 0;
+  });
 
   // Prevent accidental tab close when images exist
   useEffect(() => {
@@ -51,6 +77,79 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [images.length]);
+
+  // Keep saved session manifest up to date in localStorage
+  useEffect(() => {
+    if (images.length > 0) {
+      const manifest: SavedSessionItem[] = images.map(img => ({
+        id: img.id,
+        name: img.name,
+        size: img.size,
+        width: img.width,
+        height: img.height,
+        mimeType: img.blob.type,
+        savedAt: Date.now(),
+      }));
+      try {
+        localStorage.setItem(OPFS_SESSION_MANIFEST_KEY, JSON.stringify(manifest));
+        setSavedSessionCount(manifest.length);
+      } catch {}
+    }
+  }, [images]);
+
+  const clearSavedSession = useCallback(() => {
+    try {
+      localStorage.removeItem(OPFS_SESSION_MANIFEST_KEY);
+      setSavedSessionCount(0);
+      clearOPFSWorkspace();
+    } catch {}
+  }, []);
+
+  const restoreSavedSession = useCallback(async () => {
+    try {
+      const raw = localStorage.getItem(OPFS_SESSION_MANIFEST_KEY);
+      if (!raw) return;
+      const manifest: SavedSessionItem[] = JSON.parse(raw);
+      if (!Array.isArray(manifest) || manifest.length === 0) return;
+
+      setIsProcessing(true);
+      const recoveredItems: ImageItem[] = [];
+
+      for (const item of manifest) {
+        const blob = await readFromOPFS(item.id, item.mimeType);
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          recoveredItems.push({
+            id: item.id,
+            name: item.name,
+            size: item.size,
+            type: item.mimeType,
+            blob,
+            url,
+            previewUrl: url,
+            width: item.width,
+            height: item.height,
+            status: 'idle',
+            progress: 100,
+            metadata: { width: item.width, height: item.height },
+            createdAt: item.savedAt || Date.now(),
+          });
+        }
+      }
+
+      if (recoveredItems.length > 0) {
+        setImages(recoveredItems);
+        setActiveImageId(recoveredItems[0].id);
+        setToastMessage(`⚡ Restored ${recoveredItems.length} images from your private local storage.`);
+      } else {
+        clearSavedSession();
+      }
+    } catch (err) {
+      console.warn('Failed to restore session from OPFS:', err);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [clearSavedSession]);
 
   // Initialize Codecs Web Worker
   useEffect(() => {
@@ -206,9 +305,52 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     });
     clearOPFSWorkspace();
+    clearSavedSession();
     setImages([]);
     setActiveImageId(null);
-  }, [images]);
+  }, [images, clearSavedSession]);
+
+  // Global Clipboard Pasting (Ctrl + V from anywhere on page)
+  useEffect(() => {
+    const handlePaste = async (e: ClipboardEvent) => {
+      const activeEl = document.activeElement;
+      if (
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          (activeEl as HTMLElement).isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.clipboardData && e.clipboardData.items) {
+        const imageFiles: File[] = [];
+        for (let i = 0; i < e.clipboardData.items.length; i++) {
+          const item = e.clipboardData.items[i];
+          if (item.type && item.type.startsWith('image/')) {
+            const blob = item.getAsFile();
+            if (blob) {
+              const ext = blob.type.split('/')[1]?.replace('+xml', '') || 'png';
+              const file = new File(
+                [blob],
+                `clipboard_${new Date().toISOString().slice(11, 19).replace(/:/g, '-')}.${ext}`,
+                { type: blob.type }
+              );
+              imageFiles.push(file);
+            }
+          }
+        }
+        if (imageFiles.length > 0) {
+          e.preventDefault();
+          await addImages(imageFiles);
+          setToastMessage(`⚡ Pasted ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''} from clipboard!`);
+        }
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [addImages]);
 
   const sendToUtility = useCallback((targetUtilityId: string, imageId?: string) => {
     const targetId = imageId || activeImageId;
@@ -353,6 +495,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       else if (activeUtilityId === 'png-to-svg') taskType = 'vectorize';
       else if (activeUtilityId === 'collage-maker') taskType = 'collage';
       else if (activeUtilityId === 'camera-raw') taskType = 'camera_raw';
+      else if (activeUtilityId === 'workflow-recipes') taskType = 'workflow_recipe';
 
       const bitmap = await createImageBitmap(activeImage.blob);
       const taskId = 'task_' + Math.random().toString(36).substring(2, 9);
@@ -455,9 +598,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         isProcessing,
         toastMessage,
         currentParams,
+        savedSessionCount,
         addImages,
         removeImage,
         clearWorkspace,
+        restoreSavedSession,
+        clearSavedSession,
         setActiveImageId,
         setActiveUtilityId,
         setCurrentParams,

@@ -22,6 +22,7 @@ import { SvgControls } from '../utilities/SvgControls';
 import { CollageControls } from '../utilities/CollageControls';
 import { CameraRawControls } from '../utilities/CameraRawControls';
 import { AiSuiteControls } from '../utilities/AiSuiteControls';
+import { RecipeControls } from '../utilities/RecipeControls';
 
 interface ControlRackProps {
   isMobileDrawer?: boolean;
@@ -48,6 +49,8 @@ export const ControlRack: React.FC<ControlRackProps> = ({
 
   const renderActiveControls = () => {
     switch (activeUtilityId) {
+      case 'workflow-recipes':
+        return <RecipeControls />;
       case 'batch-resize':
         return <ResizeControls />;
       case 'compression':

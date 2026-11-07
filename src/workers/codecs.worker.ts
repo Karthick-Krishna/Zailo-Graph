@@ -130,6 +130,9 @@ self.onmessage = async (e: MessageEvent) => {
       case 'camera_raw':
         resultBlob = await processCameraRaw(imageBitmap, params);
         break;
+      case 'workflow_recipe':
+        resultBlob = await processWorkflowRecipe(imageBitmap, params);
+        break;
       default:
         throw new Error(`Unsupported worker task: ${type}`);
     }
@@ -193,7 +196,7 @@ async function processCompress(bitmap: ImageBitmap, params: any): Promise<Blob> 
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('OffscreenCanvas 2D context unavailable');
 
-  const format = params?.format || 'image/jpeg';
+  const format = params?.format || 'image/webp';
   const quality = params?.quality !== undefined ? params.quality : 0.85;
 
   if (format === 'image/jpeg') {
@@ -203,10 +206,18 @@ async function processCompress(bitmap: ImageBitmap, params: any): Promise<Blob> 
 
   ctx.drawImage(bitmap, 0, 0);
 
-  return await canvas.convertToBlob({
-    type: format,
-    quality: quality,
-  });
+  try {
+    return await canvas.convertToBlob({
+      type: format,
+      quality: quality,
+    });
+  } catch {
+    // Graceful fallback to WebP if browser engine lacks direct AVIF encode in OffscreenCanvas
+    return await canvas.convertToBlob({
+      type: 'image/webp',
+      quality: quality,
+    });
+  }
 }
 
 async function processCrop(bitmap: ImageBitmap, params: any): Promise<Blob> {
@@ -931,4 +942,115 @@ async function processCameraRaw(bitmap: ImageBitmap, params: any): Promise<Blob>
   ctx.drawImage(bitmap, 0, 0);
 
   return await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.95 });
+}
+
+async function processWorkflowRecipe(bitmap: ImageBitmap, params: any): Promise<Blob> {
+  const recipeId = params?.recipeId || 'ecommerce';
+
+  if (recipeId === 'ecommerce') {
+    // 1. Amazon / E-Commerce: Pure #FFFFFF canvas, 1:1 Square, product centered, clean WebP/AVIF
+    const dim = Math.max(bitmap.width, bitmap.height);
+    const canvas = new OffscreenCanvas(dim, dim);
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) throw new Error('OffscreenCanvas 2D unavailable');
+
+    // Solid studio white background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, dim, dim);
+
+    // Center image
+    const dx = Math.round((dim - bitmap.width) / 2);
+    const dy = Math.round((dim - bitmap.height) / 2);
+    ctx.drawImage(bitmap, dx, dy);
+
+    // Apply micro unsharp contrast
+    const imgData = ctx.getImageData(0, 0, dim, dim);
+    applySharpen(imgData, 0.4);
+    ctx.putImageData(imgData, 0, 0);
+
+    try {
+      return await canvas.convertToBlob({ type: 'image/avif', quality: 0.88 });
+    } catch {
+      return await canvas.convertToBlob({ type: 'image/webp', quality: 0.88 });
+    }
+  }
+
+  if (recipeId === 'youtube') {
+    // 2. YouTube Thumbnail: 16:9 crop, 1280x720, vibrant contrast & saturation
+    const targetW = 1280;
+    const targetH = 720;
+    const canvas = new OffscreenCanvas(targetW, targetH);
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) throw new Error('OffscreenCanvas 2D unavailable');
+
+    // Calculate center-crop from original
+    const origRatio = bitmap.width / bitmap.height;
+    const targetRatio = 16 / 9;
+    let sW = bitmap.width;
+    let sH = bitmap.height;
+    let sX = 0;
+    let sY = 0;
+
+    if (origRatio > targetRatio) {
+      sW = Math.round(bitmap.height * targetRatio);
+      sX = Math.round((bitmap.width - sW) / 2);
+    } else {
+      sH = Math.round(bitmap.width / targetRatio);
+      sY = Math.round((bitmap.height - sH) / 2);
+    }
+
+    // Apply vibrancy filter
+    ctx.filter = 'saturate(1.25) contrast(1.15) brightness(1.02)';
+    ctx.drawImage(bitmap, sX, sY, sW, sH, 0, 0, targetW, targetH);
+    ctx.filter = 'none';
+
+    // Sharpen for punchy thumbnail edges
+    const thumbData = ctx.getImageData(0, 0, targetW, targetH);
+    applySharpen(thumbData, 0.6);
+    ctx.putImageData(thumbData, 0, 0);
+
+    return await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.88 });
+  }
+
+  if (recipeId === 'passport') {
+    // 3. Biometric Passport & Visa 6-Photo Sheet (4x6" @ 300 DPI = 1800x1200)
+    return await processPassportPhoto(bitmap, { sheetMode: '4x6_grid', targetWidthMm: 51, targetHeightMm: 51, whitenedBackground: true });
+  }
+
+  if (recipeId === 'web_seo') {
+    // 4. Lighthouse 100 Web SEO: Max 1920px, strip metadata, modern AVIF/WebP
+    const maxDim = 1920;
+    let outW = bitmap.width;
+    let outH = bitmap.height;
+    if (outW > maxDim || outH > maxDim) {
+      if (outW > outH) {
+        outH = Math.round((outH * maxDim) / outW);
+        outW = maxDim;
+      } else {
+        outW = Math.round((outW * maxDim) / outH);
+        outH = maxDim;
+      }
+    }
+
+    const canvas = new OffscreenCanvas(outW, outH);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('OffscreenCanvas 2D unavailable');
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bitmap, 0, 0, outW, outH);
+
+    try {
+      return await canvas.convertToBlob({ type: 'image/avif', quality: 0.82 });
+    } catch {
+      return await canvas.convertToBlob({ type: 'image/webp', quality: 0.82 });
+    }
+  }
+
+  // 5. Privacy Cleanse: Re-draw into clean offscreen canvas to strip all device fingerprints
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('OffscreenCanvas 2D unavailable');
+  ctx.drawImage(bitmap, 0, 0);
+  return await canvas.convertToBlob({ type: 'image/png' });
 }

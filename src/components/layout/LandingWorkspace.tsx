@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 
 export const LandingWorkspace: React.FC = () => {
-  const { addImages, setActiveUtilityId } = useSession();
+  const { addImages, setActiveUtilityId, savedSessionCount, restoreSavedSession, clearSavedSession } = useSession();
   const { user, openAuthModal } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<UtilityCategory | 'all'>('all');
@@ -251,9 +251,44 @@ export const LandingWorkspace: React.FC = () => {
 
           <p className="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed">
             Compress, vectorize, crop, colorize, and enhance images with WebAssembly and WebGPU. 
-            All 25 tools run strictly in your browser — zero cloud latency, zero subscriptions, zero ads.
+            All 26 tools run strictly in your browser — zero cloud latency, zero subscriptions, zero ads.
           </p>
         </div>
+
+        {/* Local Session Recovery Banner (Zero Data Loss) */}
+        {savedSessionCount > 0 && (
+          <div className="w-full max-w-xl mx-auto p-4 rounded-2xl bg-neutral-900 border border-violet-500/40 text-white flex items-center justify-between shadow-xl shadow-violet-950/20 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-violet-600/30 border border-violet-400/40 text-cyan-400">
+                <Layers className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span>Previous Session Available</span>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-violet-500/30 text-violet-200">
+                    {savedSessionCount} {savedSessionCount === 1 ? 'image' : 'images'}
+                  </span>
+                </p>
+                <p className="text-[10px] text-neutral-400">Saved in your browser virtual disk. Restore with zero loss.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={clearSavedSession}
+                className="text-[11px] text-neutral-400 hover:text-white px-2.5 py-1 transition cursor-pointer"
+              >
+                Dismiss
+              </button>
+              <button
+                onClick={restoreSavedSession}
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 text-white text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition"
+              >
+                <span>Restore Files</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Hero Interactive Drag & Drop Box */}
         <div
@@ -276,18 +311,22 @@ export const LandingWorkspace: React.FC = () => {
           </div>
 
           <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
-            Drop your images here, or <span className="underline decoration-violet-300 underline-offset-4 group-hover:decoration-violet-600 transition">browse files</span>
+            Drop your images here, paste with <kbd className="px-2 py-0.5 rounded-md bg-neutral-100 border border-neutral-300 font-mono text-xs text-neutral-700">Ctrl + V</kbd>, or <span className="underline decoration-violet-300 underline-offset-4 group-hover:decoration-violet-600 transition">browse files</span>
           </h2>
           <p className="text-xs text-neutral-500 max-w-md mb-6 leading-relaxed">
-            Drag single files or an entire batch. Supports high-res JPEG, PNG, WebP, SVG, Apple HEIC, and Camera RAW (Canon CR2/CR3, Nikon NEF, Sony ARW, Adobe DNG).
+            Drag single files or an entire batch. Supports high-res AVIF, JPEG, PNG, WebP, SVG, Apple HEIC, and Camera RAW (Canon CR2/CR3, Nikon NEF, Sony ARW, Adobe DNG).
           </p>
 
           {/* Supported Format Badges */}
           <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-lg mb-8">
-            {['JPEG / JPG', 'PNG', 'WEBP', 'SVG', 'APPLE HEIC', 'CANON CR2/CR3', 'NIKON NEF', 'SONY ARW', 'ADOBE DNG'].map((fmt) => (
+            {['NEXT-GEN AVIF', 'WEBP', 'JPEG / JPG', 'PNG', 'SVG', 'APPLE HEIC', 'CANON CR2/CR3', 'NIKON NEF', 'SONY ARW', 'ADOBE DNG'].map((fmt) => (
               <span
                 key={fmt}
-                className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-neutral-100 text-neutral-600 border border-neutral-200/60"
+                className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium border ${
+                  fmt === 'NEXT-GEN AVIF' 
+                    ? 'bg-gradient-to-r from-violet-50 to-cyan-50 text-violet-700 border-violet-200/80 font-bold' 
+                    : 'bg-neutral-100 text-neutral-600 border-neutral-200/60'
+                }`}
               >
                 {fmt}
               </span>

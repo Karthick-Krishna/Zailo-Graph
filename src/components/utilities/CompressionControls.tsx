@@ -6,7 +6,7 @@ import { Zap, CheckCircle2 } from 'lucide-react';
 export const CompressionControls: React.FC = () => {
   const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
 
-  const [format, setFormat] = useState<'image/webp' | 'image/jpeg' | 'image/png'>('image/webp');
+  const [format, setFormat] = useState<'image/avif' | 'image/webp' | 'image/jpeg' | 'image/png'>('image/avif');
   const [quality, setQuality] = useState<number>(0.85);
   const initialRunRef = useRef<string | null>(null);
 
@@ -38,9 +38,10 @@ export const CompressionControls: React.FC = () => {
       {/* Target Format */}
       <div>
         <label className="block text-xs font-semibold text-neutral-700 mb-2">Target Compression Codec</label>
-        <div className="grid grid-cols-3 gap-1.5 p-1 bg-neutral-100 rounded-xl">
+        <div className="grid grid-cols-4 gap-1 p-1 bg-neutral-100 rounded-xl">
           {[
-            { id: 'image/webp', label: 'WebP', tag: 'Best Savings' },
+            { id: 'image/avif', label: 'AVIF', tag: 'Next-Gen 30%' },
+            { id: 'image/webp', label: 'WebP', tag: 'Best Web' },
             { id: 'image/jpeg', label: 'MozJPEG', tag: 'Universal' },
             { id: 'image/png', label: 'PNG', tag: 'Lossless' },
           ].map(fmt => (
@@ -56,8 +57,8 @@ export const CompressionControls: React.FC = () => {
                   : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
-              <span>{fmt.label}</span>
-              <span className="text-[9px] text-neutral-400 font-normal">{fmt.tag}</span>
+              <span className="font-bold">{fmt.label}</span>
+              <span className="text-[8px] text-neutral-400 font-normal leading-tight text-center">{fmt.tag}</span>
             </button>
           ))}
         </div>

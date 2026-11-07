@@ -57,7 +57,8 @@ export const Workspace: React.FC = () => {
         {/* Category Filter Segmented Control */}
         <div className="flex items-center gap-1 p-0.5 bg-neutral-100 rounded-xl shrink-0 border border-neutral-200/60">
           {[
-            { id: 'all', label: 'All 25' },
+            { id: 'all', label: 'All 26' },
+            { id: 'recipes', label: '⚡ Recipes' },
             { id: 'optimize', label: 'Optimize' },
             { id: 'convert', label: 'Convert' },
             { id: 'ai', label: 'AI Suite' },

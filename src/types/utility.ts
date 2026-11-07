@@ -1,4 +1,5 @@
 export type UtilityCategory = 
+  | 'recipes'
   | 'convert'
   | 'optimize'
   | 'ai'
@@ -21,6 +22,19 @@ export interface UtilityDefinition {
 }
 
 export const UTILITIES: UtilityDefinition[] = [
+  // 0. 1-Click Workflow Recipes
+  {
+    id: 'workflow-recipes',
+    name: '1-Click Recipes',
+    description: 'Instant multi-step automation: Amazon E-Commerce, YouTube Thumbnails, Biometric Passports, and Lighthouse 100 SEO.',
+    category: 'recipes',
+    isCompetitorPaid: false,
+    icon: 'Sparkles',
+    badge: 'Automation',
+    inputFormats: ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/heic'],
+    outputFormats: ['image/webp', 'image/avif', 'image/jpeg', 'image/png'],
+    supportsBatch: true,
+  },
   // 1. Batch Image Resizing
   {
     id: 'batch-resize',
