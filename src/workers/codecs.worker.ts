@@ -1,5 +1,5 @@
 /**
- * Imazora Codecs and 2D Image Manipulation Web Worker.
+ * Zailo Graph Codecs and 2D Image Manipulation Web Worker.
  * Multi-threaded OffscreenCanvas execution for all raster, vector, palette, and preset operations.
  */
 
@@ -239,7 +239,7 @@ async function processWatermark(bitmap: ImageBitmap, params: any): Promise<Blob>
 
   ctx.drawImage(bitmap, 0, 0);
 
-  const text = params?.text || 'Imazora';
+  const text = params?.text || 'Zailo Graph';
   const fontSize = params?.fontSize || Math.max(16, Math.round(bitmap.width * 0.04));
   const opacity = params?.opacity !== undefined ? params.opacity : 0.7;
   const color = params?.color || '#FFFFFF';

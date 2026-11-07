@@ -15,7 +15,7 @@ export const GatedFeatureCard: React.FC<GatedFeatureCardProps> = ({ utility }) =
       {/* Badge */}
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold mb-6">
         <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-        <span>Competitor-Paid Feature • 100% Free on Imazora</span>
+        <span>Competitor-Paid Feature • 100% Free on Zailo Graph</span>
       </div>
 
       {/* Title & Description */}
@@ -29,7 +29,7 @@ export const GatedFeatureCard: React.FC<GatedFeatureCardProps> = ({ utility }) =
       {/* Visual Showcase Box */}
       <div className="w-full p-6 rounded-2xl bg-neutral-50 border border-neutral-200/60 mb-8 text-left">
         <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-3">
-          What makes this free on Imazora?
+          What makes this free on Zailo Graph?
         </h4>
         <div className="space-y-3">
           <div className="flex items-start gap-3">

@@ -17,7 +17,7 @@ export const CameraRawControls: React.FC = () => {
 
   const handleApply = (mode = engineMode, ev = exposureEv, temp = temperature) => {
     if (!user) {
-      openAuthModal('pro_feature', 'camera-raw', 'Camera RAW Studio is completely free on Imazora. Sign in with email to process Canon CR2/CR3, Nikon NEF, Sony ARW, and Adobe DNG files!');
+      openAuthModal('pro_feature', 'camera-raw', 'Camera RAW Studio is completely free on Zailo Graph. Sign in with email to process Canon CR2/CR3, Nikon NEF, Sony ARW, and Adobe DNG files!');
       return;
     }
 

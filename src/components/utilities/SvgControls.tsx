@@ -56,7 +56,7 @@ export const SvgControls: React.FC = () => {
 
     // Generate sample SVG representation
     const sampleSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${activeImage.width || 800} ${activeImage.height || 600}">
-  <!-- Imazora VTracer Vector Paths -->
+  <!-- Zailo Graph VTracer Vector Paths -->
   <path fill="#09090B" d="M150 100 L650 100 Q700 300 650 500 L150 500 Z" />
   <circle cx="400" cy="300" r="120" fill="#F59E0B" opacity="0.9" />
 </svg>`;

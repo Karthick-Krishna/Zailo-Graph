@@ -33,7 +33,7 @@ export const AiSuiteControls: React.FC = () => {
 
   const handleApplyAi = (overrideParams?: any) => {
     if (!user) {
-      openAuthModal('pro_feature', activeUtilityId, 'This AI model is completely free on Imazora. Sign in with email to run it directly on your hardware!');
+      openAuthModal('pro_feature', activeUtilityId, 'This AI model is completely free on Zailo Graph. Sign in with email to run it directly on your hardware!');
       return;
     }
 

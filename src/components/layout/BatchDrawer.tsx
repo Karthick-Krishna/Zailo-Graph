@@ -37,14 +37,14 @@ export const BatchDrawer: React.FC = () => {
         const blob = img.processedBlob || img.blob;
         const ext = blob.type === 'image/jpeg' ? 'jpg' : blob.type === 'image/webp' ? 'webp' : 'png';
         const baseName = img.name.replace(/\.[^/.]+$/, '');
-        zip.file(`${baseName}_imazora_${i + 1}.${ext}`, blob);
+        zip.file(`${baseName}_zailograph_${i + 1}.${ext}`, blob);
       }
 
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const url = URL.createObjectURL(zipBlob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `imazora_batch_export_${images.length}_images.zip`;
+      a.download = `zailo_graph_batch_export_${images.length}_images.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

@@ -130,7 +130,7 @@ export const PrivacyRedactControls: React.FC = () => {
           <span>Destructive Pixel Eradication</span>
         </div>
         <p className="text-[11px] leading-relaxed text-neutral-500">
-          Unlike reversible CSS blur overlays, Imazora irreversibly scrambles the underlying pixel array in raw WASM memory before export.
+          Unlike reversible CSS blur overlays, Zailo Graph irreversibly scrambles the underlying pixel array in raw WASM memory before export.
         </p>
       </div>
     </div>

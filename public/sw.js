@@ -1,4 +1,4 @@
-const CACHE_NAME = 'imazora-offline-v1';
+const CACHE_NAME = 'zailo-graph-offline-v1';
 const ASSETS_TO_PRECACHE = [
   '/',
   '/index.html',

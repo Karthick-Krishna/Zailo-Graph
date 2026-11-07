@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { UTILITIES, UtilityCategory } from '../../types/utility';
-import { ImazoraLogo } from '../common/ImazoraLogo';
+import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
 import { 
   UploadCloud, 
   ShieldCheck, 
@@ -186,12 +186,12 @@ export const LandingWorkspace: React.FC = () => {
     ctx.save();
     ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
     ctx.font = 'bold 20px monospace';
-    ctx.fillText(`IMAZORA STUDIO SAMPLE • ${type.toUpperCase()} • 1920×1080`, 60, 1020);
+    ctx.fillText(`ZAILO GRAPH STUDIO SAMPLE • ${type.toUpperCase()} • 1920×1080`, 60, 1020);
     ctx.restore();
 
     canvas.toBlob((blob) => {
       if (blob) {
-        const file = new File([blob], `imazora_sample_${type}_1080p.png`, { type: 'image/png' });
+        const file = new File([blob], `zailo_graph_sample_${type}_1080p.png`, { type: 'image/png' });
         addImages([file]);
       }
     }, 'image/png');
@@ -223,7 +223,7 @@ export const LandingWorkspace: React.FC = () => {
           {/* Logo Brand Emblem with Subtle Glow */}
           <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
             <div className="absolute -inset-2 bg-gradient-to-r from-violet-600/20 to-cyan-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition duration-300"></div>
-            <ImazoraLogo size="lg" showText={false} className="relative drop-shadow-md" />
+            <ZailoGraphLogo size="lg" showText={false} className="relative drop-shadow-md" />
           </div>
 
           {/* Privacy Trust Pill */}
@@ -462,7 +462,7 @@ export const LandingWorkspace: React.FC = () => {
 
         {/* Footer Trust Bar */}
         <div className="w-full pt-8 pb-12 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400 font-mono">
-          <div>IMAZORA • ZORQUELZ OPEN PRODUCT ECOSYSTEM</div>
+          <div>ZAILO GRAPH • ZORQUELZ OPEN PRODUCT ECOSYSTEM</div>
           <div className="flex items-center gap-4">
             <span>ZERO CLOUD TRANSMISSION</span>
             <span>•</span>

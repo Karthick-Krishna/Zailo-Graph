@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { ImazoraLogo } from '../common/ImazoraLogo';
+import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
 import { Sparkles, Shield, Check, X, ArrowRight, Zap, Mail, UserCheck } from 'lucide-react';
 
 export const AuthModal: React.FC = () => {
@@ -31,7 +31,7 @@ export const AuthModal: React.FC = () => {
       case 'resolution_limit':
         return 'Unlock 8K Unconstrained Exports';
       default:
-        return mode === 'signin' ? 'Sign In to Imazora' : 'Create Free Account';
+        return mode === 'signin' ? 'Sign In to Zailo Graph' : 'Create Free Account';
     }
   };
 
@@ -44,7 +44,7 @@ export const AuthModal: React.FC = () => {
         {/* Top Header */}
         <div className="p-6 pb-4 border-b border-neutral-100 flex items-start justify-between bg-neutral-50/60">
           <div className="flex items-center gap-3">
-            <ImazoraLogo size="sm" showText={false} />
+            <ZailoGraphLogo size="sm" showText={false} />
             <div>
               <h3 className="text-xl font-bold text-neutral-900 tracking-tight">
                 {getReasonTitle()}

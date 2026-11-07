@@ -1,7 +1,7 @@
-# Imazora — Technology Stack & Architectural Decisions
+# Zailo Graph — Technology Stack & Architectural Decisions
 
 **Document Version:** 1.0.0  
-**Target Domain:** `Imazora.zorquelz.com`  
+**Target Domain:** `zailograph.zorquelz.com`  
 **Evaluation Scope:** Complete Technical Evaluation, Trade-off Matrices, and Ground-Truth Reality Checks  
 **Status:** Approved Architectural Document  
 

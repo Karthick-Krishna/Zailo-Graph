@@ -438,7 +438,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const ext = downloadBlob.type === 'image/jpeg' ? 'jpg' : downloadBlob.type === 'image/webp' ? 'webp' : 'png';
     const baseName = item.name.replace(/\.[^/.]+$/, '');
-    a.download = `${baseName}_imazora.${ext}`;
+    a.download = `${baseName}_zailograph.${ext}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

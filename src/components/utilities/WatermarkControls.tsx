@@ -5,7 +5,7 @@ import { Stamp, Grid, Move } from 'lucide-react';
 export const WatermarkControls: React.FC = () => {
   const { executeActiveUtility, setCurrentParams } = useSession();
 
-  const [text, setText] = useState('© Imazora by Zorquelz');
+  const [text, setText] = useState('© Zailo Graph by Zorquelz');
   const [fontSize, setFontSize] = useState(28);
   const [opacity, setOpacity] = useState(0.75);
   const [color, setColor] = useState('#FFFFFF');

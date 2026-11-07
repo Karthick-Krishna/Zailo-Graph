@@ -1,6 +1,6 @@
 {
-  "name": "Imazora — High-Velocity Image Studio",
-  "short_name": "Imazora",
+  "name": "Zailo Graph — High-Velocity Image Studio",
+  "short_name": "Zailo Graph",
   "description": "Privacy-first, web-native image utility platform by Zorquelz. 100% free with local hardware acceleration.",
   "start_url": "/",
   "display": "standalone",

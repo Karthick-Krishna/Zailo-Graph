@@ -1,7 +1,7 @@
-# Imazora — Engineering Roadmap & Implementation Plan
+# Zailo Graph — Engineering Roadmap & Implementation Plan
 
 **Document Version:** 1.0.0  
-**Target Domain:** `Imazora.zorquelz.com`  
+**Target Domain:** `zailograph.zorquelz.com`  
 **Execution Philosophy:** Multi-Phase Modular Delivery with Explicit Prototype Validation Gates  
 **Status:** Approved Roadmap  
 

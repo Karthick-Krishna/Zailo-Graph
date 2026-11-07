@@ -1,7 +1,7 @@
-# Imazora — Product Requirements Document (PRD)
+# Zailo Graph — Product Requirements Document (PRD)
 
 **Document Version:** 1.0.0  
-**Target Domain:** `Imazora.zorquelz.com`  
+**Target Domain:** `zailograph.zorquelz.com`  
 **Brand Identity:** Zorquelz  
 **Tagline:** *"Your images. Your workflow. Your control."*  
 **Status:** Approved Architecture Draft  

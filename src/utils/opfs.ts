@@ -3,7 +3,7 @@
  * Keeps heavy 50 MB files off the main JavaScript heap.
  */
 
-const WORKSPACE_DIR = 'imazora_workspace';
+const WORKSPACE_DIR = 'zailo_graph_workspace';
 
 export async function isOPFSSupported(): Promise<boolean> {
   return typeof navigator !== 'undefined' && 

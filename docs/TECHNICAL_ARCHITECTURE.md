@@ -1,7 +1,7 @@
-# Imazora — Technical Architecture Blueprint
+# Zailo Graph — Technical Architecture Blueprint
 
 **Document Version:** 1.0.0  
-**Target Domain:** `Imazora.zorquelz.com`  
+**Target Domain:** `zailograph.zorquelz.com`  
 **Architectural Model:** Local-First Hybrid Architecture  
 **Status:** Approved Engineering Blueprint  
 

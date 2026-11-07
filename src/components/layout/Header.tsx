@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSession } from '../../context/SessionContext';
-import { ImazoraLogo } from '../common/ImazoraLogo';
+import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
 import { Shield, Trash2, LogOut, ChevronDown, Keyboard } from 'lucide-react';
 
 interface HeaderProps {
@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
         {/* Brand with Official Vector Logo */}
         <div className="flex items-center gap-3">
-          <ImazoraLogo size="sm" showText={true} />
+          <ZailoGraphLogo size="sm" showText={true} />
           <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-400 pl-2 border-l border-neutral-200">
             by Zorquelz
           </span>

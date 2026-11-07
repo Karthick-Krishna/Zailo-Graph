@@ -1,7 +1,7 @@
-# Imazora — Privacy Architecture & Security Blueprint
+# Zailo Graph — Privacy Architecture & Security Blueprint
 
 **Document Version:** 1.0.0  
-**Target Domain:** `Imazora.zorquelz.com`  
+**Target Domain:** `zailograph.zorquelz.com`  
 **Security Model:** Zero-Knowledge Client-Side Sandbox with Ephemeral Opt-In Fallback  
 **Status:** Approved Security Document  
 
