@@ -43,3 +43,5 @@ coverage/
 public/models/*.onnx
 test-fixtures/raw-samples/
 
+
+*.tsbuildinfo
