@@ -336,8 +336,8 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
         onPointerMove={handlePointerMove}
         className={`relative w-full flex-1 max-w-7xl min-h-[460px] overflow-hidden rounded-2xl select-none flex items-center justify-center touch-none transition-colors duration-200 ${
           canvasTheme === 'light' 
-            ? 'bg-[#F4F4F6] border border-neutral-300/80 shadow-xs' 
-            : 'bg-neutral-950 border border-neutral-800 shadow-xl'
+            ? 'bg-[#F4F4F6]/80 backdrop-blur-md border border-neutral-300/80 shadow-xs' 
+            : 'bg-neutral-950/85 backdrop-blur-md border border-neutral-800 shadow-xl'
         } ${
           viewMode === 'slider' ? 'cursor-ew-resize' : zoomLevel > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
         }`}

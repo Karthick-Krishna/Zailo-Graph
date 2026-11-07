@@ -311,3 +311,4 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
     </aside>
   );
 };
+
