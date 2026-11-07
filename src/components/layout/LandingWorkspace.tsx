@@ -215,10 +215,10 @@ export const LandingWorkspace: React.FC = () => {
 
       {/* Main Container */}
       <div className="w-full max-w-5xl flex flex-col items-center space-y-10 relative">
-        {/* Dynamic Atmospheric Ambient Aura Blooms */}
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-violet-600/30 via-indigo-500/25 to-cyan-400/30 blur-[100px] pointer-events-none rounded-full"></div>
-        <div className="absolute top-1/3 -right-28 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/20 via-blue-500/15 to-violet-600/20 blur-[110px] pointer-events-none rounded-full"></div>
-        <div className="absolute top-2/3 -left-28 w-[480px] h-[480px] bg-gradient-to-tr from-violet-600/25 to-fuchsia-600/15 blur-[100px] pointer-events-none rounded-full"></div>
+        {/* Active Ambient Fluid Aurora Blooms */}
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-violet-600/35 via-indigo-500/30 to-cyan-400/35 blur-[100px] pointer-events-none rounded-full animate-aura-1"></div>
+        <div className="absolute top-1/3 -right-28 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/25 via-blue-500/20 to-violet-600/25 blur-[110px] pointer-events-none rounded-full animate-aura-2"></div>
+        <div className="absolute top-2/3 -left-28 w-[480px] h-[480px] bg-gradient-to-tr from-violet-600/30 to-fuchsia-600/20 blur-[100px] pointer-events-none rounded-full animate-aura-3"></div>
 
         {/* Hero Banner Header */}
         <div className="text-center space-y-5 max-w-3xl relative z-10 flex flex-col items-center">
