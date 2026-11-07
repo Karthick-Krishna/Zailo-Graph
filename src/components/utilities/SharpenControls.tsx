@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { Sliders, Sun, Eye, Sparkles } from 'lucide-react';
 
 export const SharpenControls: React.FC = () => {
-  const { executeActiveUtility, setCurrentParams } = useSession();
+  const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
 
   const [sharpen, setSharpen] = useState<number>(1.5);
   const [brightness, setBrightness] = useState<number>(1.0);
@@ -12,6 +12,7 @@ export const SharpenControls: React.FC = () => {
   const [grayscale, setGrayscale] = useState<boolean>(false);
   const [sepia, setSepia] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
+  const initialRunRef = useRef<string | null>(null);
 
   const handleApply = (
     s = sharpen,
@@ -34,6 +35,15 @@ export const SharpenControls: React.FC = () => {
     setCurrentParams(params);
     executeActiveUtility(params);
   };
+
+  useEffect(() => {
+    if (!activeImage) return;
+    const runKey = `${activeImage.id}_sharpen`;
+    if (initialRunRef.current !== runKey) {
+      initialRunRef.current = runKey;
+      handleApply();
+    }
+  }, [activeImage?.id]);
 
   const resetAll = () => {
     setSharpen(0);

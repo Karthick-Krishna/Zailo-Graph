@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { IdCard, Printer, Check, Shield } from 'lucide-react';
 
@@ -18,10 +18,11 @@ const STANDARDS: PassportStandard[] = [
 ];
 
 export const PassportPhotoControls: React.FC = () => {
-  const { executeActiveUtility, setCurrentParams } = useSession();
+  const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
   const [activeStandard, setActiveStandard] = useState<PassportStandard>(STANDARDS[0]);
   const [sheetMode, setSheetMode] = useState<'single' | '4x6_grid'>('4x6_grid');
   const [whitenBg, setWhitenBg] = useState<boolean>(true);
+  const initialRunRef = useRef<string | null>(null);
 
   const handleApply = (standard = activeStandard, mode = sheetMode, whiten = whitenBg) => {
     const params = {
@@ -33,6 +34,15 @@ export const PassportPhotoControls: React.FC = () => {
     setCurrentParams(params);
     executeActiveUtility(params);
   };
+
+  useEffect(() => {
+    if (!activeImage) return;
+    const runKey = `${activeImage.id}_passport_${activeStandard.id}_${sheetMode}_${whitenBg}`;
+    if (initialRunRef.current !== runKey) {
+      initialRunRef.current = runKey;
+      handleApply();
+    }
+  }, [activeImage?.id]);
 
   return (
     <div className="space-y-5">

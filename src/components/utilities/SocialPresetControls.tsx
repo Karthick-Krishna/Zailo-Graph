@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { Sparkles } from 'lucide-react';
 
@@ -23,9 +23,10 @@ const SOCIAL_PRESETS: PresetItem[] = [
 ];
 
 export const SocialPresetControls: React.FC = () => {
-  const { executeActiveUtility, setCurrentParams } = useSession();
+  const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
   const [activePreset, setActivePreset] = useState<PresetItem>(SOCIAL_PRESETS[0]);
   const [fillMode, setFillMode] = useState<'blur' | 'color'>('blur');
+  const initialRunRef = useRef<string | null>(null);
 
   const handleApply = (preset = activePreset, fill = fillMode) => {
     const params = {
@@ -37,6 +38,15 @@ export const SocialPresetControls: React.FC = () => {
     setCurrentParams(params);
     executeActiveUtility(params);
   };
+
+  useEffect(() => {
+    if (!activeImage) return;
+    const runKey = `${activeImage.id}_social_${activePreset.id}_${fillMode}`;
+    if (initialRunRef.current !== runKey) {
+      initialRunRef.current = runKey;
+      handleApply();
+    }
+  }, [activeImage?.id]);
 
   return (
     <div className="space-y-5">

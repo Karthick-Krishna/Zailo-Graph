@@ -1,26 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { Camera, Zap, Sliders, Shield, SunMedium } from 'lucide-react';
 
 export const CameraRawControls: React.FC = () => {
   const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
-  const { user, openAuthModal } = useAuth();
+  const { user } = useAuth();
 
   const [engineMode, setEngineMode] = useState<'fast_preview' | 'sensor_demosaic'>('fast_preview');
   const [exposureEv, setExposureEv] = useState<number>(0);
   const [temperature, setTemperature] = useState<number>(5500); // Kelvin
   const [tint, setTint] = useState<number>(0);
   const [highlightRecovery, setHighlightRecovery] = useState<boolean>(true);
+  const initialRunRef = useRef<string | null>(null);
 
   if (!activeImage) return null;
 
   const handleApply = (mode = engineMode, ev = exposureEv, temp = temperature) => {
-    if (!user) {
-      openAuthModal('pro_feature', 'camera-raw', 'Camera RAW Studio is completely free on Zailo Graph. Sign in with email to process Canon CR2/CR3, Nikon NEF, Sony ARW, and Adobe DNG files!');
-      return;
-    }
-
     const params = {
       engineMode: mode,
       exposureEv: ev,
@@ -32,6 +28,14 @@ export const CameraRawControls: React.FC = () => {
     setCurrentParams(params);
     executeActiveUtility(params);
   };
+
+  useEffect(() => {
+    const runKey = `${activeImage.id}_raw_${engineMode}`;
+    if (initialRunRef.current !== runKey) {
+      initialRunRef.current = runKey;
+      handleApply();
+    }
+  }, [activeImage.id]);
 
   return (
     <div className="space-y-5">

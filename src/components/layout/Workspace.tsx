@@ -173,6 +173,7 @@ export const Workspace: React.FC = () => {
                 processedWidth={activeImage!.processedWidth}
                 processedHeight={activeImage!.processedHeight}
                 imageName={activeImage!.name}
+                activeUtilityId={activeUtilityId}
               />
             </div>
           )}

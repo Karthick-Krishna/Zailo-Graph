@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { Lock, Unlock, Percent, Maximize2 } from 'lucide-react';
 
@@ -7,9 +7,10 @@ export const ResizeControls: React.FC = () => {
 
   const [width, setWidth] = useState<number>(activeImage?.width || 1920);
   const [height, setHeight] = useState<number>(activeImage?.height || 1080);
-  const [scalePercent, setScalePercent] = useState<number>(100);
+  const [scalePercent, setScalePercent] = useState<number>(75);
   const [lockAspect, setLockAspect] = useState<boolean>(true);
   const [mode, setMode] = useState<'percent' | 'exact'>('percent');
+  const initialRunRef = useRef<string | null>(null);
 
   if (!activeImage) return null;
 
@@ -52,6 +53,14 @@ export const ResizeControls: React.FC = () => {
     setCurrentParams({ width: presetW, height: presetH });
     executeActiveUtility({ width: presetW, height: presetH });
   };
+
+  useEffect(() => {
+    const runKey = `${activeImage.id}_resize`;
+    if (initialRunRef.current !== runKey) {
+      initialRunRef.current = runKey;
+      handleScaleChange(75);
+    }
+  }, [activeImage.id]);
 
   return (
     <div className="space-y-5">

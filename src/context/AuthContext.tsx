@@ -10,8 +10,8 @@ const REGISTERED_MAX_BATCH = 50;
 const ANONYMOUS_ENTITLEMENTS: Entitlements = {
   maxFileSize: ANONYMOUS_MAX_FILE_SIZE,
   maxBatchQueue: ANONYMOUS_MAX_BATCH,
-  maxExportResolution: { width: 1920, height: 1080 },
-  gatedUtilities: UTILITIES.filter(u => u.isCompetitorPaid).map(u => u.id),
+  maxExportResolution: null, // Uncapped preview & test for all tools
+  gatedUtilities: [], // All 25 utilities unlocked for frictionless testing
   hasCloudAccess: false,
   hasPersistentSessions: false,
 };
@@ -151,9 +151,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   };
 
-  const isUtilityUnlocked = (utilityId: string) => {
-    if (user) return true;
-    return !entitlements.gatedUtilities.includes(utilityId);
+  const isUtilityUnlocked = (_utilityId: string) => {
+    // All 25 utilities unlocked for live preview & processing
+    return true;
   };
 
   return (

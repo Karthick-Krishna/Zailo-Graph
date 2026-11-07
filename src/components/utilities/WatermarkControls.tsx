@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { Stamp, Grid, Move } from 'lucide-react';
 
 export const WatermarkControls: React.FC = () => {
-  const { executeActiveUtility, setCurrentParams } = useSession();
+  const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
 
   const [text, setText] = useState('© Zailo Graph by Zorquelz');
   const [fontSize, setFontSize] = useState(28);
@@ -11,6 +11,7 @@ export const WatermarkControls: React.FC = () => {
   const [color, setColor] = useState('#FFFFFF');
   const [position, setPosition] = useState<'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'tile'>('bottom-right');
   const [rotation, setRotation] = useState(0);
+  const initialRunRef = useRef<string | null>(null);
 
   const handleApply = (newPos = position, newText = text, newSize = fontSize, newOpacity = opacity, newColor = color, newRot = rotation) => {
     const params = {
@@ -24,6 +25,15 @@ export const WatermarkControls: React.FC = () => {
     setCurrentParams(params);
     executeActiveUtility(params);
   };
+
+  useEffect(() => {
+    if (!activeImage) return;
+    const runKey = `${activeImage.id}_watermark`;
+    if (initialRunRef.current !== runKey) {
+      initialRunRef.current = runKey;
+      handleApply();
+    }
+  }, [activeImage?.id]);
 
   return (
     <div className="space-y-5">

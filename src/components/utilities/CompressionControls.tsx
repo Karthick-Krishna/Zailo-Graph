@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { formatBytes, calculateSavings } from '../../utils/formatters';
 import { Zap, CheckCircle2 } from 'lucide-react';
@@ -8,6 +8,7 @@ export const CompressionControls: React.FC = () => {
 
   const [format, setFormat] = useState<'image/webp' | 'image/jpeg' | 'image/png'>('image/webp');
   const [quality, setQuality] = useState<number>(0.85);
+  const initialRunRef = useRef<string | null>(null);
 
   if (!activeImage) return null;
 
@@ -19,6 +20,14 @@ export const CompressionControls: React.FC = () => {
     setCurrentParams(params);
     executeActiveUtility(params);
   };
+
+  useEffect(() => {
+    const runKey = `${activeImage.id}_compress_${format}_${quality}`;
+    if (initialRunRef.current !== runKey) {
+      initialRunRef.current = runKey;
+      handleApply(format, quality);
+    }
+  }, [activeImage.id]);
 
   const savings = activeImage.processedSize 
     ? calculateSavings(activeImage.size, activeImage.processedSize) 

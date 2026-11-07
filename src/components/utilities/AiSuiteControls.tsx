@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
-import { Sparkles, Cpu, Cloud, Eraser, Zap, SunMedium, Wand2, ShieldCheck, Check } from 'lucide-react';
+import { Sparkles, Cpu, Cloud, Eraser, Zap, SunMedium, Wand2, ShieldCheck, Check, Loader2 } from 'lucide-react';
 import { EphemeralCloudModal } from '../cloud/EphemeralCloudModal';
 
 export const AiSuiteControls: React.FC = () => {
-  const { activeImage, activeUtilityId, executeActiveUtility, setCurrentParams } = useSession();
-  const { user, openAuthModal } = useAuth();
+  const { activeImage, activeUtilityId, executeActiveUtility, setCurrentParams, isProcessing } = useSession();
+  const { user } = useAuth();
 
   // Execution Hardware Provider & Ephemeral Cloud Consent
   const [hardwareProvider, setHardwareProvider] = useState<'webgpu' | 'cloud'>('webgpu');
@@ -29,14 +29,11 @@ export const AiSuiteControls: React.FC = () => {
   const [colorIntensity, setColorIntensity] = useState<number>(85);
   const [colorTone, setColorTone] = useState<'neutral' | 'warm' | 'cool'>('neutral');
 
+  const initialRunRef = useRef<string | null>(null);
+
   if (!activeImage) return null;
 
   const handleApplyAi = (overrideParams?: any) => {
-    if (!user) {
-      openAuthModal('pro_feature', activeUtilityId, 'This AI model is completely free on Zailo Graph. Sign in with email to run it directly on your hardware!');
-      return;
-    }
-
     const params = {
       provider: hardwareProvider,
       bgFeather,
@@ -53,6 +50,15 @@ export const AiSuiteControls: React.FC = () => {
     setCurrentParams(params);
     executeActiveUtility(params);
   };
+
+  // Auto-run when tool mounts or switches so user immediately sees the live preview result
+  useEffect(() => {
+    const runKey = `${activeImage.id}_${activeUtilityId}`;
+    if (initialRunRef.current !== runKey) {
+      initialRunRef.current = runKey;
+      handleApplyAi();
+    }
+  }, [activeUtilityId, activeImage.id]);
 
   return (
     <div className="space-y-5">
@@ -111,7 +117,10 @@ export const AiSuiteControls: React.FC = () => {
               ].map(b => (
                 <button
                   key={b.id}
-                  onClick={() => setBgMode(b.id as any)}
+                  onClick={() => {
+                    setBgMode(b.id as any);
+                    handleApplyAi({ bgMode: b.id });
+                  }}
                   className={`py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer text-center ${
                     bgMode === b.id ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-900'
                   }`}
@@ -132,8 +141,12 @@ export const AiSuiteControls: React.FC = () => {
               min="0"
               max="10"
               value={bgFeather}
-              onChange={(e) => setBgFeather(parseInt(e.target.value))}
-              className="w-full accent-neutral-900"
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                setBgFeather(val);
+                handleApplyAi({ bgFeather: val });
+              }}
+              className="w-full accent-neutral-900 cursor-pointer"
             />
           </div>
         </div>
@@ -146,17 +159,23 @@ export const AiSuiteControls: React.FC = () => {
             <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Upscaling Multiplier</label>
             <div className="grid grid-cols-2 gap-2">
               <button
-                onClick={() => setUpscaleScale(2)}
+                onClick={() => {
+                  setUpscaleScale(2);
+                  handleApplyAi({ upscaleScale: 2 });
+                }}
                 className={`py-2 px-3 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
-                  upscaleScale === 2 ? 'bg-neutral-900 text-white' : 'bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50'
+                  upscaleScale === 2 ? 'bg-neutral-900 text-white shadow-sm' : 'bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50'
                 }`}
               >
                 2× Resolution (2K/4K)
               </button>
               <button
-                onClick={() => setUpscaleScale(4)}
+                onClick={() => {
+                  setUpscaleScale(4);
+                  handleApplyAi({ upscaleScale: 4 });
+                }}
                 className={`py-2 px-3 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
-                  upscaleScale === 4 ? 'bg-neutral-900 text-white' : 'bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50'
+                  upscaleScale === 4 ? 'bg-neutral-900 text-white shadow-sm' : 'bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50'
                 }`}
               >
                 4× Super-Resolution (8K)
@@ -168,7 +187,10 @@ export const AiSuiteControls: React.FC = () => {
             <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Model Architecture</label>
             <div className="grid grid-cols-2 gap-1.5 p-1 bg-neutral-100 rounded-xl">
               <button
-                onClick={() => setUpscaleModel('photo')}
+                onClick={() => {
+                  setUpscaleModel('photo');
+                  handleApplyAi({ upscaleModel: 'photo' });
+                }}
                 className={`py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer text-center ${
                   upscaleModel === 'photo' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-900'
                 }`}
@@ -176,7 +198,10 @@ export const AiSuiteControls: React.FC = () => {
                 Real-ESRGAN Photo
               </button>
               <button
-                onClick={() => setUpscaleModel('anime')}
+                onClick={() => {
+                  setUpscaleModel('anime');
+                  handleApplyAi({ upscaleModel: 'anime' });
+                }}
                 className={`py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer text-center ${
                   upscaleModel === 'anime' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-900'
                 }`}
@@ -224,8 +249,12 @@ export const AiSuiteControls: React.FC = () => {
               min="30"
               max="120"
               value={colorIntensity}
-              onChange={(e) => setColorIntensity(parseInt(e.target.value))}
-              className="w-full accent-neutral-900"
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                setColorIntensity(val);
+                handleApplyAi({ colorIntensity: val });
+              }}
+              className="w-full accent-neutral-900 cursor-pointer"
             />
           </div>
 
@@ -239,7 +268,10 @@ export const AiSuiteControls: React.FC = () => {
               ].map(t => (
                 <button
                   key={t.id}
-                  onClick={() => setColorTone(t.id as any)}
+                  onClick={() => {
+                    setColorTone(t.id as any);
+                    handleApplyAi({ colorTone: t.id });
+                  }}
                   className={`py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer text-center ${
                     colorTone === t.id ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-900'
                   }`}
@@ -254,11 +286,21 @@ export const AiSuiteControls: React.FC = () => {
 
       {/* Run Trigger */}
       <button
-        onClick={handleApplyAi}
-        className="w-full py-3 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+        onClick={() => handleApplyAi()}
+        disabled={isProcessing}
+        className="w-full py-3 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 disabled:bg-neutral-400 text-white font-semibold text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
       >
-        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-        <span>Run AI Model Inference</span>
+        {isProcessing ? (
+          <>
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+            <span>Processing Neural Inference...</span>
+          </>
+        ) : (
+          <>
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Re-Run AI Inference</span>
+          </>
+        )}
       </button>
 
       {/* Model Weight & Privacy Guarantee */}

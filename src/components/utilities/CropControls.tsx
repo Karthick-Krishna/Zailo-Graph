@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { RotateCw, FlipHorizontal, FlipVertical, Circle, Square } from 'lucide-react';
 
@@ -6,6 +6,7 @@ export const CropControls: React.FC = () => {
   const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
   const [isCircle, setIsCircle] = useState(false);
   const [aspectPreset, setAspectPreset] = useState<'1:1' | '4:5' | '16:9' | '9:16' | 'free'>('1:1');
+  const initialRunRef = useRef<string | null>(null);
 
   if (!activeImage) return null;
 
@@ -41,6 +42,15 @@ export const CropControls: React.FC = () => {
     setCurrentParams(params);
     executeActiveUtility(params);
   };
+
+  // Automatically execute crop on mount / image load so preview updates immediately
+  useEffect(() => {
+    const runKey = `${activeImage.id}_crop_${isCircle}_${aspectPreset}`;
+    if (initialRunRef.current !== runKey) {
+      initialRunRef.current = runKey;
+      handleApplyCrop(isCircle, aspectPreset);
+    }
+  }, [activeImage.id]);
 
   return (
     <div className="space-y-5">

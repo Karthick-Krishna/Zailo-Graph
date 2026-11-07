@@ -128,3 +128,4 @@ export const ZailoGraphLogo: React.FC<ZailoGraphLogoProps> = ({
 };
 
 export const ImazoraLogo = ZailoGraphLogo;
+
