@@ -221,9 +221,9 @@ export const LandingWorkspace: React.FC = () => {
         {/* Hero Banner Header */}
         <div className="text-center space-y-5 max-w-3xl relative z-10 flex flex-col items-center">
           {/* Logo Brand Emblem with Subtle Glow */}
-          <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-            <div className="absolute -inset-2 bg-gradient-to-r from-violet-600/20 to-cyan-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition duration-300"></div>
-            <ZailoGraphLogo size="lg" showText={false} className="relative drop-shadow-md" />
+          <div className="relative group cursor-pointer py-2" onClick={() => fileInputRef.current?.click()}>
+            <div className="absolute -inset-4 bg-gradient-to-r from-fuchsia-600/20 via-purple-600/15 to-cyan-500/20 rounded-3xl blur-2xl group-hover:blur-3xl transition duration-500"></div>
+            <ZailoGraphLogo size="xl" showText={true} showTagline={true} className="relative drop-shadow-xl" />
           </div>
 
           {/* Privacy Trust Pill */}

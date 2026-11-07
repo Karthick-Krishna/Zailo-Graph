@@ -1,11 +1,12 @@
 import React from 'react';
 
 export interface ZailoGraphLogoProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   showText?: boolean;
   showTagline?: boolean;
   className?: string;
   theme?: 'dark' | 'light' | 'auto';
+  variant?: 'vector' | 'banner';
 }
 
 export const ZailoGraphLogo: React.FC<ZailoGraphLogoProps> = ({
@@ -13,113 +14,185 @@ export const ZailoGraphLogo: React.FC<ZailoGraphLogoProps> = ({
   showText = true,
   showTagline = false,
   className = '',
+  theme = 'auto',
+  variant = 'vector',
 }) => {
   const sizeMap = {
-    sm: { icon: 28, text: 'text-base', tagline: 'text-[9px]' },
-    md: { icon: 34, text: 'text-xl', tagline: 'text-[10px]' },
-    lg: { icon: 48, text: 'text-2xl', tagline: 'text-xs' },
-    xl: { icon: 64, text: 'text-4xl', tagline: 'text-sm' },
+    xs: { icon: 22, text: 'text-sm', tagline: 'text-[8px]', star: 8 },
+    sm: { icon: 30, text: 'text-base', tagline: 'text-[9px]', star: 10 },
+    md: { icon: 38, text: 'text-xl', tagline: 'text-[10px]', star: 13 },
+    lg: { icon: 56, text: 'text-3xl', tagline: 'text-xs', star: 16 },
+    xl: { icon: 76, text: 'text-5xl', tagline: 'text-sm', star: 20 },
   };
 
-  const { icon, text, tagline } = sizeMap[size];
+  const { icon, text, tagline, star } = sizeMap[size];
+
+  // Optional Full Raster Banner Mode
+  if (variant === 'banner') {
+    return (
+      <div className={`inline-flex flex-col items-center select-none ${className}`}>
+        <img
+          src="/zailograph-banner.jpg"
+          alt="Zailograph — Create • Edit • Convert • Optimize"
+          className="rounded-2xl shadow-2xl border border-violet-500/30 max-w-full h-auto object-contain"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={`inline-flex items-center gap-3 select-none ${className}`}>
-      {/* Precision Vector Emblem matching the brandmark */}
+      {/* Precision Vector Emblem matching the new Zailograph icon badge */}
       <svg
         width={icon}
         height={icon}
         viewBox="0 0 120 120"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="shrink-0 transition-transform duration-300 hover:scale-105"
+        className="shrink-0 transition-transform duration-300 hover:scale-105 drop-shadow-md"
       >
         <defs>
-          {/* Main Ribbon Gradient: Neon Violet to Electric Cyan */}
-          <linearGradient id="zg-ribbon" x1="20" y1="95" x2="105" y2="25" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#A855F7" />
-            <stop offset="35%" stopColor="#818CF8" />
-            <stop offset="70%" stopColor="#38BDF8" />
-            <stop offset="100%" stopColor="#06B6D4" />
+          {/* Neon Border Gradient: Vivid Magenta/Purple to Electric Cyan */}
+          <linearGradient id="zg-neon-border" x1="12" y1="108" x2="108" y2="12" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#E026FD" />
+            <stop offset="45%" stopColor="#A855F7" />
+            <stop offset="75%" stopColor="#06B6D4" />
+            <stop offset="100%" stopColor="#00F0FF" />
           </linearGradient>
 
-          {/* Ribbon Shadow/Depth Inner Layer */}
-          <linearGradient id="zg-depth" x1="30" y1="80" x2="90" y2="40" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#581C87" />
-            <stop offset="50%" stopColor="#312E81" />
-            <stop offset="100%" stopColor="#0369A1" />
+          {/* Electric Stylized Letter 'Z' Gradient */}
+          <linearGradient id="zg-z-gradient" x1="28" y1="92" x2="94" y2="28" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#D946EF" />
+            <stop offset="30%" stopColor="#C026D3" />
+            <stop offset="65%" stopColor="#38BDF8" />
+            <stop offset="100%" stopColor="#00F0FF" />
           </linearGradient>
 
-          {/* Mountain Peak Gradient */}
-          <linearGradient id="zg-mountain" x1="45" y1="80" x2="80" y2="55" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#9333EA" />
-            <stop offset="60%" stopColor="#6366F1" />
-            <stop offset="100%" stopColor="#38BDF8" />
+          {/* Mountain Silhouette Landscape Gradient */}
+          <linearGradient id="zg-mountains" x1="30" y1="90" x2="85" y2="50" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#3B0764" />
+            <stop offset="50%" stopColor="#1E1B4B" />
+            <stop offset="100%" stopColor="#0284C7" />
           </linearGradient>
 
-          {/* Ambient Glow Filter */}
-          <filter id="zg-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#8B5CF6" floodOpacity="0.35" />
+          {/* Subtle Outer Neon Glow Filter */}
+          <filter id="zg-outer-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
 
-        {/* Top-Left Crop Bracket */}
-        <path
-          d="M32 20H22C19.7909 20 18 21.7909 18 24V34"
-          stroke="#C084FC"
+        {/* Squircle Dark Canvas Background */}
+        <rect
+          x="6"
+          y="6"
+          width="108"
+          height="108"
+          rx="26"
+          fill="#070913"
+        />
+
+        {/* Squircle Neon Ambient Glow Border */}
+        <rect
+          x="6"
+          y="6"
+          width="108"
+          height="108"
+          rx="26"
+          stroke="url(#zg-neon-border)"
           strokeWidth="3.5"
+          filter="url(#zg-outer-glow)"
+        />
+
+        {/* Viewfinder Crop Corner Brackets */}
+        {/* Top-Left Bracket */}
+        <path
+          d="M24 38V24H38"
+          stroke="#FFFFFF"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {/* Bottom-Right Bracket */}
+        <path
+          d="M96 82V96H82"
+          stroke="#FFFFFF"
+          strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
 
-        {/* Bottom-Right Crop Bracket */}
+        {/* Background Mountain Peaks */}
         <path
-          d="M88 100H98C100.209 100 102 98.2091 102 96V86"
-          stroke="#38BDF8"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          d="M26 84L45 56C47 53 51 53 53 56L68 76L74 68C76 65 80 65 82 68L94 84H26Z"
+          fill="url(#zg-mountains)"
+          opacity="0.85"
         />
 
-        {/* Central Geometric Camera/Artwork Ribbon Frame */}
-        <g filter="url(#zg-glow)">
-          {/* Outer Stylized Folded Parallelogram Ribbon */}
-          <path
-            d="M32 40C30 33 34 26 42 24L86 16C92 15 98 20 96 26L88 78C87 84 81 89 75 90L34 98C27 99 22 93 24 87L32 40Z"
-            fill="url(#zg-ribbon)"
-          />
+        {/* Celestial Sun/Moon Dot */}
+        <circle cx="86" cy="46" r="4.5" fill="#00F0FF" />
 
-          {/* Inner Cutout (revealing dark/photo center) */}
-          <path
-            d="M39 44L47 31L86 25L80 71L72 82L34 89L39 44Z"
-            fill="#0B0F19"
-          />
+        {/* Electric Sharp Stylized Lightning Letter 'Z' */}
+        <path
+          d="M32 30H86C88 30 90 32 89 34L42 78H88C90 78 91 80 90 82L86 90C85 91 83 92 81 92H28C26 92 24 90 25 88L72 44H30C28 44 27 42 28 40L32 30Z"
+          fill="url(#zg-z-gradient)"
+        />
 
-          {/* Interior Mountain Silhouette */}
-          <path
-            d="M38 74L54 54C56 51 60 51 62 54L71 65L77 59C79 57 82 57 84 59L87 63L85 71L38 74Z"
-            fill="url(#zg-mountain)"
-          />
-
-          {/* Sun / Moon Orb */}
-          <circle cx="78" cy="40" r="6" fill="#F8FAFC" />
-        </g>
+        {/* Specular Inner Blade Edge */}
+        <path
+          d="M32 30H86L42 78L72 44H30L32 30Z"
+          fill="#FFFFFF"
+          opacity="0.25"
+        />
       </svg>
 
       {/* Brand Wordmark */}
       {showText && (
-        <div className="flex flex-col">
-          <div className={`font-bold tracking-tight text-neutral-900 flex items-baseline leading-none ${text}`}>
-            <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent font-extrabold">
+        <div className="flex flex-col justify-center">
+          <div className={`font-black tracking-tight flex items-baseline leading-none relative ${text}`}>
+            {/* 'Zailo' in Pure White (Dark Mode) or Rich Obsidian (Light Mode) */}
+            <span className={theme === 'dark' ? 'text-white' : 'text-neutral-900'}>
               Zailo
             </span>
-            <span className="ml-1.5 text-neutral-900 font-bold">Graph</span>
+
+            {/* 'graph' with Electric Neon Magenta to Cyan Gradient */}
+            <span className="bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent font-black ml-0.5">
+              graph
+            </span>
+
+            {/* 4-Point Neon Sparkle Star over the 'h' */}
+            <svg
+              width={star}
+              height={star}
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="inline-block ml-0.5 -translate-y-1.5 shrink-0"
+            >
+              <path
+                d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z"
+                fill="url(#zg-star-grad)"
+              />
+              <defs>
+                <linearGradient id="zg-star-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#E026FD" />
+                  <stop offset="100%" stopColor="#00F0FF" />
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
 
+          {/* Sub-tagline: CREATE • EDIT • CONVERT • OPTIMIZE */}
           {showTagline && (
-            <span className={`font-mono font-medium tracking-widest text-neutral-400 uppercase mt-1 ${tagline}`}>
-              Your images. Your workflow. Your control.
-            </span>
+            <div className={`flex items-center gap-1.5 font-mono font-semibold tracking-widest text-neutral-400 uppercase mt-1 ${tagline}`}>
+              <span>CREATE</span>
+              <span className="text-fuchsia-500">•</span>
+              <span>EDIT</span>
+              <span className="text-purple-500">•</span>
+              <span>CONVERT</span>
+              <span className="text-cyan-500">•</span>
+              <span>OPTIMIZE</span>
+            </div>
           )}
         </div>
       )}
@@ -128,4 +201,3 @@ export const ZailoGraphLogo: React.FC<ZailoGraphLogoProps> = ({
 };
 
 export const ImazoraLogo = ZailoGraphLogo;
-

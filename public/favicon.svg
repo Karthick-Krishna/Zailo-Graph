@@ -1,23 +1,40 @@
-<svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="imazora-ribbon" x1="20" y1="95" x2="105" y2="25" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stopColor="#A855F7" />
-      <stop offset="35%" stopColor="#818CF8" />
-      <stop offset="70%" stopColor="#38BDF8" />
-      <stop offset="100%" stopColor="#06B6D4" />
+    <linearGradient id="favicon-border" x1="12" y1="108" x2="108" y2="12" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#E026FD" />
+      <stop offset="45%" stopColor="#A855F7" />
+      <stop offset="75%" stopColor="#06B6D4" />
+      <stop offset="100%" stopColor="#00F0FF" />
     </linearGradient>
-    <linearGradient id="imazora-mountain" x1="45" y1="80" x2="80" y2="55" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stopColor="#9333EA" />
-      <stop offset="60%" stopColor="#6366F1" />
-      <stop offset="100%" stopColor="#38BDF8" />
+    <linearGradient id="favicon-z" x1="28" y1="92" x2="94" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#D946EF" />
+      <stop offset="30%" stopColor="#C026D3" />
+      <stop offset="65%" stopColor="#38BDF8" />
+      <stop offset="100%" stopColor="#00F0FF" />
+    </linearGradient>
+    <linearGradient id="favicon-mountains" x1="30" y1="90" x2="85" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#3B0764" />
+      <stop offset="50%" stopColor="#1E1B4B" />
+      <stop offset="100%" stopColor="#0284C7" />
     </linearGradient>
   </defs>
-  <rect width="120" height="120" rx="28" fill="#0B0F19" />
-  <path d="M32 20H22C19.7909 20 18 21.7909 18 24V34" stroke="#C084FC" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-  <path d="M88 100H98C100.209 100 102 98.2091 102 96V86" stroke="#38BDF8" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-  <path d="M32 40C30 33 34 26 42 24L86 16C92 15 98 20 96 26L88 78C87 84 81 89 75 90L34 98C27 99 22 93 24 87L32 40Z" fill="url(#imazora-ribbon)" />
-  <path d="M39 44L47 31L86 25L80 71L72 82L34 89L39 44Z" fill="#0B0F19" />
-  <path d="M38 74L54 54C56 51 60 51 62 54L71 65L77 59C79 57 82 57 84 59L87 63L85 71L38 74Z" fill="url(#imazora-mountain)" />
-  <circle cx="78" cy="40" r="6" fill="#F8FAFC" />
-</svg>
 
+  <!-- Dark Squircle Canvas -->
+  <rect x="6" y="6" width="108" height="108" rx="26" fill="#070913" />
+
+  <!-- Neon Border -->
+  <rect x="6" y="6" width="108" height="108" rx="26" stroke="url(#favicon-border)" stroke-width="4.5" />
+
+  <!-- Viewfinder Crop Brackets -->
+  <path d="M24 38V24H38" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M96 82V96H82" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Mountains -->
+  <path d="M26 84L45 56C47 53 51 53 53 56L68 76L74 68C76 65 80 65 82 68L94 84H26Z" fill="url(#favicon-mountains)" opacity="0.85" />
+  
+  <!-- Cyan Moon Dot -->
+  <circle cx="86" cy="46" r="5" fill="#00F0FF" />
+
+  <!-- Electric Sharp 'Z' -->
+  <path d="M32 30H86C88 30 90 32 89 34L42 78H88C90 78 91 80 90 82L86 90C85 91 83 92 81 92H28C26 92 24 90 25 88L72 44H30C28 44 27 42 28 40L32 30Z" fill="url(#favicon-z)" />
+</svg>
