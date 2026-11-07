@@ -134,15 +134,15 @@ export const ControlRack: React.FC<ControlRackProps> = ({
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Active Utility</span>
-            <span className="text-[10px] font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200/60 uppercase">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Settings</span>
+            <span className="text-[10px] font-semibold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md border border-neutral-200/80 uppercase">
               {activeUtility.category}
             </span>
           </div>
           <h3 className="text-base font-bold text-neutral-900 tracking-tight">
             {activeUtility.name}
           </h3>
-          <p className="text-[11px] text-neutral-500 mt-1 leading-relaxed">
+          <p className="text-[11px] text-neutral-500 mt-0.5 leading-relaxed">
             {activeUtility.description}
           </p>
         </div>
@@ -154,7 +154,7 @@ export const ControlRack: React.FC<ControlRackProps> = ({
       </div>
 
       {/* Bottom Action Rack & "Send To..." Workflow Bus */}
-      <div className="p-5 sm:p-6 border-t border-neutral-200/80 bg-neutral-50/50 space-y-3">
+      <div className="p-4 sm:p-5 border-t border-neutral-200/80 bg-neutral-50/70 space-y-2.5">
         {/* Process Button */}
         <button
           onClick={() => {
@@ -164,11 +164,11 @@ export const ControlRack: React.FC<ControlRackProps> = ({
             }
           }}
           disabled={isProcessing}
-          className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-neutral-900 via-violet-950 to-neutral-900 hover:from-violet-900 hover:to-indigo-900 text-white font-semibold text-xs transition shadow-sm hover:shadow-md hover:shadow-violet-500/10 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          className="w-full py-2.5 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white font-semibold text-xs transition shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border border-neutral-800"
         >
           {isProcessing ? (
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
               <span>Processing locally...</span>
             </span>
           ) : (
@@ -183,9 +183,9 @@ export const ControlRack: React.FC<ControlRackProps> = ({
         {activeImage.processedBlob && (
           <button
             onClick={() => downloadImage(activeImage.id)}
-            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs transition shadow-sm hover:shadow-md hover:shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow-xs flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5" />
             <span>Download Result ({formatBytes(activeImage.processedSize!)})</span>
           </button>
         )}
@@ -193,31 +193,31 @@ export const ControlRack: React.FC<ControlRackProps> = ({
         {/* Connected Workflow "Send to..." Menu */}
         {activeImage.processedBlob && (
           <div className="pt-2 border-t border-neutral-200/60">
-            <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
+            <span className="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">
               Continue Workflow in...
             </span>
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={() => sendToUtility('watermark')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-violet-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
               >
                 &rarr; Watermark
               </button>
               <button
                 onClick={() => sendToUtility('avatar-crop')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-violet-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
               >
                 &rarr; Circular Crop
               </button>
               <button
                 onClick={() => sendToUtility('batch-resize')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-violet-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
               >
                 &rarr; Batch Resize
               </button>
               <button
                 onClick={() => sendToUtility('social-presets')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-violet-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
               >
                 &rarr; Social Preset
               </button>
