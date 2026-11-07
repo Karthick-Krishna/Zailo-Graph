@@ -180,15 +180,62 @@ async function processResize(bitmap: ImageBitmap, params: any): Promise<Blob> {
     targetW = Math.round((bitmap.width * targetH) / bitmap.height);
   }
 
+  const format = params?.format || 'image/webp';
+  const quality = params?.quality !== undefined ? params.quality : 0.88;
+  const resampleMethod = params?.resampleMethod || 'lanczos3';
+
+  // Mode: Retro Pixel Art (Nearest Neighbor)
+  if (resampleMethod === 'pixel_art') {
+    const finalCanvas = new OffscreenCanvas(targetW, targetH);
+    const finalCtx = finalCanvas.getContext('2d');
+    if (!finalCtx) throw new Error('OffscreenCanvas 2D context unavailable');
+    finalCtx.imageSmoothingEnabled = false;
+    finalCtx.drawImage(bitmap, 0, 0, targetW, targetH);
+    return await finalCanvas.convertToBlob({ type: format, quality });
+  }
+
+  // Multi-step Mipmapped Downscaling (High-Fidelity anti-aliased Lanczos3 emulation)
+  let currentCanvas: OffscreenCanvas | ImageBitmap = bitmap;
+  let curW = bitmap.width;
+  let curH = bitmap.height;
+
+  if (curW > targetW * 2 || curH > targetH * 2) {
+    while (curW * 0.5 > targetW && curH * 0.5 > targetH) {
+      const nextW = Math.max(targetW, Math.round(curW * 0.5));
+      const nextH = Math.max(targetH, Math.round(curH * 0.5));
+      const stepCanvas = new OffscreenCanvas(nextW, nextH);
+      const stepCtx = stepCanvas.getContext('2d');
+      if (stepCtx) {
+        stepCtx.imageSmoothingEnabled = true;
+        stepCtx.imageSmoothingQuality = 'high';
+        stepCtx.drawImage(currentCanvas, 0, 0, nextW, nextH);
+        currentCanvas = stepCanvas;
+        curW = nextW;
+        curH = nextH;
+      } else {
+        break;
+      }
+    }
+  }
+
   const canvas = new OffscreenCanvas(targetW, targetH);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('OffscreenCanvas 2D context unavailable');
 
+  if (format === 'image/jpeg') {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, targetW, targetH);
+  }
+
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(bitmap, 0, 0, targetW, targetH);
+  ctx.drawImage(currentCanvas, 0, 0, targetW, targetH);
 
-  return await canvas.convertToBlob({ type: 'image/png' });
+  try {
+    return await canvas.convertToBlob({ type: format, quality });
+  } catch {
+    return await canvas.convertToBlob({ type: 'image/png' });
+  }
 }
 
 async function processCompress(bitmap: ImageBitmap, params: any): Promise<Blob> {

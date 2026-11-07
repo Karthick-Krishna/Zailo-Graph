@@ -38,12 +38,110 @@ interface SessionContextType {
   setActiveUtilityId: (utilityId: string) => void;
   setCurrentParams: (params: any) => void;
   sendToUtility: (targetUtilityId: string, imageId?: string) => void;
-  executeActiveUtility: (params?: any) => Promise<void>;
+  executeActiveUtility: (params?: any, targetUtility?: string) => Promise<void>;
   downloadImage: (imageId: string) => void;
   dismissToast: () => void;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
+
+export const getDefaultParamsForUtility = (utilityId: string, image: { width: number; height: number } | null) => {
+  const w = image?.width || 1920;
+  const h = image?.height || 1080;
+  const minDim = Math.min(w, h);
+
+  switch (utilityId) {
+    case 'batch-resize':
+      return {
+        scalePercent: 75,
+        width: Math.max(1, Math.round(w * 0.75)),
+        height: Math.max(1, Math.round(h * 0.75)),
+        resampleMethod: 'lanczos3',
+        format: 'image/webp',
+        quality: 0.85,
+      };
+    case 'compression':
+      return { format: 'image/webp', quality: 0.8 };
+    case 'heic-converter':
+      return { format: 'image/jpeg', quality: 0.9 };
+    case 'webp-to-raster':
+      return { format: 'image/png' };
+    case 'raster-to-webp':
+      return { format: 'image/webp', quality: 0.85 };
+    case 'svg-to-png':
+      return { scaleMultiplier: 2 };
+    case 'png-to-svg':
+      return { colorCount: 8, simplify: 2 };
+    case 'ai-upscale':
+      return { upscaleScale: 2, upscaleModel: 'esrgan' };
+    case 'ai-bg-removal':
+      return { bgMode: 'transparent', bgFeather: 20 };
+    case 'sharpen-enhance':
+      return { sharpen: 60, contrast: 15, brightness: 5, saturation: 10 };
+    case 'avatar-crop':
+      return {
+        isCircle: true,
+        width: minDim,
+        height: minDim,
+        x: Math.max(0, Math.round((w - minDim) / 2)),
+        y: Math.max(0, Math.round((h - minDim) / 2)),
+      };
+    case 'social-presets':
+      return { presetWidth: 1080, presetHeight: 1080, fillMode: 'blur' };
+    case 'watermark':
+      return {
+        text: 'ZAILOGRAPH',
+        fontSize: Math.max(24, Math.round(minDim * 0.05)),
+        opacity: 0.75,
+        position: 'bottom-right',
+        color: '#FFFFFF',
+        rotation: 0,
+      };
+    case 'collage-maker':
+      return { layout: 'grid_2x2', gap: 12, borderRadius: 16 };
+    case 'color-palette':
+      return { count: 6 };
+    case 'passport-photo':
+      return {
+        sheetMode: '4x6_grid',
+        targetWidthMm: 51,
+        targetHeightMm: 51,
+        whitenedBackground: true,
+      };
+    case 'ai-colorization':
+      return { intensity: 0.85, warmth: 1.1 };
+    case 'ai-inpainting':
+      return { mode: 'smart_heal', radius: 24 };
+    case 'exif-viewer':
+      return {};
+    case 'exif-remover':
+      return { stripMetadata: true };
+    case 'privacy-redact':
+      return {
+        regions: [
+          {
+            x: Math.round(w * 0.2),
+            y: Math.round(h * 0.2),
+            width: Math.round(w * 0.3),
+            height: Math.round(h * 0.2),
+            mode: 'pixelate',
+          },
+        ],
+      };
+    case 'favicon-studio':
+      return { size: 64 };
+    case 'image-to-base64':
+      return {};
+    case 'base64-to-image':
+      return {};
+    case 'camera-raw':
+      return { exposure: 0.2, contrast: 10 };
+    case 'workflow-recipes':
+      return { recipeId: 'ecommerce' };
+    default:
+      return {};
+  }
+};
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { validateFileSize, validateBatchCount, isUtilityUnlocked, openAuthModal } = useAuth();
@@ -153,13 +251,21 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Initialize Codecs Web Worker
   useEffect(() => {
-    const w = new Worker(new URL('../workers/codecs.worker.ts', import.meta.url), {
-      type: 'module',
-    });
-    setWorker(w);
+    let w: Worker;
+    try {
+      w = new Worker(new URL('../workers/codecs.worker.ts', import.meta.url), {
+        type: 'module',
+      });
+      w.onerror = (err) => {
+        console.error('Codecs Worker runtime error:', err);
+      };
+      setWorker(w);
+    } catch (e) {
+      console.error('Failed to spawn worker via URL, fallback:', e);
+    }
 
     return () => {
-      w.terminate();
+      if (w) w.terminate();
     };
   }, []);
 
@@ -352,6 +458,31 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => window.removeEventListener('paste', handlePaste);
   }, [addImages]);
 
+  const selectUtility = useCallback((newUtilityId: string) => {
+    setActiveUtilityId(newUtilityId);
+    // Clear stale processed output so user never sees previous tool's result
+    setImages(prev => prev.map(img => {
+      if (img.id === activeImageId && img.processedUrl) {
+        URL.revokeObjectURL(img.processedUrl);
+        return {
+          ...img,
+          processedBlob: undefined,
+          processedUrl: undefined,
+          processedSize: undefined,
+          status: 'idle',
+        };
+      }
+      return img;
+    }));
+
+    const defaults = getDefaultParamsForUtility(newUtilityId, activeImage);
+    setCurrentParams(defaults);
+    // Auto-execute the selected tool immediately
+    setTimeout(() => {
+      executeActiveUtility(defaults, newUtilityId);
+    }, 20);
+  }, [activeImageId, activeImage]);
+
   const sendToUtility = useCallback((targetUtilityId: string, imageId?: string) => {
     const targetId = imageId || activeImageId;
     if (!targetId) return;
@@ -382,26 +513,29 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return img;
     }));
 
-    setActiveUtilityId(targetUtilityId);
+    selectUtility(targetUtilityId);
     setToastMessage(`Switched to ${targetUtilityId.replace(/-/g, ' ')} with current result.`);
-  }, [activeImageId, isUtilityUnlocked, openAuthModal]);
+  }, [activeImageId, isUtilityUnlocked, openAuthModal, selectUtility]);
 
-  const executeActiveUtility = useCallback(async (params?: any) => {
+  const executeActiveUtility = useCallback(async (params?: any, targetUtility?: string) => {
     if (!activeImage || !worker) return;
 
-    if (!isUtilityUnlocked(activeUtilityId)) {
-      openAuthModal('pro_feature', activeUtilityId);
+    const utilityToRun = targetUtility || activeUtilityId;
+
+    if (!isUtilityUnlocked(utilityToRun)) {
+      openAuthModal('pro_feature', utilityToRun);
       return;
     }
 
-    const effectiveParams = { ...(currentParams || {}), ...(params || {}) };
+    const defaultParams = getDefaultParamsForUtility(utilityToRun, activeImage);
+    const effectiveParams = { ...defaultParams, ...(currentParams || {}), ...(params || {}) };
 
     setIsProcessing(true);
     setImages(prev => prev.map(img => img.id === activeImage.id ? { ...img, status: 'processing', progress: 10 } : img));
 
     try {
       // Direct handling for lossless EXIF metadata stripping
-      if (activeUtilityId === 'exif-remover' || (activeUtilityId === 'exif-viewer' && effectiveParams?.stripMetadata)) {
+      if (utilityToRun === 'exif-remover' || (utilityToRun === 'exif-viewer' && effectiveParams?.stripMetadata)) {
         const strippedBlob = await stripJpegMetadataLossless(activeImage.blob);
         const processedUrl = URL.createObjectURL(strippedBlob);
         setImages(prev => prev.map(img => {
@@ -427,14 +561,14 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
 
       // Direct handling for EXIF viewer inspection
-      if (activeUtilityId === 'exif-viewer') {
+      if (utilityToRun === 'exif-viewer') {
         setToastMessage('EXIF metadata parsed and available in parameter panel.');
         setIsProcessing(false);
         return;
       }
 
       // Direct handling for Image to Base64
-      if (activeUtilityId === 'image-to-base64') {
+      if (utilityToRun === 'image-to-base64') {
         const reader = new FileReader();
         reader.onload = () => {
           const b64 = reader.result as string;
@@ -447,7 +581,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
 
       // Direct handling for HEIC decoder
-      if (activeUtilityId === 'heic-converter') {
+      if (utilityToRun === 'heic-converter') {
         const converted = await convertHeicToRaster(activeImage.blob, effectiveParams);
         const processedUrl = URL.createObjectURL(converted);
         const bitmap = await createImageBitmap(converted);
@@ -479,32 +613,33 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       // Map utility to worker task
       let taskType = 'compress';
-      if (activeUtilityId === 'batch-resize' || activeUtilityId === 'svg-to-png') taskType = 'resize';
-      else if (activeUtilityId === 'avatar-crop') taskType = 'crop';
-      else if (activeUtilityId === 'watermark') taskType = 'watermark';
-      else if (activeUtilityId === 'sharpen-enhance') taskType = 'filter';
-      else if (activeUtilityId === 'social-presets') taskType = 'social_preset';
-      else if (activeUtilityId === 'passport-photo') taskType = 'passport_photo';
-      else if (activeUtilityId === 'color-palette') taskType = 'extract_palette';
-      else if (activeUtilityId === 'privacy-redact') taskType = 'privacy_redact';
-      else if (activeUtilityId === 'favicon-studio') taskType = 'favicon_pack';
-      else if (activeUtilityId === 'ai-bg-removal') taskType = 'ai_bg_removal';
-      else if (activeUtilityId === 'ai-upscale') taskType = 'ai_upscale';
-      else if (activeUtilityId === 'ai-inpainting') taskType = 'ai_inpainting';
-      else if (activeUtilityId === 'ai-colorization') taskType = 'ai_colorization';
-      else if (activeUtilityId === 'png-to-svg') taskType = 'vectorize';
-      else if (activeUtilityId === 'collage-maker') taskType = 'collage';
-      else if (activeUtilityId === 'camera-raw') taskType = 'camera_raw';
-      else if (activeUtilityId === 'workflow-recipes') taskType = 'workflow_recipe';
+      if (utilityToRun === 'batch-resize' || utilityToRun === 'svg-to-png') taskType = 'resize';
+      else if (utilityToRun === 'avatar-crop') taskType = 'crop';
+      else if (utilityToRun === 'watermark') taskType = 'watermark';
+      else if (utilityToRun === 'sharpen-enhance') taskType = 'filter';
+      else if (utilityToRun === 'social-presets') taskType = 'social_preset';
+      else if (utilityToRun === 'passport-photo') taskType = 'passport_photo';
+      else if (utilityToRun === 'color-palette') taskType = 'extract_palette';
+      else if (utilityToRun === 'privacy-redact') taskType = 'privacy_redact';
+      else if (utilityToRun === 'favicon-studio') taskType = 'favicon_pack';
+      else if (utilityToRun === 'ai-bg-removal') taskType = 'ai_bg_removal';
+      else if (utilityToRun === 'ai-upscale') taskType = 'ai_upscale';
+      else if (utilityToRun === 'ai-inpainting') taskType = 'ai_inpainting';
+      else if (utilityToRun === 'ai-colorization') taskType = 'ai_colorization';
+      else if (utilityToRun === 'png-to-svg') taskType = 'vectorize';
+      else if (utilityToRun === 'collage-maker') taskType = 'collage';
+      else if (utilityToRun === 'camera-raw') taskType = 'camera_raw';
+      else if (utilityToRun === 'workflow-recipes') taskType = 'workflow_recipe';
 
       const bitmap = await createImageBitmap(activeImage.blob);
       const taskId = 'task_' + Math.random().toString(36).substring(2, 9);
 
       const promise = new Promise<{ blob: Blob; size: number }>((resolve, reject) => {
+        // Robust 45-second processing window so large super-res / WASM operations never timeout
         const timer = setTimeout(() => {
           worker.removeEventListener('message', handler);
-          reject(new Error('Processing timed out. Please try a smaller file or standard settings.'));
-        }, 5000);
+          reject(new Error('Processing took longer than expected. Please try standard resolution.'));
+        }, 45000);
 
         const handler = (e: MessageEvent) => {
           if (e.data.taskId === taskId) {
@@ -557,7 +692,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             processedHeight: pHeight,
             status: 'done',
             progress: 100,
-            lastUtilityApplied: activeUtilityId,
+            lastUtilityApplied: utilityToRun,
           };
         }
         return img;
@@ -588,6 +723,14 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     URL.revokeObjectURL(url);
   }, [images]);
 
+  // Auto-process initial image when loaded if not yet processed
+  useEffect(() => {
+    if (activeImage && !activeImage.processedUrl && activeImage.status === 'idle' && worker) {
+      const defaults = getDefaultParamsForUtility(activeUtilityId, activeImage);
+      executeActiveUtility(defaults, activeUtilityId);
+    }
+  }, [activeImage?.id, activeImage?.status, activeUtilityId, worker, executeActiveUtility]);
+
   return (
     <SessionContext.Provider
       value={{
@@ -605,7 +748,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         restoreSavedSession,
         clearSavedSession,
         setActiveImageId,
-        setActiveUtilityId,
+        setActiveUtilityId: selectUtility,
         setCurrentParams,
         sendToUtility,
         executeActiveUtility,

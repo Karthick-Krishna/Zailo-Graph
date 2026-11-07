@@ -208,21 +208,19 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           </button>
         </div>
 
-        {/* 1:1 Pixel Inspection Button (Especially crucial for Super-Resolution) */}
-        {isUpscaleTool && (
-          <button
-            onClick={togglePixelInspection}
-            className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs border ${
-              zoomLevel >= 2
-                ? 'bg-violet-600 border-violet-700 text-white'
-                : 'bg-violet-50 hover:bg-violet-100 text-violet-700 border-violet-200'
-            }`}
-            title="Inspect 1:1 real pixel resolution"
-          >
-            <Sparkles className="w-3 h-3 text-amber-400" />
-            <span>{zoomLevel >= 2 ? 'Exit 1:1' : '1:1 Pixel Detail'}</span>
-          </button>
-        )}
+        {/* 1:1 Pixel Inspection Button (Essential for checking sharpness, noise, and real resolution) */}
+        <button
+          onClick={togglePixelInspection}
+          className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs border ${
+            zoomLevel >= 2
+              ? 'bg-violet-600 border-violet-700 text-white'
+              : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300'
+          }`}
+          title="Inspect 1:1 actual pixel resolution (100% scale)"
+        >
+          <Sparkles className="w-3 h-3 text-cyan-500" />
+          <span>{zoomLevel >= 2 ? 'Exit 100%' : '1:1 Actual Pixels'}</span>
+        </button>
 
         {/* Zoom Controls */}
         <div className="flex items-center gap-0.5 pl-1 border-l border-neutral-200">
@@ -286,11 +284,17 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
               draggable={false}
             />
 
-            {/* Top Layer: Processed Result */}
+            {/* Top Layer: Processed Result (With opaque alpha-checkerboard so transparency doesn't bleed original through!) */}
             {processedUrl && (
               <div 
                 className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center"
-                style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+                style={{ 
+                  clipPath: `inset(0 0 0 ${sliderPosition}%)`,
+                  backgroundColor: '#0E1017',
+                  backgroundImage: 'radial-gradient(#2A2D3D 1px, transparent 1px), radial-gradient(#2A2D3D 1px, #0E1017 1px)',
+                  backgroundSize: '16px 16px',
+                  backgroundPosition: '0 0, 8px 8px',
+                }}
               >
                 <img
                   src={processedUrl}
@@ -299,6 +303,16 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
                   draggable={false}
                 />
               </div>
+            )}
+
+            {/* Floating In-Viewport Badges */}
+            <span className="absolute top-2 left-2 z-10 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md text-white text-[10px] font-mono border border-white/10 shadow-sm">
+              Original: {originalWidth}×{originalHeight} px
+            </span>
+            {processedWidth && (
+              <span className="absolute top-2 right-2 z-10 px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-950 to-indigo-950 backdrop-blur-md text-cyan-300 text-[10px] font-mono border border-violet-400/40 shadow-sm">
+                Result: {processedWidth}×{processedHeight} px
+              </span>
             )}
 
             {/* Glowing Draggable Split Handle */}
@@ -325,8 +339,8 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           >
             {/* Original Panel */}
             <div className="flex flex-col items-center justify-center w-full h-full max-h-[52vh] sm:max-h-[60vh] bg-black/40 rounded-xl p-3 border border-white/5 relative">
-              <span className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-md text-white text-[10px] font-mono border border-white/10">
-                Original ({originalWidth}×{originalHeight} px)
+              <span className="absolute top-2 left-2 z-10 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md text-white text-[10px] font-mono border border-white/10">
+                Original • {originalWidth}×{originalHeight} px • {formatBytes(originalSize)}
               </span>
               <img
                 src={originalUrl}
@@ -337,9 +351,17 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
             </div>
 
             {/* Processed Panel */}
-            <div className="flex flex-col items-center justify-center w-full h-full max-h-[52vh] sm:max-h-[60vh] bg-black/40 rounded-xl p-3 border border-violet-500/20 relative">
-              <span className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md bg-gradient-to-r from-violet-950 to-indigo-950 backdrop-blur-md text-white text-[10px] font-mono border border-violet-400/40">
-                Result {processedWidth ? `(${processedWidth}×${processedHeight} px)` : ''}
+            <div 
+              className="flex flex-col items-center justify-center w-full h-full max-h-[52vh] sm:max-h-[60vh] rounded-xl p-3 border border-violet-500/30 relative overflow-hidden"
+              style={{
+                backgroundColor: '#0E1017',
+                backgroundImage: 'radial-gradient(#2A2D3D 1px, transparent 1px), radial-gradient(#2A2D3D 1px, #0E1017 1px)',
+                backgroundSize: '16px 16px',
+                backgroundPosition: '0 0, 8px 8px',
+              }}
+            >
+              <span className="absolute top-2 left-2 z-10 px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-950 to-indigo-950 backdrop-blur-md text-cyan-300 text-[10px] font-mono border border-violet-400/40">
+                Result {processedWidth ? `• ${processedWidth}×${processedHeight} px` : ''} {processedSize ? `• ${formatBytes(processedSize)}` : ''}
               </span>
               {processedUrl ? (
                 <img
@@ -358,11 +380,20 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
         {/* VIEW MODE 3: RESULT ONLY */}
         {viewMode === 'result' && (
           <div 
-            className="relative max-w-full max-h-full transition-transform duration-75 flex items-center justify-center"
+            className="relative max-w-full max-h-full transition-transform duration-75 flex items-center justify-center rounded-2xl overflow-hidden p-2"
             style={{ 
-              transform: `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)` 
+              transform: `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`,
+              backgroundColor: '#0E1017',
+              backgroundImage: 'radial-gradient(#2A2D3D 1px, transparent 1px), radial-gradient(#2A2D3D 1px, #0E1017 1px)',
+              backgroundSize: '16px 16px',
+              backgroundPosition: '0 0, 8px 8px',
             }}
           >
+            {processedWidth && (
+              <span className="absolute top-2 left-2 z-10 px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-950 to-indigo-950 backdrop-blur-md text-cyan-300 text-[10px] font-mono border border-violet-400/40 shadow-sm">
+                Result: {processedWidth}×{processedHeight} px {processedSize ? `• ${formatBytes(processedSize)}` : ''}
+              </span>
+            )}
             <img
               src={processedUrl || originalUrl}
               alt="Processed Result"
