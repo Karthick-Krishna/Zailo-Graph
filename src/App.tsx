@@ -75,7 +75,28 @@ const AppContent: React.FC = () => {
   }, [images, activeImage, executeActiveUtility, downloadImage, clearWorkspace, setActiveUtilityId]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-[#09090B]">
+    <div className="min-h-screen flex flex-col bg-[#F8F9FB] text-[#09090B] relative overflow-hidden">
+      {/* Universal Ambient Adaptive Aura Background Visual (Visible across all pages) */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
+        {/* Top-Center Radiant Atmospheric Aura Bloom */}
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[550px] bg-gradient-to-tr from-violet-600/25 via-indigo-500/20 to-cyan-400/25 rounded-full blur-[110px] transform -rotate-6 pointer-events-none"></div>
+
+        {/* Bottom-Right Electric Cyan Bloom */}
+        <div className="absolute -bottom-28 -right-28 w-[650px] h-[650px] bg-gradient-to-br from-cyan-400/20 via-blue-600/15 to-violet-600/20 rounded-full blur-[130px] pointer-events-none"></div>
+
+        {/* Bottom-Left Deep Violet Glow */}
+        <div className="absolute -bottom-20 -left-20 w-[550px] h-[550px] bg-gradient-to-tr from-purple-600/20 to-violet-500/15 rounded-full blur-[100px] pointer-events-none"></div>
+
+        {/* Subtle Precision Dot Matrix Grid */}
+        <div 
+          className="absolute inset-0 opacity-[0.45]"
+          style={{
+            backgroundImage: 'radial-gradient(#94A3B8 1.2px, transparent 1.2px)',
+            backgroundSize: '28px 28px',
+          }}
+        ></div>
+      </div>
+
       <Header onOpenShortcuts={() => setIsShortcutsOpen(true)} />
       <Workspace />
       <AuthModal />

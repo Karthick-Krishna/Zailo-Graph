@@ -352,18 +352,18 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
         {/* Concept 1: Ambient Adaptive Aura (Dynamic Reactive Backlight from image) */}
         {showAura && (
           <div 
-            className="absolute inset-0 flex items-center justify-center pointer-events-none -z-0 overflow-hidden"
+            className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden"
             aria-hidden="true"
           >
             <div 
-              className={`w-3/4 h-3/4 max-w-4xl max-h-[75vh] rounded-full blur-[80px] transform scale-110 transition-all duration-700 pointer-events-none ${
-                canvasTheme === 'light' ? 'opacity-30 saturate-200' : 'opacity-45 saturate-150'
+              className={`w-4/5 h-4/5 max-w-5xl max-h-[80vh] rounded-full blur-[72px] transform scale-110 transition-all duration-700 pointer-events-none ${
+                canvasTheme === 'light' ? 'opacity-50 saturate-200' : 'opacity-70 saturate-150'
               }`}
               style={{
                 backgroundImage: `url(${processedUrl || originalUrl})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                filter: 'blur(72px) contrast(1.2)',
+                filter: 'blur(54px) contrast(1.2)',
               }}
             />
           </div>

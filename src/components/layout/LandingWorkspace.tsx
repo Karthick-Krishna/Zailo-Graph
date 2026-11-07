@@ -215,8 +215,10 @@ export const LandingWorkspace: React.FC = () => {
 
       {/* Main Container */}
       <div className="w-full max-w-5xl flex flex-col items-center space-y-10 relative">
-        {/* Subtle Ambient Violet & Cyan Rim Glow from Logo */}
-        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-96 h-56 bg-gradient-to-r from-violet-600/15 via-indigo-600/10 to-cyan-500/15 blur-3xl pointer-events-none rounded-full"></div>
+        {/* Dynamic Atmospheric Ambient Aura Blooms */}
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-violet-600/30 via-indigo-500/25 to-cyan-400/30 blur-[100px] pointer-events-none rounded-full"></div>
+        <div className="absolute top-1/3 -right-28 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/20 via-blue-500/15 to-violet-600/20 blur-[110px] pointer-events-none rounded-full"></div>
+        <div className="absolute top-2/3 -left-28 w-[480px] h-[480px] bg-gradient-to-tr from-violet-600/25 to-fuchsia-600/15 blur-[100px] pointer-events-none rounded-full"></div>
 
         {/* Hero Banner Header */}
         <div className="text-center space-y-5 max-w-3xl relative z-10 flex flex-col items-center">
@@ -296,10 +298,10 @@ export const LandingWorkspace: React.FC = () => {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`relative w-full rounded-3xl border-2 border-dashed p-10 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white shadow-sm ${
+          className={`relative w-full rounded-3xl border-2 border-dashed p-10 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white/85 backdrop-blur-xl shadow-lg ${
             isDragOver
-              ? 'border-violet-600 bg-violet-50/30 scale-[1.01] shadow-xl shadow-violet-500/10'
-              : 'border-neutral-300 hover:border-violet-400 hover:shadow-lg hover:shadow-violet-500/5'
+              ? 'border-violet-600 bg-violet-50/50 scale-[1.01] shadow-2xl shadow-violet-500/15'
+              : 'border-violet-300/80 hover:border-violet-500 hover:shadow-xl hover:shadow-violet-500/10'
           }`}
         >
           {/* Subtle Ambient Radial Highlight */}
