@@ -41,11 +41,10 @@ export const CameraRawControls: React.FC = () => {
               setEngineMode('fast_preview');
               handleApply('fast_preview');
             }}
-            className={`w-full p-3 rounded-xl border text-left transition flex items-start gap-3 cursor-pointer ${
-              engineMode === 'fast_preview'
+            className={`w-full p-3 rounded-xl border text-left transition flex items-start gap-3 cursor-pointer ${engineMode === 'fast_preview'
                 ? 'border-neutral-900 bg-neutral-50 ring-1 ring-neutral-900/10'
                 : 'border-neutral-200/80 bg-white hover:border-neutral-300'
-            }`}
+              }`}
           >
             <Zap className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
             <div>
@@ -61,11 +60,10 @@ export const CameraRawControls: React.FC = () => {
               setEngineMode('sensor_demosaic');
               handleApply('sensor_demosaic');
             }}
-            className={`w-full p-3 rounded-xl border text-left transition flex items-start gap-3 cursor-pointer ${
-              engineMode === 'sensor_demosaic'
+            className={`w-full p-3 rounded-xl border text-left transition flex items-start gap-3 cursor-pointer ${engineMode === 'sensor_demosaic'
                 ? 'border-neutral-900 bg-neutral-50 ring-1 ring-neutral-900/10'
                 : 'border-neutral-200/80 bg-white hover:border-neutral-300'
-            }`}
+              }`}
           >
             <Camera className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <div>

@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Sparkles, Shield, Check, X, ArrowRight, Zap, Mail, UserCheck } from 'lucide-react';
 
 export const AuthModal: React.FC = () => {
-  const { authModal, closeAuthModal, signInWithEmail, signUpWithEmail, recentEmails } = useAuth();
+  const { authModal, closeAuthModal, signInWithEmail, signUpWithEmail } = useAuth();
   const [email, setEmail] = useState('');
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
 
@@ -17,10 +17,6 @@ export const AuthModal: React.FC = () => {
     } else {
       signUpWithEmail(email);
     }
-  };
-
-  const handleQuickLogin = (targetEmail: string) => {
-    signInWithEmail(targetEmail);
   };
 
   const getReasonTitle = () => {
@@ -41,7 +37,7 @@ export const AuthModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-neutral-200 overflow-hidden"
+        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-neutral-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header */}
@@ -104,46 +100,8 @@ export const AuthModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Quick 1-Click Email Login */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-neutral-700">
-                1-Click Instant Login:
-              </span>
-              <span className="text-[10px] text-neutral-400 font-mono">
-                Click any email to sign in
-              </span>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {recentEmails.map((savedEmail) => (
-                <button
-                  key={savedEmail}
-                  type="button"
-                  onClick={() => handleQuickLogin(savedEmail)}
-                  className="px-3 py-1.5 rounded-xl bg-neutral-50 hover:bg-neutral-900 text-neutral-700 hover:text-white border border-neutral-200/80 hover:border-neutral-900 text-xs font-medium transition cursor-pointer flex items-center gap-1.5 group shadow-2xs"
-                >
-                  <Mail className="w-3 h-3 text-neutral-400 group-hover:text-white transition" />
-                  <span>{savedEmail}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200" />
-            </div>
-            <div className="relative flex justify-center text-[11px] uppercase">
-              <span className="bg-white px-3 text-neutral-400 font-semibold tracking-wider">
-                Or enter your own email
-              </span>
-            </div>
-          </div>
-
           {/* Email Input Form */}
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Email Address
@@ -156,6 +114,7 @@ export const AuthModal: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@company.com"
+                  autoFocus
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 text-sm text-neutral-900 placeholder:text-neutral-400 transition"
                 />
               </div>
@@ -178,11 +137,11 @@ export const AuthModal: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
               <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>50 Concurrent Batch Queue</span>
+              <span>50 Batch Queue</span>
             </div>
             <div className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
               <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>WebGPU AI Background Removal</span>
+              <span>WebGPU AI Suite</span>
             </div>
             <div className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
               <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />

@@ -31,7 +31,6 @@ interface AuthContextType {
   entitlements: Entitlements;
   isAuthenticated: boolean;
   authModal: AuthModalState;
-  recentEmails: string[];
   
   // Actions
   signInWithEmail: (email: string) => void;
@@ -49,13 +48,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'imazora_user_session';
-const RECENT_EMAILS_KEY = 'imazora_recent_emails';
-
-const DEFAULT_RECENT_EMAILS = [
-  'creator@zorquelz.com',
-  'studio@photography.com',
-  'designer@imazora.com',
-];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
@@ -64,15 +56,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
-    }
-  });
-
-  const [recentEmails, setRecentEmails] = useState<string[]>(() => {
-    try {
-      const stored = localStorage.getItem(RECENT_EMAILS_KEY);
-      return stored ? JSON.parse(stored) : DEFAULT_RECENT_EMAILS;
-    } catch {
-      return DEFAULT_RECENT_EMAILS;
     }
   });
 
@@ -115,14 +98,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tier: 'free_registered',
     };
     setUser(newUser);
-
-    // Save to recent emails list for instant 1-click re-login
-    setRecentEmails(prev => {
-      const updated = [trimmed, ...prev.filter(e => e !== trimmed)].slice(0, 5);
-      localStorage.setItem(RECENT_EMAILS_KEY, JSON.stringify(updated));
-      return updated;
-    });
-
     closeAuthModal();
   };
 
@@ -189,7 +164,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         entitlements,
         isAuthenticated: !!user,
         authModal,
-        recentEmails,
         signInWithEmail,
         signUpWithEmail,
         logout,
