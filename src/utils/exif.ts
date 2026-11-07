@@ -123,3 +123,4 @@ export async function stripJpegMetadataLossless(file: Blob): Promise<Blob> {
 
   return new Blob(chunks, { type: 'image/jpeg' });
 }
+

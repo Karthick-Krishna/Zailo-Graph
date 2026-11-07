@@ -34,3 +34,4 @@ export interface AuthModalState {
   targetUtilityId?: string;
   customMessage?: string;
 }
+

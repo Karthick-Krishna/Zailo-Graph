@@ -49,3 +49,4 @@ export function getFileExt(filename: string): string {
   const match = filename.match(/\.([^.]+)$/);
   return match ? match[1].toLowerCase() : '';
 }
+

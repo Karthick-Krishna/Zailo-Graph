@@ -69,3 +69,4 @@ export const GatedFeatureCard: React.FC<GatedFeatureCardProps> = ({ utility }) =
     </div>
   );
 };
+

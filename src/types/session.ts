@@ -26,3 +26,4 @@ export interface WorkspaceSession {
   totalBatchProgress: number;
   estimatedMemoryBytes: number;
 }
+

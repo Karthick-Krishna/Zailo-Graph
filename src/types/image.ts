@@ -50,3 +50,4 @@ export interface ImageItem {
   lastUtilityApplied?: string;
   createdAt: number;
 }
+
