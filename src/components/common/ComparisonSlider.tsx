@@ -68,6 +68,9 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
   // Corporate light canvas vs dark studio toggle
   const [canvasTheme, setCanvasTheme] = useState<'light' | 'dark'>('light');
 
+  // Concept 1: Ambient Adaptive Aura (Reactive Backlight)
+  const [showAura, setShowAura] = useState<boolean>(true);
+
   const [isPeekingOriginal, setIsPeekingOriginal] = useState<boolean>(false);
   const [sliderPosition, setSliderPosition] = useState<number>(50);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -272,6 +275,20 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           <span>{zoomLevel >= 2 ? 'Exit 100%' : '1:1 Pixels'}</span>
         </button>
 
+        {/* Concept 1: Ambient Adaptive Aura Toggle */}
+        <button
+          onClick={() => setShowAura(prev => !prev)}
+          className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border ${
+            showAura
+              ? 'bg-neutral-900 border-neutral-900 text-cyan-300 shadow-2xs'
+              : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-500 border-neutral-200'
+          }`}
+          title="Toggle Concept 1: Ambient Adaptive Aura (Dynamic Reactive Backlight)"
+        >
+          <span className={`w-2 h-2 rounded-full ${showAura ? 'bg-cyan-400 animate-pulse' : 'bg-neutral-400'}`}></span>
+          <span>Aura</span>
+        </button>
+
         {/* Canvas Backdrop Theme Toggle (Light Corporate vs Dark Studio) */}
         <button
           onClick={() => setCanvasTheme(prev => prev === 'light' ? 'dark' : 'light')}
@@ -332,6 +349,26 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           backgroundPosition: '0 0, 12px 12px',
         }}
       >
+        {/* Concept 1: Ambient Adaptive Aura (Dynamic Reactive Backlight from image) */}
+        {showAura && (
+          <div 
+            className="absolute inset-0 flex items-center justify-center pointer-events-none -z-0 overflow-hidden"
+            aria-hidden="true"
+          >
+            <div 
+              className={`w-3/4 h-3/4 max-w-4xl max-h-[75vh] rounded-full blur-[80px] transform scale-110 transition-all duration-700 pointer-events-none ${
+                canvasTheme === 'light' ? 'opacity-30 saturate-200' : 'opacity-45 saturate-150'
+              }`}
+              style={{
+                backgroundImage: `url(${processedUrl || originalUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'blur(72px) contrast(1.2)',
+              }}
+            />
+          </div>
+        )}
+
         {/* VIEW MODE 1: SPLIT SLIDER */}
         {viewMode === 'slider' && (
           <div 
