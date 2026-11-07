@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { UTILITIES, UtilityCategory } from '../../types/utility';
-import { DropZone } from '../common/DropZone';
+import { LandingWorkspace } from './LandingWorkspace';
 import { ComparisonSlider } from '../common/ComparisonSlider';
 import { GatedFeatureCard } from '../auth/GatedFeatureCard';
 import { ControlRack } from './ControlRack';
@@ -33,7 +33,7 @@ export const Workspace: React.FC = () => {
         </div>
       )}
 
-      {/* Top Utility Selector Bar */}
+      {/* Top Utility Selector Bar (Only displayed or condensed when workspace is active) */}
       <div className="w-full bg-[#FAFAFA] border-b border-neutral-200/80 px-6 py-2 flex items-center gap-3 overflow-x-auto shrink-0 select-none">
         {/* Category Filter */}
         <div className="flex items-center gap-1 pr-3 border-r border-neutral-200 shrink-0">
@@ -88,30 +88,36 @@ export const Workspace: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Center Canvas Viewport */}
-        <main className="flex-1 flex flex-col items-center justify-center overflow-y-auto bg-[#F4F4F6] relative">
+        <main className="flex-1 flex flex-col items-center justify-start overflow-y-auto bg-[#F8F9FA] relative">
           {images.length === 0 ? (
-            <DropZone />
+            <LandingWorkspace />
           ) : !isUnlocked ? (
-            <GatedFeatureCard utility={activeUtility} />
+            <div className="flex-1 flex items-center justify-center p-6 w-full">
+              <GatedFeatureCard utility={activeUtility} />
+            </div>
           ) : (
-            <ComparisonSlider
-              originalUrl={activeImage!.url}
-              processedUrl={activeImage!.processedUrl}
-              originalSize={activeImage!.size}
-              processedSize={activeImage!.processedSize}
-              originalWidth={activeImage!.width}
-              originalHeight={activeImage!.height}
-              imageName={activeImage!.name}
-            />
+            <div className="flex-1 flex items-center justify-center p-6 w-full">
+              <ComparisonSlider
+                originalUrl={activeImage!.url}
+                processedUrl={activeImage!.processedUrl}
+                originalSize={activeImage!.size}
+                processedSize={activeImage!.processedSize}
+                originalWidth={activeImage!.width}
+                originalHeight={activeImage!.height}
+                processedWidth={activeImage!.processedWidth}
+                processedHeight={activeImage!.processedHeight}
+                imageName={activeImage!.name}
+              />
+            </div>
           )}
         </main>
 
-        {/* Right Control Rack */}
+        {/* Right Utility Configuration Rack (Only shown when an image is loaded) */}
         {images.length > 0 && isUnlocked && <ControlRack />}
       </div>
 
-      {/* Bottom Batch Queue Drawer */}
-      <BatchDrawer />
+      {/* Bottom Batch Image Queue Drawer (Only shown when images exist) */}
+      {images.length > 0 && <BatchDrawer />}
     </div>
   );
 };

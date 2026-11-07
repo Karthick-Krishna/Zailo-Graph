@@ -3,6 +3,7 @@ import { ImageItem } from '../types/image';
 import { useAuth } from './AuthContext';
 import { parseImageMetadata } from '../utils/exif';
 import { extractEmbeddedRawPreview } from '../utils/rawExtractor';
+import { convertHeicToRaster } from '../utils/heic';
 import { saveToOPFS, deleteFromOPFS, clearOPFSWorkspace } from '../utils/opfs';
 
 interface SessionContextType {
@@ -80,11 +81,19 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       let activeFile: Blob = file;
       const lowerName = file.name.toLowerCase();
       const isRaw = lowerName.endsWith('.cr2') || lowerName.endsWith('.cr3') || lowerName.endsWith('.nef') || lowerName.endsWith('.arw') || lowerName.endsWith('.dng') || lowerName.endsWith('.orf');
+      const isHeic = lowerName.endsWith('.heic') || lowerName.endsWith('.heif') || file.type === 'image/heic' || file.type === 'image/heif';
 
       if (isRaw) {
         const rawPreview = await extractEmbeddedRawPreview(file);
         if (rawPreview) {
           activeFile = rawPreview;
+        }
+      } else if (isHeic) {
+        try {
+          const heicRaster = await convertHeicToRaster(file);
+          activeFile = heicRaster;
+        } catch (err) {
+          console.warn('HEIC decode fallback:', err);
         }
       }
 
