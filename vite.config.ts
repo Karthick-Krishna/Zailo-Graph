@@ -29,4 +29,31 @@ export default defineConfig({
       'Cross-Origin-Embedder-Policy': 'require-corp',
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-core';
+            }
+            if (id.includes('lucide-react')) {
+              return 'icons';
+            }
+            if (id.includes('heic2any')) {
+              return 'heic2any';
+            }
+            if (id.includes('exifr')) {
+              return 'exifr';
+            }
+            if (id.includes('jszip')) {
+              return 'jszip';
+            }
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
 });
