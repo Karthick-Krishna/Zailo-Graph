@@ -148,15 +148,21 @@ export const ZailoGraphLogo: React.FC<ZailoGraphLogoProps> = ({
 
       {/* Brand Wordmark */}
       {showText && (
-        <div className="flex flex-col justify-center">
-          <div className={`font-black tracking-tight flex items-baseline leading-none relative ${text}`}>
+        <div className="flex flex-col justify-center overflow-visible">
+          <div className={`font-black flex items-baseline leading-normal relative overflow-visible ${text}`}>
             {/* 'Zailo' in Pure White (Dark Mode) or Rich Obsidian (Light Mode) */}
-            <span className={theme === 'dark' ? 'text-white' : 'text-neutral-900'}>
+            <span className={`inline-block ${theme === 'dark' ? 'text-white' : 'text-neutral-900'}`}>
               Zailo
             </span>
 
-            {/* 'graph' with Electric Neon Magenta to Cyan Gradient */}
-            <span className="bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent font-black ml-0.5">
+            {/* 'graph' with Electric Neon Magenta to Cyan Gradient (Generous padding to prevent 'g' left-bowl and descender clipping) */}
+            <span 
+              className="inline-block bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent font-black pl-1.5 pr-1.5 py-1 -ml-0.5 overflow-visible"
+              style={{
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
               graph
             </span>
 
@@ -167,7 +173,7 @@ export const ZailoGraphLogo: React.FC<ZailoGraphLogoProps> = ({
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="inline-block ml-0.5 -translate-y-1.5 shrink-0"
+              className="inline-block ml-0.5 -translate-y-1.5 shrink-0 overflow-visible"
             >
               <path
                 d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z"
