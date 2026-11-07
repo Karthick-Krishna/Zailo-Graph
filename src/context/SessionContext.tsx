@@ -634,7 +634,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const bitmap = await createImageBitmap(activeImage.blob);
       const taskId = 'task_' + Math.random().toString(36).substring(2, 9);
 
-      const promise = new Promise<{ blob: Blob; size: number }>((resolve, reject) => {
+      const promise = new Promise<{ blob: Blob; size: number; extraData?: any }>((resolve, reject) => {
         // Robust 45-second processing window so large super-res / WASM operations never timeout
         const timer = setTimeout(() => {
           worker.removeEventListener('message', handler);
@@ -646,7 +646,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             clearTimeout(timer);
             worker.removeEventListener('message', handler);
             if (e.data.success) {
-              resolve({ blob: e.data.blob, size: e.data.size });
+              resolve({ blob: e.data.blob, size: e.data.size, extraData: e.data.extraData });
             } else {
               reject(new Error(e.data.error || 'Worker execution failed'));
             }
@@ -693,6 +693,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             status: 'done',
             progress: 100,
             lastUtilityApplied: utilityToRun,
+            extraData: result.extraData || img.extraData,
           };
         }
         return img;

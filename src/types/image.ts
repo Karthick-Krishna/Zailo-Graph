@@ -48,6 +48,7 @@ export interface ImageItem {
   progress: number; // 0 - 100
   error?: string;
   lastUtilityApplied?: string;
+  extraData?: any;
   createdAt: number;
 }
 

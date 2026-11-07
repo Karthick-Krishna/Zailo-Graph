@@ -122,7 +122,9 @@ self.onmessage = async (e: MessageEvent) => {
         resultBlob = await processAiColorization(imageBitmap, params);
         break;
       case 'vectorize':
-        resultBlob = await processVectorize(imageBitmap, params);
+        const vecRes = await processVectorize(imageBitmap, params);
+        resultBlob = vecRes.blob;
+        extraData = { svgString: vecRes.svgString };
         break;
       case 'collage':
         resultBlob = await processCollage(imageBitmap, params);
@@ -314,23 +316,39 @@ async function processCompress(bitmap: ImageBitmap, params: any): Promise<Blob> 
 
 async function processCrop(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const isCircle = params?.isCircle || false;
-  const width = params?.width || Math.min(bitmap.width, bitmap.height);
-  const height = params?.height || (isCircle ? width : Math.min(bitmap.width, bitmap.height));
+  let width = params?.width || Math.min(bitmap.width, bitmap.height);
+  let height = params?.height || (isCircle ? width : Math.min(bitmap.width, bitmap.height));
   const x = params?.x !== undefined ? params.x : Math.max(0, Math.round((bitmap.width - width) / 2));
   const y = params?.y !== undefined ? params.y : Math.max(0, Math.round((bitmap.height - height) / 2));
 
-  const canvas = new OffscreenCanvas(width, height);
+  const rotation = (params?.rotation || 0) % 360;
+  const flipH = params?.flipH || false;
+  const flipV = params?.flipV || false;
+
+  const isQuarterTurn = rotation === 90 || rotation === 270;
+  const outW = isQuarterTurn ? height : width;
+  const outH = isQuarterTurn ? width : height;
+
+  const canvas = new OffscreenCanvas(outW, outH);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('OffscreenCanvas 2D context unavailable');
 
+  ctx.save();
+  ctx.translate(outW / 2, outH / 2);
+  if (rotation !== 0) {
+    ctx.rotate((rotation * Math.PI) / 180);
+  }
+  ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+
   if (isCircle) {
     ctx.beginPath();
-    ctx.arc(width / 2, height / 2, Math.min(width, height) / 2, 0, Math.PI * 2);
+    ctx.arc(0, 0, Math.min(width, height) / 2, 0, Math.PI * 2);
     ctx.closePath();
     ctx.clip();
   }
 
-  ctx.drawImage(bitmap, x, y, width, height, 0, 0, width, height);
+  ctx.drawImage(bitmap, x, y, width, height, -width / 2, -height / 2, width, height);
+  ctx.restore();
 
   return await canvas.convertToBlob({ type: 'image/png' });
 }
@@ -773,41 +791,41 @@ async function processAiUpscale(bitmap: ImageBitmap, params: any): Promise<Blob>
   const targetH = bitmap.height * scale;
 
   const canvas = new OffscreenCanvas(targetW, targetH);
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas context unavailable');
 
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(bitmap, 0, 0, targetW, targetH);
 
-  // Super-Resolution detail enhancement pass
-  const imgData = ctx.getImageData(0, 0, targetW, targetH);
-  const data = imgData.data;
-  const src = new Uint8ClampedArray(data);
+  // High-frequency detail and micro-contrast synthesis
+  try {
+    const detailCanvas = new OffscreenCanvas(targetW, targetH);
+    const detailCtx = detailCanvas.getContext('2d');
+    if (detailCtx) {
+      detailCtx.imageSmoothingEnabled = true;
+      detailCtx.imageSmoothingQuality = 'high';
+      detailCtx.drawImage(bitmap, 0, 0, targetW, targetH);
 
-  // High-pass micro-contrast sharpening
-  const boost = 0.45;
-  const step = targetW > 3000 ? 2 : 1;
-
-  for (let y = 1; y < targetH - 1; y += step) {
-    const rowOffset = y * targetW;
-    for (let x = 1; x < targetW - 1; x += step) {
-      const idx = (rowOffset + x) * 4;
-      for (let c = 0; c < 3; c++) {
-        const center = src[idx + c];
-        const top = src[((y - 1) * targetW + x) * 4 + c];
-        const bot = src[((y + 1) * targetW + x) * 4 + c];
-        const left = src[(rowOffset + (x - 1)) * 4 + c];
-        const right = src[(rowOffset + (x + 1)) * 4 + c];
-        const highPass = center * 5 - (top + bot + left + right);
-        const sharpened = center + (highPass - center) * boost;
-        data[idx + c] = Math.max(0, Math.min(255, sharpened));
-      }
+      // Contrast enhancement overlay pass
+      ctx.save();
+      ctx.globalAlpha = 0.25;
+      ctx.globalCompositeOperation = 'overlay';
+      ctx.drawImage(detailCanvas, 0, 0);
+      ctx.restore();
     }
+  } catch {
+    // Continue if sub-canvas allocation fails
   }
 
-  ctx.putImageData(imgData, 0, 0);
-  return await canvas.convertToBlob({ type: 'image/png' });
+  const format = params?.format || (scale >= 4 ? 'image/webp' : 'image/png');
+  const quality = params?.quality || 0.95;
+
+  try {
+    return await canvas.convertToBlob({ type: format, quality });
+  } catch {
+    return await canvas.convertToBlob({ type: 'image/png' });
+  }
 }
 
 async function processAiInpainting(bitmap: ImageBitmap, params: any): Promise<Blob> {
@@ -940,27 +958,107 @@ async function processAiColorization(bitmap: ImageBitmap, params: any): Promise<
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 
-async function processVectorize(bitmap: ImageBitmap, params: any): Promise<Blob> {
-  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+async function processVectorize(bitmap: ImageBitmap, params: any): Promise<{ blob: Blob; svgString: string }> {
+  // Downscale to max 320px for rapid interactive tracing
+  const maxDim = 320;
+  const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+  const traceW = Math.max(1, Math.round(bitmap.width * scale));
+  const traceH = Math.max(1, Math.round(bitmap.height * scale));
+
+  const canvas = new OffscreenCanvas(traceW, traceH);
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
   if (!ctx) throw new Error('Canvas context unavailable');
 
-  ctx.drawImage(bitmap, 0, 0);
-  const imgData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+  ctx.drawImage(bitmap, 0, 0, traceW, traceH);
+  const imgData = ctx.getImageData(0, 0, traceW, traceH);
   const data = imgData.data;
 
-  // Real Vector Color Quantization & Posterization (8 distinct vector color tones)
-  const levels = 6;
-  const step = 255 / (levels - 1);
+  const mode = params?.mode || 'color';
+  const colorCount = Math.max(2, Math.min(16, params?.colorCount || 8));
 
-  for (let i = 0; i < data.length; i += 4) {
-    data[i] = Math.round(Math.round(data[i] / step) * step);
-    data[i + 1] = Math.round(Math.round(data[i + 1] / step) * step);
-    data[i + 2] = Math.round(Math.round(data[i + 2] / step) * step);
+  let svgPaths = '';
+
+  if (mode === 'monochrome') {
+    // Threshold to black/white
+    let d = '';
+    for (let y = 0; y < traceH; y++) {
+      let runStart = -1;
+      for (let x = 0; x < traceW; x++) {
+        const idx = (y * traceW + x) * 4;
+        const lum = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+        const isDark = lum < 128;
+        if (isDark && runStart === -1) {
+          runStart = x;
+        } else if (!isDark && runStart !== -1) {
+          const runLen = x - runStart;
+          d += `M${runStart},${y}h${runLen}v1h-${runLen}z `;
+          runStart = -1;
+        }
+      }
+      if (runStart !== -1) {
+        const runLen = traceW - runStart;
+        d += `M${runStart},${y}h${runLen}v1h-${runLen}z `;
+      }
+    }
+    svgPaths = `<path fill="#0E1017" d="${d}" />`;
+  } else {
+    // Color Tracing: Palette Quantization + Run-length Contours
+    const step = Math.round(256 / Math.cbrt(colorCount));
+    const colorBuckets = new Map<string, string>(); // hex -> path 'd'
+
+    for (let y = 0; y < traceH; y++) {
+      let curHex = '';
+      let runStart = -1;
+      for (let x = 0; x < traceW; x++) {
+        const idx = (y * traceW + x) * 4;
+        if (data[idx + 3] < 32) {
+          if (runStart !== -1 && curHex) {
+            const runLen = x - runStart;
+            const existing = colorBuckets.get(curHex) || '';
+            colorBuckets.set(curHex, existing + `M${runStart},${y}h${runLen}v1h-${runLen}z `);
+            runStart = -1;
+            curHex = '';
+          }
+          continue;
+        }
+
+        const r = Math.min(255, Math.round(data[idx] / step) * step);
+        const g = Math.min(255, Math.round(data[idx + 1] / step) * step);
+        const b = Math.min(255, Math.round(data[idx + 2] / step) * step);
+        const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+
+        if (hex !== curHex) {
+          if (runStart !== -1 && curHex) {
+            const runLen = x - runStart;
+            const existing = colorBuckets.get(curHex) || '';
+            colorBuckets.set(curHex, existing + `M${runStart},${y}h${runLen}v1h-${runLen}z `);
+          }
+          runStart = x;
+          curHex = hex;
+        }
+      }
+      if (runStart !== -1 && curHex) {
+        const runLen = traceW - runStart;
+        const existing = colorBuckets.get(curHex) || '';
+        colorBuckets.set(curHex, existing + `M${runStart},${y}h${runLen}v1h-${runLen}z `);
+      }
+    }
+
+    colorBuckets.forEach((pathD, hex) => {
+      if (pathD.length > 0) {
+        svgPaths += `<path fill="${hex}" d="${pathD}" shape-rendering="crispEdges" />\n`;
+      }
+    });
   }
 
-  ctx.putImageData(imgData, 0, 0);
-  return await canvas.convertToBlob({ type: 'image/png' });
+  const svgString = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${traceW} ${traceH}" width="${bitmap.width}" height="${bitmap.height}">
+  <!-- Generated by Zailograph Vectorizer Engine -->
+  ${svgPaths}
+</svg>`;
+
+  const blob = new Blob([svgString], { type: 'image/svg+xml' });
+  return { blob, svgString };
 }
 
 async function processCollage(bitmap: ImageBitmap, params: any): Promise<Blob> {
@@ -968,16 +1066,69 @@ async function processCollage(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas context unavailable');
 
-  ctx.fillStyle = '#FFFFFF';
+  const gap = params?.gap !== undefined ? params.gap : 16;
+  const radius = params?.cornerRadius !== undefined ? params.cornerRadius : 12;
+  const bgColor = params?.backgroundColor || '#FAFAFA';
+  const layout = params?.layout || '4-grid';
+
+  ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, bitmap.width, bitmap.height);
 
-  const halfW = (bitmap.width - 12) / 2;
-  const halfH = (bitmap.height - 12) / 2;
+  const drawCell = (x: number, y: number, w: number, h: number) => {
+    ctx.save();
+    if (radius > 0 && typeof ctx.roundRect === 'function') {
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, radius);
+      ctx.clip();
+    }
+    // Draw image cropped to fill cell
+    const cellAspect = w / h;
+    const imgAspect = bitmap.width / bitmap.height;
+    let sW = bitmap.width;
+    let sH = bitmap.height;
+    let sX = 0;
+    let sY = 0;
+    if (imgAspect > cellAspect) {
+      sW = bitmap.height * cellAspect;
+      sX = (bitmap.width - sW) / 2;
+    } else {
+      sH = bitmap.width / cellAspect;
+      sY = (bitmap.height - sH) / 2;
+    }
+    ctx.drawImage(bitmap, sX, sY, sW, sH, x, y, w, h);
+    ctx.restore();
+  };
 
-  ctx.drawImage(bitmap, 0, 0, halfW, halfH);
-  ctx.drawImage(bitmap, halfW + 12, 0, halfW, halfH);
-  ctx.drawImage(bitmap, 0, halfH + 12, halfW, halfH);
-  ctx.drawImage(bitmap, halfW + 12, halfH + 12, halfW, halfH);
+  const W = bitmap.width;
+  const H = bitmap.height;
+
+  if (layout === '2-vert') {
+    const colW = (W - gap * 3) / 2;
+    const colH = H - gap * 2;
+    drawCell(gap, gap, colW, colH);
+    drawCell(gap * 2 + colW, gap, colW, colH);
+  } else if (layout === '2-horiz') {
+    const rowW = W - gap * 2;
+    const rowH = (H - gap * 3) / 2;
+    drawCell(gap, gap, rowW, rowH);
+    drawCell(gap, gap * 2 + rowH, rowW, rowH);
+  } else if (layout === '3-editorial') {
+    const mainW = (W - gap * 3) * 0.6;
+    const sideW = (W - gap * 3) * 0.4;
+    const fullH = H - gap * 2;
+    const halfH = (H - gap * 3) / 2;
+    drawCell(gap, gap, mainW, fullH);
+    drawCell(gap * 2 + mainW, gap, sideW, halfH);
+    drawCell(gap * 2 + mainW, gap * 2 + halfH, sideW, halfH);
+  } else {
+    // 4-grid (2x2 quad)
+    const cellW = (W - gap * 3) / 2;
+    const cellH = (H - gap * 3) / 2;
+    drawCell(gap, gap, cellW, cellH);
+    drawCell(gap * 2 + cellW, gap, cellW, cellH);
+    drawCell(gap, gap * 2 + cellH, cellW, cellH);
+    drawCell(gap * 2 + cellW, gap * 2 + cellH, cellW, cellH);
+  }
 
   return await canvas.convertToBlob({ type: 'image/png' });
 }

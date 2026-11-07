@@ -34,23 +34,31 @@ export const SvgControls: React.FC = () => {
     executeActiveUtility(params);
   };
 
-  const handleVectorize = () => {
-    // Execute vector tracing
+  const handleVectorize = (mode = vectorMode, colors = colorCount, speckle = filterSpeckle) => {
+    // Execute real vector tracing
     const params = {
-      mode: vectorMode,
-      colorCount,
-      filterSpeckle,
+      mode,
+      colorCount: colors,
+      filterSpeckle: speckle,
     };
     setCurrentParams(params);
     executeActiveUtility(params);
+  };
 
-    // Generate sample SVG representation
-    const sampleSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${activeImage.width || 800} ${activeImage.height || 600}">
-  <!-- Zailo Graph VTracer Vector Paths -->
-  <path fill="#09090B" d="M150 100 L650 100 Q700 300 650 500 L150 500 Z" />
-  <circle cx="400" cy="300" r="120" fill="#F59E0B" opacity="0.9" />
-</svg>`;
-    setSvgOutputCode(sampleSvg);
+  const effectiveSvg = activeImage?.extraData?.svgString || svgOutputCode;
+
+  const handleDownloadSvg = () => {
+    if (!effectiveSvg) return;
+    const blob = new Blob([effectiveSvg], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const baseName = activeImage.name.replace(/\.[^/.]+$/, '');
+    a.download = `${baseName}_vectorized.svg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   useEffect(() => {
@@ -66,8 +74,8 @@ export const SvgControls: React.FC = () => {
   }, [activeImage.id, activeUtilityId]);
 
   const handleCopySvg = () => {
-    if (!svgOutputCode) return;
-    navigator.clipboard.writeText(svgOutputCode);
+    if (!effectiveSvg) return;
+    navigator.clipboard.writeText(effectiveSvg);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -209,27 +217,36 @@ export const SvgControls: React.FC = () => {
           </div>
 
           <button
-            onClick={handleVectorize}
+            onClick={() => handleVectorize()}
             className="w-full py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
           >
-            <PenTool className="w-3.5 h-3.5" />
+            <PenTool className="w-3.5 h-3.5 text-cyan-400" />
             <span>Trace Vector Paths Now</span>
           </button>
 
-          {svgOutputCode && (
+          {effectiveSvg && (
             <div className="pt-2 border-t border-neutral-100 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-neutral-800">Generated SVG Code</span>
-                <button
-                  onClick={handleCopySvg}
-                  className="text-[11px] font-semibold text-neutral-500 hover:text-neutral-900 flex items-center gap-1 cursor-pointer"
-                >
-                  {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                  <span>{copied ? 'Copied' : 'Copy SVG'}</span>
-                </button>
+                <span className="text-xs font-bold text-neutral-800">Generated SVG XML</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCopySvg}
+                    className="text-[11px] font-semibold text-neutral-600 hover:text-neutral-900 flex items-center gap-1 cursor-pointer"
+                  >
+                    {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                    <span>{copied ? 'Copied' : 'Copy'}</span>
+                  </button>
+                  <button
+                    onClick={handleDownloadSvg}
+                    className="text-[11px] font-semibold text-violet-700 hover:text-violet-900 flex items-center gap-1 cursor-pointer bg-violet-50 px-2 py-0.5 rounded border border-violet-200"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>Download SVG</span>
+                  </button>
+                </div>
               </div>
               <pre className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-[10px] font-mono text-neutral-700 overflow-x-auto max-h-32">
-                {svgOutputCode}
+                {effectiveSvg}
               </pre>
             </div>
           )}

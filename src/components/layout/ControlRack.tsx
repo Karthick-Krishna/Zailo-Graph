@@ -8,6 +8,9 @@ import { Play, Download, X, Sliders } from 'lucide-react';
 // Modular Utility Controls
 import { ResizeControls } from '../utilities/ResizeControls';
 import { CompressionControls } from '../utilities/CompressionControls';
+import { HeicControls } from '../utilities/HeicControls';
+import { WebpToRasterControls } from '../utilities/WebpToRasterControls';
+import { RasterToWebpControls } from '../utilities/RasterToWebpControls';
 import { CropControls } from '../utilities/CropControls';
 import { SocialPresetControls } from '../utilities/SocialPresetControls';
 import { WatermarkControls } from '../utilities/WatermarkControls';
@@ -54,10 +57,13 @@ export const ControlRack: React.FC<ControlRackProps> = ({
       case 'batch-resize':
         return <ResizeControls />;
       case 'compression':
-      case 'webp-to-raster':
-      case 'raster-to-webp':
-      case 'heic-converter':
         return <CompressionControls />;
+      case 'heic-converter':
+        return <HeicControls />;
+      case 'webp-to-raster':
+        return <WebpToRasterControls />;
+      case 'raster-to-webp':
+        return <RasterToWebpControls />;
       case 'avatar-crop':
         return <CropControls />;
       case 'social-presets':

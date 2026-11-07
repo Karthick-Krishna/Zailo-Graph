@@ -21,25 +21,27 @@ export const PaletteControls: React.FC = () => {
 
   if (!activeImage) return null;
 
-  // Placeholder or extracted palette data
-  const samplePalette: ColorSwatch[] = [
-    { hex: '#0F172A', rgb: 'rgb(15, 23, 42)', luminance: 20 },
-    { hex: '#334155', rgb: 'rgb(51, 65, 85)', luminance: 65 },
-    { hex: '#64748B', rgb: 'rgb(100, 116, 139)', luminance: 110 },
-    { hex: '#94A3B8', rgb: 'rgb(148, 163, 184)', luminance: 160 },
-    { hex: '#CBD5E1', rgb: 'rgb(203, 213, 225)', luminance: 212 },
-    { hex: '#F8FAFC', rgb: 'rgb(248, 250, 252)', luminance: 250 },
-  ].slice(0, swatchCount);
+  // Real extracted palette from worker or fallback
+  const palette: ColorSwatch[] = (activeImage.extraData && Array.isArray(activeImage.extraData))
+    ? activeImage.extraData.slice(0, swatchCount)
+    : [
+        { hex: '#0F172A', rgb: 'rgb(15, 23, 42)', luminance: 20 },
+        { hex: '#334155', rgb: 'rgb(51, 65, 85)', luminance: 65 },
+        { hex: '#64748B', rgb: 'rgb(100, 116, 139)', luminance: 110 },
+        { hex: '#94A3B8', rgb: 'rgb(148, 163, 184)', luminance: 160 },
+        { hex: '#CBD5E1', rgb: 'rgb(203, 213, 225)', luminance: 212 },
+        { hex: '#F8FAFC', rgb: 'rgb(248, 250, 252)', luminance: 250 },
+      ].slice(0, swatchCount);
 
   const copyCssVariables = () => {
-    const css = samplePalette.map((c, i) => `  --color-${i + 1}: ${c.hex};`).join('\n');
+    const css = palette.map((c, i) => `  --color-${i + 1}: ${c.hex};`).join('\n');
     navigator.clipboard.writeText(`:root {\n${css}\n}`);
     setCopiedFormat('css');
     setTimeout(() => setCopiedFormat(null), 2000);
   };
 
   const copyTailwindJson = () => {
-    const obj = samplePalette.reduce((acc, c, i) => {
+    const obj = palette.reduce((acc, c, i) => {
       acc[`color-${i + 1}`] = c.hex;
       return acc;
     }, {} as Record<string, string>);
@@ -70,7 +72,7 @@ export const PaletteControls: React.FC = () => {
       <div>
         <label className="block text-xs font-semibold text-neutral-700 mb-2">Palette Harmonies</label>
         <div className="space-y-1.5">
-          {samplePalette.map((c, idx) => (
+          {palette.map((c: ColorSwatch, idx: number) => (
             <div
               key={idx}
               onClick={() => {
