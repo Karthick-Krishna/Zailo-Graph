@@ -189,3 +189,4 @@ export const HeicControls: React.FC = () => {
     </div>
   );
 };
+

@@ -8,8 +8,6 @@ import {
   Columns, 
   Eye, 
   Sparkles, 
-  Maximize2,
-  Check,
   SplitSquareVertical
 } from 'lucide-react';
 
@@ -41,52 +39,93 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
   imageName,
   activeUtilityId,
 }) => {
-  // Determine if aspect ratios differ significantly (e.g. crop or circle avatar)
+  // Determine if aspect ratios differ significantly (e.g. crop, custom batch-resize, social preset, passport)
   const isAspectMismatched = Boolean(
     processedWidth && 
     processedHeight && 
-    Math.abs((originalWidth / originalHeight) - (processedWidth / processedHeight)) > 0.08
+    originalWidth &&
+    originalHeight &&
+    Math.abs((originalWidth / originalHeight) - (processedWidth / processedHeight)) > 0.05
   );
 
-  const isCropOrMaskTool = activeUtilityId === 'avatar-crop' || activeUtilityId === 'passport-photo' || activeUtilityId === 'social-presets';
+  const isCropOrMaskTool = 
+    activeUtilityId === 'avatar-crop' || 
+    activeUtilityId === 'passport-photo' || 
+    activeUtilityId === 'social-presets' ||
+    activeUtilityId === 'collage-maker';
+
   const isUpscaleTool = activeUtilityId === 'ai-upscale';
   const isBgRemovalTool = activeUtilityId === 'ai-bg-removal';
 
-  // Default view mode: for crops or masks with mismatch, default to 'side_by_side' or 'result'
+  // If aspect ratios differ or it's a crop/collage tool, default to full result view
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    if (isCropOrMaskTool) return 'side_by_side';
+    if (isCropOrMaskTool || isAspectMismatched) return 'result';
     return 'slider';
   });
 
+  const [isPeekingOriginal, setIsPeekingOriginal] = useState<boolean>(false);
   const [sliderPosition, setSliderPosition] = useState<number>(50);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [isDragging, setIsDragging] = useState(false);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef({ x: 0, y: 0 });
+  
+  // Ref on the actual image frame for accurate pixel-to-pixel split wipe
+  const imageFrameRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Sync mode when utility changes
+  // Auto-switch away from split slider if aspect ratio changes so outputs never look smashed or letterboxed
   useEffect(() => {
-    if (isCropOrMaskTool && viewMode === 'slider') {
-      setViewMode('side_by_side');
+    if (isAspectMismatched || isCropOrMaskTool) {
+      if (viewMode === 'slider') {
+        setViewMode('result');
+      }
     }
-  }, [activeUtilityId, isCropOrMaskTool]);
+  }, [activeUtilityId, isAspectMismatched, isCropOrMaskTool, viewMode]);
+
+  // Spacebar hotkey to hold and peek original image
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat && processedUrl && (e.target as HTMLElement).tagName !== 'INPUT') {
+        e.preventDefault();
+        setIsPeekingOriginal(true);
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && (e.target as HTMLElement).tagName !== 'INPUT') {
+        e.preventDefault();
+        setIsPeekingOriginal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [processedUrl]);
+
+  const updateSliderFromEvent = (clientX: number) => {
+    const frame = imageFrameRef.current || containerRef.current;
+    if (!frame) return;
+    const rect = frame.getBoundingClientRect();
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPosition(percent);
+  };
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    // If zoomed in and right button or space-drag, pan; otherwise drag slider
+    // If zoomed in and middle click or Alt/Shift, trigger pan
     if (e.button === 1 || e.altKey || (zoomLevel > 1 && e.shiftKey)) {
       setIsPanning(true);
       panStartRef.current = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
       return;
     }
 
-    if (viewMode === 'slider' && containerRef.current) {
+    if (viewMode === 'slider') {
       setIsDragging(true);
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      setSliderPosition(percent);
+      updateSliderFromEvent(e.clientX);
     }
   };
 
@@ -104,11 +143,8 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
       return;
     }
 
-    if (isDragging && containerRef.current && viewMode === 'slider') {
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      setSliderPosition(percent);
+    if (isDragging && viewMode === 'slider') {
+      updateSliderFromEvent(e.clientX);
     }
   }, [isDragging, isPanning, viewMode]);
 
@@ -132,13 +168,13 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
   const savings = processedSize ? calculateSavings(originalSize, processedSize) : null;
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center p-2 sm:p-4 overflow-hidden select-none">
+    <div className="relative w-full h-full flex flex-col items-center justify-between p-1 sm:p-3 overflow-hidden select-none">
       {/* Top Floating Control Deck */}
-      <div className="absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-2 px-3 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200/90 shadow-md text-xs max-w-[96vw]">
+      <div className="z-20 flex flex-wrap items-center justify-center gap-2 px-3 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200/90 shadow-md text-xs max-w-[96vw] mb-2 shrink-0">
         
         {/* File Telemetry */}
         <div className="flex items-center gap-1.5 font-medium text-neutral-800">
-          <span className="font-semibold truncate max-w-[110px] sm:max-w-[150px]">{imageName}</span>
+          <span className="font-semibold truncate max-w-[120px] sm:max-w-[180px]">{imageName}</span>
           <span className="text-neutral-300">|</span>
           <span className="font-mono text-neutral-500 text-[11px]">{formatBytes(originalSize)}</span>
         </div>
@@ -164,15 +200,37 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
 
         {/* Mode Selector Segmented Control */}
         <div className="flex items-center gap-0.5 p-0.5 bg-neutral-100 rounded-xl border border-neutral-200/80">
+          {/* Split Mode: available when aspect ratios match */}
+          {!isAspectMismatched ? (
+            <button
+              onClick={() => setViewMode('slider')}
+              className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
+                viewMode === 'slider' ? 'bg-white text-neutral-900 shadow-xs' : 'text-neutral-500 hover:text-neutral-800'
+              }`}
+              title="Split comparison slider"
+            >
+              <SplitSquareVertical className="w-3 h-3 text-violet-600" />
+              <span className="hidden sm:inline">Split</span>
+            </button>
+          ) : (
+            <span 
+              className="px-2 py-1 text-[10px] text-neutral-400 font-medium italic flex items-center gap-1 cursor-help"
+              title="Split wipe requires matching aspect ratios. Output has custom dimensions."
+            >
+              <SplitSquareVertical className="w-3 h-3 opacity-40" />
+              <span className="hidden sm:inline">Split (Aspect Differs)</span>
+            </span>
+          )}
+
           <button
-            onClick={() => setViewMode('slider')}
+            onClick={() => setViewMode('result')}
             className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
-              viewMode === 'slider' ? 'bg-white text-neutral-900 shadow-xs' : 'text-neutral-500 hover:text-neutral-800'
+              viewMode === 'result' ? 'bg-white text-neutral-900 shadow-xs' : 'text-neutral-500 hover:text-neutral-800'
             }`}
-            title="Split comparison slider"
+            title="Show Processed Result Only (Full scale)"
           >
-            <SplitSquareVertical className="w-3 h-3" />
-            <span className="hidden md:inline">Split</span>
+            <Eye className="w-3 h-3 text-cyan-600" />
+            <span>Result</span>
           </button>
 
           <button
@@ -183,18 +241,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
             title="Side-by-side comparison"
           >
             <Columns className="w-3 h-3" />
-            <span className="hidden md:inline">Side by Side</span>
-          </button>
-
-          <button
-            onClick={() => setViewMode('result')}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 ${
-              viewMode === 'result' ? 'bg-white text-neutral-900 shadow-xs' : 'text-neutral-500 hover:text-neutral-800'
-            }`}
-            title="Show Processed Result Only"
-          >
-            <Eye className="w-3 h-3" />
-            <span className="hidden md:inline">Result</span>
+            <span className="hidden sm:inline">Side by Side</span>
           </button>
 
           <button
@@ -204,11 +251,11 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
             }`}
             title="Show Original Only"
           >
-            <span className="hidden md:inline">Original</span>
+            <span className="hidden sm:inline">Original</span>
           </button>
         </div>
 
-        {/* 1:1 Pixel Inspection Button (Essential for checking sharpness, noise, and real resolution) */}
+        {/* 1:1 Pixel Inspection Button */}
         <button
           onClick={togglePixelInspection}
           className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs border ${
@@ -219,7 +266,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           title="Inspect 1:1 actual pixel resolution (100% scale)"
         >
           <Sparkles className="w-3 h-3 text-cyan-500" />
-          <span>{zoomLevel >= 2 ? 'Exit 100%' : '1:1 Actual Pixels'}</span>
+          <span>{zoomLevel >= 2 ? 'Exit 100%' : '1:1 Pixels'}</span>
         </button>
 
         {/* Zoom Controls */}
@@ -258,73 +305,78 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
         onPointerMove={handlePointerMove}
-        className={`relative max-w-5xl w-full h-[56vh] sm:h-[66vh] md:h-[620px] overflow-hidden rounded-2xl bg-neutral-950 border border-neutral-300/80 select-none flex items-center justify-center touch-none shadow-md ${
+        className={`relative w-full flex-1 max-w-7xl min-h-[460px] overflow-hidden rounded-2xl bg-neutral-950 border border-neutral-800/80 select-none flex items-center justify-center touch-none shadow-xl ${
           viewMode === 'slider' ? 'cursor-ew-resize' : zoomLevel > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
         }`}
         style={{
-          // Subtle checkered pattern for transparency inspection
+          // Professional dark checkerboard backdrop for transparency and edge inspection
           backgroundImage: 'radial-gradient(#27272a 1px, transparent 1px), radial-gradient(#27272a 1px, #09090b 1px)',
           backgroundSize: '24px 24px',
           backgroundPosition: '0 0, 12px 12px',
         }}
       >
-        {/* VIEW MODE 1: SPLIT SLIDER */}
+        {/* VIEW MODE 1: SPLIT SLIDER (For matching aspect ratios) */}
         {viewMode === 'slider' && (
           <div 
-            className="relative max-w-full max-h-full transition-transform duration-75 flex items-center justify-center"
+            className="relative w-full h-full flex items-center justify-center p-4 transition-transform duration-75"
             style={{ 
               transform: `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)` 
             }}
           >
-            {/* Base Layer: Original */}
-            <img
-              src={originalUrl}
-              alt="Original Preview"
-              className="max-w-full max-h-[50vh] sm:max-h-[60vh] md:max-h-[560px] object-contain pointer-events-none select-none"
-              draggable={false}
-            />
+            {/* Image Frame: strictly tightly-bounded to the image aspect ratio so split wipe has NO dead space */}
+            <div 
+              ref={imageFrameRef}
+              className="relative inline-flex items-center justify-center max-w-full max-h-full rounded-xl overflow-hidden shadow-2xl border border-white/10"
+              style={{
+                aspectRatio: `${originalWidth} / ${originalHeight}`,
+              }}
+            >
+              {/* Base Layer: Original Image */}
+              <img
+                src={originalUrl}
+                alt="Original Preview"
+                className="w-full h-full object-contain pointer-events-none select-none"
+                draggable={false}
+              />
 
-            {/* Top Layer: Processed Result (With opaque alpha-checkerboard so transparency doesn't bleed original through!) */}
-            {processedUrl && (
-              <div 
-                className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center"
-                style={{ 
-                  clipPath: `inset(0 0 0 ${sliderPosition}%)`,
-                  backgroundColor: '#0E1017',
-                  backgroundImage: 'radial-gradient(#2A2D3D 1px, transparent 1px), radial-gradient(#2A2D3D 1px, #0E1017 1px)',
-                  backgroundSize: '16px 16px',
-                  backgroundPosition: '0 0, 8px 8px',
-                }}
-              >
-                <img
-                  src={processedUrl}
-                  alt="Processed Result"
-                  className="max-w-full max-h-[50vh] sm:max-h-[60vh] md:max-h-[560px] object-contain select-none"
-                  draggable={false}
-                />
-              </div>
-            )}
+              {/* Top Layer: Processed Result (Cleanly clipped without black letterboxing) */}
+              {processedUrl && (
+                <div 
+                  className="absolute inset-0 overflow-hidden pointer-events-none"
+                  style={{ 
+                    clipPath: `inset(0 0 0 ${sliderPosition}%)`,
+                  }}
+                >
+                  <img
+                    src={processedUrl}
+                    alt="Processed Result"
+                    className="w-full h-full object-contain select-none"
+                    draggable={false}
+                  />
+                </div>
+              )}
 
-            {/* Floating In-Viewport Badges */}
-            <span className="absolute top-2 left-2 z-10 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md text-white text-[10px] font-mono border border-white/10 shadow-sm">
+              {/* Glowing Draggable Split Handle Line */}
+              {processedUrl && (
+                <div 
+                  className="absolute top-0 bottom-0 w-[2px] bg-gradient-to-b from-cyan-400 via-white to-violet-400 pointer-events-none z-10"
+                  style={{ left: `${sliderPosition}%` }}
+                >
+                  <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 shadow-xl shadow-violet-500/50 border-2 border-white flex items-center justify-center text-white cursor-ew-resize transform transition-transform hover:scale-110 active:scale-95">
+                    <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Badges on Top Corners */}
+            <span className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md text-white text-[10px] font-mono border border-white/10 shadow-sm">
               Original: {originalWidth}×{originalHeight} px
             </span>
             {processedWidth && (
-              <span className="absolute top-2 right-2 z-10 px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-950 to-indigo-950 backdrop-blur-md text-cyan-300 text-[10px] font-mono border border-violet-400/40 shadow-sm">
+              <span className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-950 to-indigo-950 backdrop-blur-md text-cyan-300 text-[10px] font-mono border border-violet-400/40 shadow-sm">
                 Result: {processedWidth}×{processedHeight} px
               </span>
-            )}
-
-            {/* Glowing Draggable Split Handle */}
-            {processedUrl && (
-              <div 
-                className="absolute top-0 bottom-0 w-[2px] bg-gradient-to-b from-violet-400 via-white to-cyan-400 shadow-md pointer-events-none z-10"
-                style={{ left: `${sliderPosition}%` }}
-              >
-                <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 shadow-xl shadow-violet-500/50 border-2 border-white flex items-center justify-center text-white cursor-ew-resize transform transition-transform hover:scale-110 active:scale-95">
-                  <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2.5]" />
-                </div>
-              </div>
             )}
           </div>
         )}
@@ -338,21 +390,21 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
             }}
           >
             {/* Original Panel */}
-            <div className="flex flex-col items-center justify-center w-full h-full max-h-[52vh] sm:max-h-[60vh] bg-black/40 rounded-xl p-3 border border-white/5 relative">
+            <div className="flex flex-col items-center justify-center w-full h-full max-h-full bg-black/40 rounded-xl p-3 border border-white/10 relative overflow-hidden">
               <span className="absolute top-2 left-2 z-10 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md text-white text-[10px] font-mono border border-white/10">
                 Original • {originalWidth}×{originalHeight} px • {formatBytes(originalSize)}
               </span>
               <img
                 src={originalUrl}
                 alt="Original"
-                className="max-w-full max-h-full object-contain pointer-events-none"
+                className="max-w-full max-h-full object-contain pointer-events-none drop-shadow-lg"
                 draggable={false}
               />
             </div>
 
             {/* Processed Panel */}
             <div 
-              className="flex flex-col items-center justify-center w-full h-full max-h-[52vh] sm:max-h-[60vh] rounded-xl p-3 border border-violet-500/30 relative overflow-hidden"
+              className="flex flex-col items-center justify-center w-full h-full max-h-full rounded-xl p-3 border border-violet-500/40 relative overflow-hidden"
               style={{
                 backgroundColor: '#0E1017',
                 backgroundImage: 'radial-gradient(#2A2D3D 1px, transparent 1px), radial-gradient(#2A2D3D 1px, #0E1017 1px)',
@@ -367,7 +419,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
                 <img
                   src={processedUrl}
                   alt="Processed"
-                  className="max-w-full max-h-full object-contain pointer-events-none"
+                  className="max-w-full max-h-full object-contain pointer-events-none drop-shadow-xl"
                   draggable={false}
                 />
               ) : (
@@ -377,44 +429,65 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           </div>
         )}
 
-        {/* VIEW MODE 3: RESULT ONLY */}
+        {/* VIEW MODE 3: RESULT ONLY (Full Frame High-Definition View) */}
         {viewMode === 'result' && (
           <div 
-            className="relative max-w-full max-h-full transition-transform duration-75 flex items-center justify-center rounded-2xl overflow-hidden p-2"
+            className="relative w-full h-full transition-transform duration-75 flex items-center justify-center p-3 overflow-hidden"
             style={{ 
               transform: `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`,
-              backgroundColor: '#0E1017',
-              backgroundImage: 'radial-gradient(#2A2D3D 1px, transparent 1px), radial-gradient(#2A2D3D 1px, #0E1017 1px)',
-              backgroundSize: '16px 16px',
-              backgroundPosition: '0 0, 8px 8px',
             }}
           >
+            {/* Dimensions Badge */}
             {processedWidth && (
-              <span className="absolute top-2 left-2 z-10 px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-950 to-indigo-950 backdrop-blur-md text-cyan-300 text-[10px] font-mono border border-violet-400/40 shadow-sm">
+              <span className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-950 to-indigo-950 backdrop-blur-md text-cyan-300 text-[10px] font-mono border border-violet-400/40 shadow-sm">
                 Result: {processedWidth}×{processedHeight} px {processedSize ? `• ${formatBytes(processedSize)}` : ''}
               </span>
             )}
+
+            {/* Rendered Result Image - Unsquashed & High Definition */}
             <img
-              src={processedUrl || originalUrl}
+              src={isPeekingOriginal ? originalUrl : (processedUrl || originalUrl)}
               alt="Processed Result"
-              className="max-w-full max-h-[50vh] sm:max-h-[60vh] md:max-h-[560px] object-contain"
+              className="max-w-full max-h-full object-contain select-none transition-all duration-75 drop-shadow-2xl rounded-lg"
               draggable={false}
             />
+
+            {/* Quick Hold to Compare Button in Result View (Mouse hold or Spacebar) */}
+            {processedUrl && (
+              <button
+                onMouseDown={() => setIsPeekingOriginal(true)}
+                onMouseUp={() => setIsPeekingOriginal(false)}
+                onTouchStart={() => setIsPeekingOriginal(true)}
+                onTouchEnd={() => setIsPeekingOriginal(false)}
+                className={`absolute bottom-10 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full font-semibold text-xs backdrop-blur-md border shadow-2xl flex items-center gap-2 active:scale-95 transition cursor-pointer select-none ${
+                  isPeekingOriginal 
+                    ? 'bg-cyan-500 text-black border-cyan-300 scale-105' 
+                    : 'bg-black/85 hover:bg-black text-white border-white/20'
+                }`}
+                title="Hold down (or press Spacebar) to compare with original image"
+              >
+                <Eye className={`w-4 h-4 ${isPeekingOriginal ? 'text-black' : 'text-cyan-400'}`} />
+                <span>{isPeekingOriginal ? 'Showing Original (Release to View Result)' : 'Hold to View Original (Spacebar)'}</span>
+              </button>
+            )}
           </div>
         )}
 
         {/* VIEW MODE 4: ORIGINAL ONLY */}
         {viewMode === 'original' && (
           <div 
-            className="relative max-w-full max-h-full transition-transform duration-75 flex items-center justify-center"
+            className="relative w-full h-full transition-transform duration-75 flex items-center justify-center p-3"
             style={{ 
               transform: `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)` 
             }}
           >
+            <span className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md text-white text-[10px] font-mono border border-white/10">
+              Original • {originalWidth}×{originalHeight} px • {formatBytes(originalSize)}
+            </span>
             <img
               src={originalUrl}
               alt="Original"
-              className="max-w-full max-h-[50vh] sm:max-h-[60vh] md:max-h-[560px] object-contain"
+              className="max-w-full max-h-full object-contain select-none drop-shadow-xl"
               draggable={false}
             />
           </div>
@@ -439,7 +512,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
                 </>
               ) : isCropOrMaskTool ? (
                 <>
-                  <span className="text-cyan-400 font-bold">Cropped Bounds:</span>
+                  <span className="text-cyan-400 font-bold">Bounds:</span>
                   <span>{processedWidth} × {processedHeight} px</span>
                 </>
               ) : isBgRemovalTool ? (

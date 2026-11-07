@@ -155,7 +155,7 @@ export const Workspace: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Center Canvas Viewport */}
-        <main className="flex-1 flex flex-col items-center justify-start overflow-y-auto bg-[#F8F9FA] relative">
+        <main className="flex-1 flex flex-col items-center justify-center overflow-hidden bg-[#F8F9FA] relative p-2 sm:p-3">
           {images.length === 0 ? (
             <LandingWorkspace />
           ) : !isUnlocked ? (
@@ -163,7 +163,7 @@ export const Workspace: React.FC = () => {
               <GatedFeatureCard utility={activeUtility} />
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center p-6 w-full">
+            <div className="flex-1 w-full h-full flex items-center justify-center min-h-0">
               <ComparisonSlider
                 originalUrl={activeImage!.url}
                 processedUrl={activeImage!.processedUrl}
