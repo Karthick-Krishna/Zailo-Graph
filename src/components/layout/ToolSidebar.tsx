@@ -78,11 +78,15 @@ const CATEGORIES: Array<{ id: UtilityCategory | 'all'; label: string }> = [
 interface ToolSidebarProps {
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  isMobileDrawer?: boolean;
+  onCloseMobile?: () => void;
 }
 
 export const ToolSidebar: React.FC<ToolSidebarProps> = ({
   isCollapsed = false,
   onToggleCollapse,
+  isMobileDrawer = false,
+  onCloseMobile,
 }) => {
   const { activeUtilityId, setActiveUtilityId } = useSession();
   const { user, isUtilityUnlocked } = useAuth();
@@ -160,11 +164,64 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
       );
     }
 
+    if (isMobileDrawer) {
+      return (
+        <button
+          key={u.id}
+          onClick={() => {
+            setActiveUtilityId(u.id);
+            if (onCloseMobile) onCloseMobile();
+          }}
+          className={`w-full p-3 rounded-2xl text-left transition-all cursor-pointer flex items-center justify-between group mb-2 border ${
+            isSelected
+              ? 'bg-neutral-900 border-neutral-900 text-white shadow-md'
+              : 'bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-800'
+          }`}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+              isSelected ? 'bg-neutral-800 text-cyan-400' : 'bg-neutral-100 text-neutral-600'
+            }`}>
+              <IconComponent className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold truncate">{u.name}</span>
+                {u.badge && (
+                  <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded border uppercase font-semibold ${
+                    isSelected ? 'bg-neutral-800 text-neutral-300 border-neutral-700' : 'bg-neutral-100 text-neutral-500 border-neutral-200'
+                  }`}>
+                    {u.badge}
+                  </span>
+                )}
+              </div>
+              <p className={`text-[11px] truncate mt-0.5 ${isSelected ? 'text-neutral-300' : 'text-neutral-500'}`}>
+                {u.description}
+              </p>
+            </div>
+          </div>
+
+          <div className="pl-2 shrink-0">
+            {isLocked ? (
+              <Lock className={`w-4 h-4 ${isSelected ? 'text-amber-400' : 'text-neutral-400'}`} />
+            ) : (
+              <span className={`text-xs ${isSelected ? 'text-cyan-400 font-bold' : 'text-neutral-400'}`}>&rarr;</span>
+            )}
+          </div>
+        </button>
+      );
+    }
+
     return (
       <button
         key={u.id}
-        onClick={() => setActiveUtilityId(u.id)}
-        className={`w-full px-3 py-2 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between group mb-1 ${
+        onClick={() => {
+          setActiveUtilityId(u.id);
+          if (isMobileDrawer && onCloseMobile) {
+            onCloseMobile();
+          }
+        }}
+        className={`w-full px-3 py-2.5 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between group mb-1 min-h-[44px] ${
           isSelected
             ? 'bg-neutral-900 text-white font-semibold shadow-xs'
             : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100/80 font-medium'
@@ -191,33 +248,62 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
 
   return (
     <aside
-      className={`h-full bg-white border-r border-neutral-200/90 flex flex-col shrink-0 select-none transition-all duration-200 z-20 ${
-        isCollapsed ? 'w-16 items-center py-3' : 'w-64 sm:w-72'
-      }`}
+      className={
+        isMobileDrawer
+          ? "w-full max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col justify-between overflow-hidden border-t border-neutral-200 animate-in slide-in-from-bottom duration-200 relative z-30"
+          : `hidden md:flex h-full bg-white border-r border-neutral-200/90 flex-col shrink-0 select-none transition-all duration-200 z-20 ${
+              isCollapsed ? 'w-16 items-center py-3' : 'w-64 sm:w-72'
+            }`
+      }
     >
-      {/* Sidebar Header: Brand & Collapse Toggle */}
-      <div className={`p-3.5 border-b border-neutral-200/80 flex items-center ${isCollapsed ? 'justify-center w-full' : 'justify-between'}`}>
-        {!isCollapsed && (
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-neutral-700" />
-            <span className="text-xs font-bold text-neutral-900 tracking-tight">Toolbox</span>
-            <span className="text-[10px] font-mono text-neutral-400 px-1.5 py-0.2 rounded bg-neutral-100 border border-neutral-200/60 font-semibold">
-              26
-            </span>
+      {/* Mobile Handle & Close Bar */}
+      {isMobileDrawer && (
+        <div className="pt-3 pb-2 px-6 flex flex-col items-center border-b border-neutral-100 bg-neutral-50/70">
+          <div className="w-12 h-1.5 rounded-full bg-neutral-300 mb-2"></div>
+          <div className="w-full flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Layers className="w-4 h-4 text-violet-600" />
+              <span className="text-sm font-bold text-neutral-900">Choose Utility</span>
+              <span className="text-[10px] font-mono text-neutral-500 bg-white px-2 py-0.5 rounded-full border border-neutral-200 font-semibold">
+                26 Available
+              </span>
+            </div>
+            <button
+              onClick={onCloseMobile}
+              className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-xl transition cursor-pointer"
+              aria-label="Close tools drawer"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {onToggleCollapse && (
-          <button
-            onClick={onToggleCollapse}
-            className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition cursor-pointer border border-transparent hover:border-neutral-200"
-            title={isCollapsed ? 'Expand Toolbox Sidebar' : 'Collapse Toolbox to Rail'}
-            aria-label="Toggle toolbox sidebar"
-          >
-            {isCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
-          </button>
-        )}
-      </div>
+      {/* Desktop Sidebar Header: Brand & Collapse Toggle */}
+      {!isMobileDrawer && (
+        <div className={`p-3.5 border-b border-neutral-200/80 flex items-center ${isCollapsed ? 'justify-center w-full' : 'justify-between'}`}>
+          {!isCollapsed && (
+            <div className="flex items-center gap-2">
+              <Layers className="w-4 h-4 text-neutral-700" />
+              <span className="text-xs font-bold text-neutral-900 tracking-tight">Toolbox</span>
+              <span className="text-[10px] font-mono text-neutral-400 px-1.5 py-0.2 rounded bg-neutral-100 border border-neutral-200/60 font-semibold">
+                26
+              </span>
+            </div>
+          )}
+
+          {onToggleCollapse && (
+            <button
+              onClick={onToggleCollapse}
+              className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition cursor-pointer border border-transparent hover:border-neutral-200"
+              title={isCollapsed ? 'Expand Toolbox Sidebar' : 'Collapse Toolbox to Rail'}
+              aria-label="Toggle toolbox sidebar"
+            >
+              {isCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Search Input (When Expanded) */}
       {!isCollapsed && (
@@ -299,7 +385,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
 
       {/* Bottom Pro / System Status Banner (When expanded) */}
       {!isCollapsed && (
-        <div className="p-3 border-t border-neutral-200/80 bg-neutral-50/60">
+        <div className={`p-3 border-t border-neutral-200/80 bg-neutral-50/60 ${isMobileDrawer ? 'pb-8 sm:pb-3.5' : ''}`}>
           <div className="flex items-center justify-between text-[11px] text-neutral-500">
             <span className="font-medium text-neutral-700">100% Private Processing</span>
             <span className="text-[10px] font-mono text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60">

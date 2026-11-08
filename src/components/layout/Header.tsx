@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSession } from '../../context/SessionContext';
 import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
-import { Shield, Trash2, LogOut, ChevronDown, Keyboard } from 'lucide-react';
+import { Shield, Trash2, LogOut, ChevronDown, Keyboard, Layers } from 'lucide-react';
 
 interface HeaderProps {
   onOpenShortcuts?: () => void;
@@ -10,18 +10,27 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
   const { user, logout, openAuthModal } = useAuth();
-  const { images, clearWorkspace } = useSession();
+  const { images, clearWorkspace, isMobileToolsOpen, setIsMobileToolsOpen } = useSession();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
     <header className="sticky top-0 z-30 w-full bg-white border-b border-neutral-200 select-none">
-      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
-        {/* Brand with Official Vector Logo */}
-        <div className="flex items-center gap-3">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2 sm:gap-4">
+        {/* Brand with Official Vector Logo & Mobile Tools (26) Launcher */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <ZailoGraphLogo size="sm" showText={true} />
           <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-400 pl-2 border-l border-neutral-200">
             by Zorquelz
           </span>
+          <button
+            onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
+            className="md:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-50 hover:bg-violet-100 active:bg-violet-200 text-violet-900 border border-violet-200 text-xs font-bold transition cursor-pointer shadow-2xs ml-1"
+            title="Browse all 26 Studio Tools"
+            aria-label="Open 26 Studio Tools Navigation"
+          >
+            <Layers className="w-3.5 h-3.5 text-violet-600" />
+            <span>Tools (26)</span>
+          </button>
         </div>
 
         {/* Center: Quiet Status Indicators */}
@@ -72,9 +81,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => openAuthModal('manual')}
-                className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 hover:from-violet-950 hover:to-indigo-950 text-white text-xs font-semibold transition-all shadow-xs hover:shadow-md hover:shadow-violet-500/10 cursor-pointer flex items-center gap-2 border border-neutral-800"
+                className="px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 hover:from-violet-950 hover:to-indigo-950 text-white text-xs font-semibold transition-all shadow-xs hover:shadow-md hover:shadow-violet-500/10 cursor-pointer flex items-center gap-2 border border-neutral-800 min-h-[38px]"
               >
-                <span>Sign In / Sign Up</span>
+                <span>Sign In</span>
               </button>
             </div>
           ) : (
@@ -83,9 +92,18 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="px-2.5 py-1.5 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 text-neutral-800 text-xs font-medium transition flex items-center gap-2 cursor-pointer shadow-2xs"
               >
-                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-violet-600 to-cyan-500 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
-                  {user?.email[0].toUpperCase()}
-                </div>
+                {user.avatarUrl ? (
+                  <img 
+                    src={user.avatarUrl} 
+                    alt={user.name || user.email}
+                    referrerPolicy="no-referrer"
+                    className="w-5 h-5 rounded-full object-cover shadow-xs border border-neutral-200" 
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-violet-600 to-cyan-500 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+                    {(user.email?.[0] || 'Z').toUpperCase()}
+                  </div>
+                )}
                 <span className="hidden sm:inline max-w-[120px] truncate text-neutral-700">{user?.name || user?.email}</span>
                 <span className="px-1.5 py-0.2 rounded bg-gradient-to-r from-violet-50 to-cyan-50 text-violet-700 border border-violet-200/60 font-mono text-[9px] font-bold">PRO</span>
                 <ChevronDown className="w-3 h-3 text-neutral-400" />

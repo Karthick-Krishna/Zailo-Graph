@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { ImageItem } from '../types/image';
 import { useAuth } from './AuthContext';
-import { parseImageMetadata, stripJpegMetadataLossless } from '../utils/exif';
+import { parseImageMetadata, stripAllImageMetadata } from '../utils/exif';
 import { extractEmbeddedRawPreview } from '../utils/rawExtractor';
 import { convertHeicToRaster } from '../utils/heic';
 import { saveToOPFS, readFromOPFS, deleteFromOPFS, clearOPFSWorkspace } from '../utils/opfs';
 
-const OPFS_SESSION_MANIFEST_KEY = 'zailograph_recent_session_manifest';
+const OPFS_SESSION_MANIFEST_KEY = 'imazora_recent_session_manifest';
 
 interface SavedSessionItem {
   id: string;
@@ -18,6 +18,13 @@ interface SavedSessionItem {
   savedAt: number;
 }
 
+export interface BatchProgressState {
+  isRunning: boolean;
+  completed: number;
+  total: number;
+  currentName?: string;
+}
+
 interface SessionContextType {
   images: ImageItem[];
   activeImageId: string | null;
@@ -27,9 +34,13 @@ interface SessionContextType {
   toastMessage: string | null;
   currentParams: any;
   savedSessionCount: number;
+  batchProgress: BatchProgressState;
+  isMobileToolsOpen: boolean;
+  setIsMobileToolsOpen: (open: boolean) => void;
   
   // Actions
   addImages: (files: File[]) => Promise<void>;
+  addBase64Image: (base64String: string, name?: string) => Promise<boolean>;
   removeImage: (id: string) => void;
   clearWorkspace: () => void;
   restoreSavedSession: () => Promise<void>;
@@ -39,7 +50,10 @@ interface SessionContextType {
   setCurrentParams: (params: any) => void;
   sendToUtility: (targetUtilityId: string, imageId?: string) => void;
   executeActiveUtility: (params?: any, targetUtility?: string) => Promise<void>;
-  downloadImage: (imageId: string) => void;
+  executeBatchUtility: (params?: any, targetUtility?: string) => Promise<void>;
+  cancelBatch: () => void;
+  retryFailedImage: (id: string) => Promise<void>;
+  downloadImage: (imageId: string, customFormat?: string, customQuality?: number) => void;
   dismissToast: () => void;
 }
 
@@ -63,42 +77,46 @@ export const getDefaultParamsForUtility = (utilityId: string, image: { width: nu
     case 'compression':
       return { format: 'image/webp', quality: 0.8 };
     case 'heic-converter':
-      return { format: 'image/jpeg', quality: 0.9 };
+      return { toFormat: 'image/jpeg', quality: 0.92, preserveExif: true };
     case 'webp-to-raster':
-      return { format: 'image/png' };
+      return { format: 'image/png', quality: 0.92 };
     case 'raster-to-webp':
       return { format: 'image/webp', quality: 0.85 };
     case 'svg-to-png':
-      return { scaleMultiplier: 2 };
+      return { scaleMultiplier: 2, dpi: 300, transparentBackground: true };
     case 'png-to-svg':
-      return { colorCount: 8, simplify: 2 };
+      return { mode: 'color', colorCount: 8, filterSpeckle: 4 };
     case 'ai-upscale':
-      return { upscaleScale: 2, upscaleModel: 'esrgan' };
+      return { upscaleScale: 2, upscaleModel: 'photo', mode: 'algorithmic' };
     case 'ai-bg-removal':
-      return { bgMode: 'transparent', bgFeather: 20 };
+      return { bgMode: 'transparent', bgFeather: 4, mode: 'algorithmic' };
     case 'sharpen-enhance':
-      return { sharpen: 60, contrast: 15, brightness: 5, saturation: 10 };
+      return { sharpen: 1.5, contrast: 1.05, brightness: 1.0, saturation: 1.05 };
     case 'avatar-crop':
       return {
         isCircle: true,
+        aspectRatio: '1:1',
         width: minDim,
         height: minDim,
         x: Math.max(0, Math.round((w - minDim) / 2)),
         y: Math.max(0, Math.round((h - minDim) / 2)),
+        rotation: 0,
+        flipH: false,
+        flipV: false,
       };
     case 'social-presets':
-      return { presetWidth: 1080, presetHeight: 1080, fillMode: 'blur' };
+      return { presetWidth: 1080, presetHeight: 1080, fillMode: 'blur', fillColor: '#FAFAFA' };
     case 'watermark':
       return {
-        text: 'ZAILOGRAPH',
-        fontSize: Math.max(24, Math.round(minDim * 0.05)),
+        text: 'Imazora Studio',
+        fontSize: Math.max(20, Math.round(minDim * 0.04)),
         opacity: 0.75,
         position: 'bottom-right',
         color: '#FFFFFF',
         rotation: 0,
       };
     case 'collage-maker':
-      return { layout: 'grid_2x2', gap: 12, borderRadius: 16 };
+      return { layout: '4-grid', gap: 16, cornerRadius: 12, backgroundColor: '#FAFAFA' };
     case 'color-palette':
       return { count: 6 };
     case 'passport-photo':
@@ -109,9 +127,9 @@ export const getDefaultParamsForUtility = (utilityId: string, image: { width: nu
         whitenedBackground: true,
       };
     case 'ai-colorization':
-      return { intensity: 0.85, warmth: 1.1 };
+      return { colorIntensity: 85, colorTone: 'neutral', mode: 'algorithmic' };
     case 'ai-inpainting':
-      return { mode: 'smart_heal', radius: 24 };
+      return { brushSize: 36, mode: 'algorithmic' };
     case 'exif-viewer':
       return {};
     case 'exif-remover':
@@ -120,22 +138,22 @@ export const getDefaultParamsForUtility = (utilityId: string, image: { width: nu
       return {
         regions: [
           {
-            x: Math.round(w * 0.2),
-            y: Math.round(h * 0.2),
-            width: Math.round(w * 0.3),
-            height: Math.round(h * 0.2),
+            x: Math.round(w * 0.25),
+            y: Math.round(h * 0.35),
+            width: Math.round(w * 0.5),
+            height: Math.round(h * 0.3),
             mode: 'pixelate',
           },
         ],
       };
     case 'favicon-studio':
-      return { size: 64 };
+      return { size: 32, asIco: false };
     case 'image-to-base64':
       return {};
     case 'base64-to-image':
       return {};
     case 'camera-raw':
-      return { exposure: 0.2, contrast: 10 };
+      return { engineMode: 'fast_preview', exposureEv: 0, temperature: 5500 };
     case 'workflow-recipes':
       return { recipeId: 'ecommerce' };
     default:
@@ -150,8 +168,18 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [activeUtilityId, setActiveUtilityId] = useState<string>('workflow-recipes');
   const [currentParams, setCurrentParams] = useState<any>({});
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [isMobileToolsOpen, setIsMobileToolsOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [worker, setWorker] = useState<Worker | null>(null);
+
+  const [batchProgress, setBatchProgress] = useState<BatchProgressState>({
+    isRunning: false,
+    completed: 0,
+    total: 0,
+  });
+
+  const cancelBatchRef = useRef<boolean>(false);
+  const currentJobSeqRef = useRef<number>(0);
 
   const [savedSessionCount, setSavedSessionCount] = useState<number>(() => {
     try {
@@ -276,7 +304,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addImages = useCallback(async (files: File[]) => {
     if (!files || files.length === 0) return;
 
-    // 1. Quota check: Batch Count
+    // Quota check: Batch Count
     const batchValidation = validateBatchCount(images.length, files.length);
     if (!batchValidation.allowed && batchValidation.allowedCount === 0) {
       openAuthModal('batch_limit', undefined, batchValidation.message);
@@ -291,16 +319,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const newItems: ImageItem[] = [];
 
     for (const file of filesToProcess) {
-      // 2. Quota check: File Size
+      // Quota check: File Size
       const sizeValidation = validateFileSize(file.size);
       if (!sizeValidation.allowed) {
-        openAuthModal('size_limit', undefined, sizeValidation.message);
+        setToastMessage(sizeValidation.message || 'File size exceeds limit');
         continue;
       }
 
       let activeFile: Blob = file;
       const lowerName = file.name.toLowerCase();
-      const isRaw = lowerName.endsWith('.cr2') || lowerName.endsWith('.cr3') || lowerName.endsWith('.nef') || lowerName.endsWith('.arw') || lowerName.endsWith('.dng') || lowerName.endsWith('.orf');
+      const isRaw = lowerName.endsWith('.cr2') || lowerName.endsWith('.cr3') || lowerName.endsWith('.nef') || lowerName.endsWith('.arw') || lowerName.endsWith('.dng') || lowerName.endsWith('.orf') || lowerName.endsWith('.raf');
       const isHeic = lowerName.endsWith('.heic') || lowerName.endsWith('.heif') || file.type === 'image/heic' || file.type === 'image/heif';
 
       if (isRaw) {
@@ -378,6 +406,26 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     }
   }, [images.length, activeImageId, validateFileSize, validateBatchCount, openAuthModal]);
+
+  const addBase64Image = useCallback(async (base64Input: string, name = 'decoded_image'): Promise<boolean> => {
+    try {
+      const trimmed = base64Input.trim();
+      let dataUrl = trimmed;
+      if (!trimmed.startsWith('data:')) {
+        dataUrl = `data:image/png;base64,${trimmed}`;
+      }
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const ext = blob.type.split('/')[1]?.replace('+xml', '') || 'png';
+      const file = new File([blob], `${name}_${Date.now()}.${ext}`, { type: blob.type });
+      await addImages([file]);
+      setToastMessage('Decoded Base64 image into workspace.');
+      return true;
+    } catch (err: any) {
+      setToastMessage('Failed to decode Base64 data: ' + (err.message || 'Invalid format'));
+      return false;
+    }
+  }, [addImages]);
 
   const removeImage = useCallback((id: string) => {
     setImages(prev => {
@@ -458,8 +506,163 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => window.removeEventListener('paste', handlePaste);
   }, [addImages]);
 
+  // Generic processing helper that executes any utility on an ImageItem
+  const processItemWithWorker = useCallback(async (
+    item: ImageItem,
+    utilityToRun: string,
+    effectiveParams: any
+  ): Promise<{ blob: Blob; size: number; width: number; height: number; extraData?: any }> => {
+    if (!worker) throw new Error('Worker engine is not ready.');
+
+    // 1. Direct handling for Lossless EXIF Stripping
+    if (utilityToRun === 'exif-remover' || (utilityToRun === 'exif-viewer' && effectiveParams?.stripMetadata)) {
+      const strippedBlob = await stripAllImageMetadata(item.blob);
+      let sW = item.width;
+      let sH = item.height;
+      try {
+        const b = await createImageBitmap(strippedBlob);
+        sW = b.width;
+        sH = b.height;
+        b.close();
+      } catch {}
+      return { blob: strippedBlob, size: strippedBlob.size, width: sW, height: sH };
+    }
+
+    // 2. Direct handling for EXIF Viewer Inspection
+    if (utilityToRun === 'exif-viewer') {
+      return { blob: item.blob, size: item.size, width: item.width, height: item.height, extraData: item.metadata };
+    }
+
+    // 3. Direct handling for Image to Base64
+    if (utilityToRun === 'image-to-base64') {
+      const b64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(item.blob);
+      });
+      return { blob: item.blob, size: item.size, width: item.width, height: item.height, extraData: { base64: b64 } };
+    }
+
+    // 4. Direct handling for HEIC decoder
+    if (utilityToRun === 'heic-converter') {
+      const converted = await convertHeicToRaster(item.blob, effectiveParams);
+      let pW = item.width;
+      let pH = item.height;
+      try {
+        const b = await createImageBitmap(converted);
+        pW = b.width;
+        pH = b.height;
+        b.close();
+      } catch {}
+      return { blob: converted, size: converted.size, width: pW, height: pH };
+    }
+
+    // 5. Map utility to worker task
+    let taskType = 'compress';
+    if (utilityToRun === 'batch-resize' || utilityToRun === 'svg-to-png') taskType = 'resize';
+    else if (utilityToRun === 'avatar-crop') taskType = 'crop';
+    else if (utilityToRun === 'watermark') taskType = 'watermark';
+    else if (utilityToRun === 'sharpen-enhance') taskType = 'filter';
+    else if (utilityToRun === 'social-presets') taskType = 'social_preset';
+    else if (utilityToRun === 'passport-photo') taskType = 'passport_photo';
+    else if (utilityToRun === 'color-palette') taskType = 'extract_palette';
+    else if (utilityToRun === 'privacy-redact') taskType = 'privacy_redact';
+    else if (utilityToRun === 'favicon-studio') taskType = 'favicon_pack';
+    else if (utilityToRun === 'ai-bg-removal') taskType = 'ai_bg_removal';
+    else if (utilityToRun === 'ai-upscale') taskType = 'ai_upscale';
+    else if (utilityToRun === 'ai-inpainting') taskType = 'ai_inpainting';
+    else if (utilityToRun === 'ai-colorization') taskType = 'ai_colorization';
+    else if (utilityToRun === 'png-to-svg') taskType = 'vectorize';
+    else if (utilityToRun === 'collage-maker') taskType = 'collage';
+    else if (utilityToRun === 'camera-raw') taskType = 'camera_raw';
+    else if (utilityToRun === 'workflow-recipes') taskType = 'workflow_recipe';
+
+    const bitmap = await createImageBitmap(item.blob);
+    const transferables: Transferable[] = [bitmap];
+
+    // For collage: load extra images from the queue
+    let extraBitmaps: ImageBitmap[] = [];
+    if (utilityToRun === 'collage-maker') {
+      const otherImages = images.filter(img => img.id !== item.id).slice(0, 3);
+      for (const other of otherImages) {
+        try {
+          const bmp = await createImageBitmap(other.blob);
+          extraBitmaps.push(bmp);
+          transferables.push(bmp);
+        } catch {}
+      }
+    }
+
+    // For watermark logo
+    let logoBmp: ImageBitmap | undefined;
+    if (utilityToRun === 'watermark' && effectiveParams?.logoBlob) {
+      try {
+        logoBmp = await createImageBitmap(effectiveParams.logoBlob);
+        transferables.push(logoBmp);
+      } catch {}
+    }
+
+    const taskId = 'task_' + Math.random().toString(36).substring(2, 9);
+
+    const promise = new Promise<{ blob: Blob; size: number; extraData?: any }>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        worker.removeEventListener('message', handler);
+        reject(new Error('Processing timed out. Please try standard resolution.'));
+      }, 45000);
+
+      const handler = (e: MessageEvent) => {
+        if (e.data.taskId === taskId) {
+          clearTimeout(timer);
+          worker.removeEventListener('message', handler);
+          if (e.data.success) {
+            resolve({ blob: e.data.blob, size: e.data.size, extraData: e.data.extraData });
+          } else {
+            reject(new Error(e.data.error || 'Worker execution failed'));
+          }
+        }
+      };
+      worker.addEventListener('message', handler);
+    });
+
+    worker.postMessage(
+      {
+        taskId,
+        type: taskType,
+        imageBitmap: bitmap,
+        extraBitmaps,
+        params: {
+          ...effectiveParams,
+          logoBitmap: logoBmp,
+        },
+      },
+      transferables
+    );
+
+    const result = await promise;
+
+    let pWidth = item.width;
+    let pHeight = item.height;
+    try {
+      const resBitmap = await createImageBitmap(result.blob);
+      pWidth = resBitmap.width;
+      pHeight = resBitmap.height;
+      resBitmap.close();
+    } catch {}
+
+    return {
+      blob: result.blob,
+      size: result.size,
+      width: pWidth,
+      height: pHeight,
+      extraData: result.extraData,
+    };
+  }, [worker, images]);
+
   const selectUtility = useCallback((newUtilityId: string) => {
     setActiveUtilityId(newUtilityId);
+    // Invalidate prior job sequences
+    currentJobSeqRef.current++;
+
     // Clear stale processed output so user never sees previous tool's result
     setImages(prev => prev.map(img => {
       if (img.id === activeImageId && img.processedUrl) {
@@ -483,45 +686,10 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, 20);
   }, [activeImageId, activeImage]);
 
-  const sendToUtility = useCallback((targetUtilityId: string, imageId?: string) => {
-    const targetId = imageId || activeImageId;
-    if (!targetId) return;
-
-    // Check if target utility is locked
-    if (!isUtilityUnlocked(targetUtilityId)) {
-      openAuthModal('pro_feature', targetUtilityId);
-      return;
-    }
-
-    // Set processed result as the active pipeline basis if available
-    setImages(prev => prev.map(img => {
-      if (img.id === targetId && img.processedBlob) {
-        const nextUrl = URL.createObjectURL(img.processedBlob);
-        return {
-          ...img,
-          blob: img.processedBlob,
-          url: nextUrl,
-          size: img.processedSize || img.processedBlob.size,
-          width: img.processedWidth || img.width,
-          height: img.processedHeight || img.height,
-          processedBlob: undefined,
-          processedUrl: undefined,
-          processedSize: undefined,
-          status: 'idle',
-        };
-      }
-      return img;
-    }));
-
-    selectUtility(targetUtilityId);
-    setToastMessage(`Switched to ${targetUtilityId.replace(/-/g, ' ')} with current result.`);
-  }, [activeImageId, isUtilityUnlocked, openAuthModal, selectUtility]);
-
   const executeActiveUtility = useCallback(async (params?: any, targetUtility?: string) => {
     if (!activeImage || !worker) return;
 
     const utilityToRun = targetUtility || activeUtilityId;
-
     if (!isUtilityUnlocked(utilityToRun)) {
       openAuthModal('pro_feature', utilityToRun);
       return;
@@ -530,183 +698,201 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const defaultParams = getDefaultParamsForUtility(utilityToRun, activeImage);
     const effectiveParams = { ...defaultParams, ...(currentParams || {}), ...(params || {}) };
 
+    const thisJobSeq = ++currentJobSeqRef.current;
+    const targetImageId = activeImage.id;
+
     setIsProcessing(true);
-    setImages(prev => prev.map(img => img.id === activeImage.id ? { ...img, status: 'processing', progress: 10 } : img));
+    setImages(prev => prev.map(img => img.id === targetImageId ? { ...img, status: 'processing', progress: 10 } : img));
 
     try {
-      // Direct handling for lossless EXIF metadata stripping
-      if (utilityToRun === 'exif-remover' || (utilityToRun === 'exif-viewer' && effectiveParams?.stripMetadata)) {
-        const strippedBlob = await stripJpegMetadataLossless(activeImage.blob);
-        const processedUrl = URL.createObjectURL(strippedBlob);
-        setImages(prev => prev.map(img => {
-          if (img.id === activeImage.id) {
-            if (img.processedUrl) URL.revokeObjectURL(img.processedUrl);
-            return {
-              ...img,
-              processedBlob: strippedBlob,
-              processedUrl,
-              processedSize: strippedBlob.size,
-              processedWidth: img.width,
-              processedHeight: img.height,
-              status: 'done',
-              progress: 100,
-              lastUtilityApplied: 'exif-remover',
-            };
-          }
-          return img;
-        }));
-        setToastMessage('Losslessly stripped EXIF metadata markers.');
-        setIsProcessing(false);
+      const result = await processItemWithWorker(activeImage, utilityToRun, effectiveParams);
+
+      // Check if job is still current (prevents race condition overwrite)
+      if (thisJobSeq !== currentJobSeqRef.current) {
         return;
       }
 
-      // Direct handling for EXIF viewer inspection
-      if (utilityToRun === 'exif-viewer') {
-        setToastMessage('EXIF metadata parsed and available in parameter panel.');
-        setIsProcessing(false);
-        return;
-      }
-
-      // Direct handling for Image to Base64
-      if (utilityToRun === 'image-to-base64') {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const b64 = reader.result as string;
-          navigator.clipboard.writeText(b64);
-          setToastMessage('Base64 Data URI copied to clipboard!');
-        };
-        reader.readAsDataURL(activeImage.blob);
-        setIsProcessing(false);
-        return;
-      }
-
-      // Direct handling for HEIC decoder
-      if (utilityToRun === 'heic-converter') {
-        const converted = await convertHeicToRaster(activeImage.blob, effectiveParams);
-        const processedUrl = URL.createObjectURL(converted);
-        const bitmap = await createImageBitmap(converted);
-        const pW = bitmap.width;
-        const pH = bitmap.height;
-        bitmap.close();
-
-        setImages(prev => prev.map(img => {
-          if (img.id === activeImage.id) {
-            if (img.processedUrl) URL.revokeObjectURL(img.processedUrl);
-            return {
-              ...img,
-              processedBlob: converted,
-              processedUrl,
-              processedSize: converted.size,
-              processedWidth: pW,
-              processedHeight: pH,
-              status: 'done',
-              progress: 100,
-              lastUtilityApplied: 'heic-converter',
-            };
-          }
-          return img;
-        }));
-        setToastMessage('Converted HEIC to raster format.');
-        setIsProcessing(false);
-        return;
-      }
-
-      // Map utility to worker task
-      let taskType = 'compress';
-      if (utilityToRun === 'batch-resize' || utilityToRun === 'svg-to-png') taskType = 'resize';
-      else if (utilityToRun === 'avatar-crop') taskType = 'crop';
-      else if (utilityToRun === 'watermark') taskType = 'watermark';
-      else if (utilityToRun === 'sharpen-enhance') taskType = 'filter';
-      else if (utilityToRun === 'social-presets') taskType = 'social_preset';
-      else if (utilityToRun === 'passport-photo') taskType = 'passport_photo';
-      else if (utilityToRun === 'color-palette') taskType = 'extract_palette';
-      else if (utilityToRun === 'privacy-redact') taskType = 'privacy_redact';
-      else if (utilityToRun === 'favicon-studio') taskType = 'favicon_pack';
-      else if (utilityToRun === 'ai-bg-removal') taskType = 'ai_bg_removal';
-      else if (utilityToRun === 'ai-upscale') taskType = 'ai_upscale';
-      else if (utilityToRun === 'ai-inpainting') taskType = 'ai_inpainting';
-      else if (utilityToRun === 'ai-colorization') taskType = 'ai_colorization';
-      else if (utilityToRun === 'png-to-svg') taskType = 'vectorize';
-      else if (utilityToRun === 'collage-maker') taskType = 'collage';
-      else if (utilityToRun === 'camera-raw') taskType = 'camera_raw';
-      else if (utilityToRun === 'workflow-recipes') taskType = 'workflow_recipe';
-
-      const bitmap = await createImageBitmap(activeImage.blob);
-      const taskId = 'task_' + Math.random().toString(36).substring(2, 9);
-
-      const promise = new Promise<{ blob: Blob; size: number; extraData?: any }>((resolve, reject) => {
-        // Robust 45-second processing window so large super-res / WASM operations never timeout
-        const timer = setTimeout(() => {
-          worker.removeEventListener('message', handler);
-          reject(new Error('Processing took longer than expected. Please try standard resolution.'));
-        }, 45000);
-
-        const handler = (e: MessageEvent) => {
-          if (e.data.taskId === taskId) {
-            clearTimeout(timer);
-            worker.removeEventListener('message', handler);
-            if (e.data.success) {
-              resolve({ blob: e.data.blob, size: e.data.size, extraData: e.data.extraData });
-            } else {
-              reject(new Error(e.data.error || 'Worker execution failed'));
-            }
-          }
-        };
-        worker.addEventListener('message', handler);
-      });
-
-      worker.postMessage(
-        {
-          taskId,
-          type: taskType,
-          imageBitmap: bitmap,
-          params: effectiveParams,
-        },
-        [bitmap] // Zero-copy transfer
-      );
-
-      const result = await promise;
       const processedUrl = URL.createObjectURL(result.blob);
 
-      // Measure real processed dimensions
-      let pWidth = activeImage.width;
-      let pHeight = activeImage.height;
-      try {
-        const resBitmap = await createImageBitmap(result.blob);
-        pWidth = resBitmap.width;
-        pHeight = resBitmap.height;
-        resBitmap.close();
-      } catch (err) {
-        // fallback
-      }
-
       setImages(prev => prev.map(img => {
-        if (img.id === activeImage.id) {
+        if (img.id === targetImageId) {
           if (img.processedUrl) URL.revokeObjectURL(img.processedUrl);
           return {
             ...img,
             processedBlob: result.blob,
             processedUrl,
             processedSize: result.size,
-            processedWidth: pWidth,
-            processedHeight: pHeight,
+            processedWidth: result.width,
+            processedHeight: result.height,
             status: 'done',
             progress: 100,
             lastUtilityApplied: utilityToRun,
             extraData: result.extraData || img.extraData,
+            error: undefined,
           };
         }
         return img;
       }));
     } catch (err: any) {
+      if (thisJobSeq !== currentJobSeqRef.current) return;
       console.error('Utility execution error:', err);
-      setImages(prev => prev.map(img => img.id === activeImage.id ? { ...img, status: 'error', error: err.message } : img));
+      setImages(prev => prev.map(img => img.id === targetImageId ? { ...img, status: 'error', error: err.message || 'Operation failed' } : img));
+    } finally {
+      if (thisJobSeq === currentJobSeqRef.current) {
+        setIsProcessing(false);
+      }
+    }
+  }, [activeImage, activeUtilityId, currentParams, worker, isUtilityUnlocked, openAuthModal, processItemWithWorker]);
+
+  const retryFailedImage = useCallback(async (id: string) => {
+    const item = images.find(img => img.id === id);
+    if (!item) return;
+
+    setIsProcessing(true);
+    setImages(prev => prev.map(img => img.id === id ? { ...img, status: 'processing', error: undefined } : img));
+
+    try {
+      const defaultParams = getDefaultParamsForUtility(activeUtilityId, item);
+      const effectiveParams = { ...defaultParams, ...(currentParams || {}) };
+      const result = await processItemWithWorker(item, activeUtilityId, effectiveParams);
+      const processedUrl = URL.createObjectURL(result.blob);
+
+      setImages(prev => prev.map(img => {
+        if (img.id === id) {
+          if (img.processedUrl) URL.revokeObjectURL(img.processedUrl);
+          return {
+            ...img,
+            processedBlob: result.blob,
+            processedUrl,
+            processedSize: result.size,
+            processedWidth: result.width,
+            processedHeight: result.height,
+            status: 'done',
+            progress: 100,
+            lastUtilityApplied: activeUtilityId,
+            extraData: result.extraData,
+            error: undefined,
+          };
+        }
+        return img;
+      }));
+      setToastMessage('Successfully processed failed image.');
+    } catch (err: any) {
+      setImages(prev => prev.map(img => img.id === id ? { ...img, status: 'error', error: err.message || 'Retry failed' } : img));
     } finally {
       setIsProcessing(false);
     }
-  }, [activeImage, activeUtilityId, currentParams, worker, isUtilityUnlocked, openAuthModal]);
+  }, [images, activeUtilityId, currentParams, processItemWithWorker]);
 
-  const downloadImage = useCallback((imageId: string) => {
+  const cancelBatch = useCallback(() => {
+    cancelBatchRef.current = true;
+    setBatchProgress(prev => ({ ...prev, isRunning: false }));
+    setToastMessage('Batch operation cancelled.');
+  }, []);
+
+  const executeBatchUtility = useCallback(async (params?: any, targetUtility?: string) => {
+    if (images.length === 0 || !worker) return;
+
+    const utilityToRun = targetUtility || activeUtilityId;
+    cancelBatchRef.current = false;
+    setBatchProgress({ isRunning: true, completed: 0, total: images.length });
+    setIsProcessing(true);
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < images.length; i++) {
+      if (cancelBatchRef.current) break;
+
+      const item = images[i];
+      setBatchProgress({ isRunning: true, completed: i, total: images.length, currentName: item.name });
+      setImages(prev => prev.map(img => img.id === item.id ? { ...img, status: 'processing', progress: 30 } : img));
+
+      try {
+        const defaultParams = getDefaultParamsForUtility(utilityToRun, item);
+        const effectiveParams = { ...defaultParams, ...(currentParams || {}), ...(params || {}) };
+        const result = await processItemWithWorker(item, utilityToRun, effectiveParams);
+
+        const processedUrl = URL.createObjectURL(result.blob);
+        setImages(prev => prev.map(img => {
+          if (img.id === item.id) {
+            if (img.processedUrl) URL.revokeObjectURL(img.processedUrl);
+            return {
+              ...img,
+              processedBlob: result.blob,
+              processedUrl,
+              processedSize: result.size,
+              processedWidth: result.width,
+              processedHeight: result.height,
+              status: 'done',
+              progress: 100,
+              lastUtilityApplied: utilityToRun,
+              extraData: result.extraData,
+              error: undefined,
+            };
+          }
+          return img;
+        }));
+        successCount++;
+      } catch (err: any) {
+        console.error(`Batch processing error on ${item.name}:`, err);
+        setImages(prev => prev.map(img => img.id === item.id ? { ...img, status: 'error', error: err.message || 'Failed' } : img));
+        failCount++;
+      }
+
+      setBatchProgress({ isRunning: true, completed: i + 1, total: images.length });
+    }
+
+    setBatchProgress(prev => ({ ...prev, isRunning: false }));
+    setIsProcessing(false);
+    setToastMessage(`Batch completed: ${successCount} successful${failCount > 0 ? `, ${failCount} failed` : ''}.`);
+  }, [images, worker, activeUtilityId, currentParams, processItemWithWorker]);
+
+  const sendToUtility = useCallback((targetUtilityId: string, imageId?: string) => {
+    const targetId = imageId || activeImageId;
+    if (!targetId) return;
+
+    let targetImg: ImageItem | undefined;
+
+    setImages(prev => prev.map(img => {
+      if (img.id === targetId && img.processedBlob) {
+        const nextUrl = URL.createObjectURL(img.processedBlob);
+        targetImg = {
+          ...img,
+          blob: img.processedBlob,
+          url: nextUrl,
+          size: img.processedSize || img.processedBlob.size,
+          width: img.processedWidth || img.width,
+          height: img.processedHeight || img.height,
+          metadata: {
+            ...img.metadata,
+            width: img.processedWidth || img.width,
+            height: img.processedHeight || img.height,
+          },
+          processedBlob: undefined,
+          processedUrl: undefined,
+          processedSize: undefined,
+          processedWidth: undefined,
+          processedHeight: undefined,
+          status: 'idle',
+        };
+        return targetImg;
+      }
+      return img;
+    }));
+
+    setActiveUtilityId(targetUtilityId);
+    const updatedImg = targetImg || images.find(i => i.id === targetId);
+    const defaults = getDefaultParamsForUtility(targetUtilityId, updatedImg || null);
+    setCurrentParams(defaults);
+    setToastMessage(`Transferred to ${targetUtilityId.replace(/-/g, ' ')} as new source.`);
+
+    setTimeout(() => {
+      executeActiveUtility(defaults, targetUtilityId);
+    }, 30);
+  }, [activeImageId, images, executeActiveUtility]);
+
+  const downloadImage = useCallback((imageId: string, customFormat?: string, customQuality?: number) => {
     const item = images.find(img => img.id === imageId);
     if (!item) return;
 
@@ -715,13 +901,24 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const a = document.createElement('a');
     a.href = url;
 
-    const ext = downloadBlob.type === 'image/jpeg' ? 'jpg' : downloadBlob.type === 'image/webp' ? 'webp' : 'png';
+    let ext = 'png';
+    if (customFormat) {
+      ext = customFormat.replace('image/', '').replace('+xml', '');
+      if (ext === 'jpeg') ext = 'jpg';
+    } else {
+      if (downloadBlob.type === 'image/jpeg') ext = 'jpg';
+      else if (downloadBlob.type === 'image/webp') ext = 'webp';
+      else if (downloadBlob.type === 'image/avif') ext = 'avif';
+      else if (downloadBlob.type === 'image/svg+xml') ext = 'svg';
+      else if (downloadBlob.type === 'image/x-icon') ext = 'ico';
+    }
+
     const baseName = item.name.replace(/\.[^/.]+$/, '');
-    a.download = `${baseName}_zailograph.${ext}`;
+    a.download = `${baseName}_imazora.${ext}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }, [images]);
 
   // Auto-process initial image when loaded if not yet processed
@@ -743,7 +940,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         toastMessage,
         currentParams,
         savedSessionCount,
+        batchProgress,
+        isMobileToolsOpen,
+        setIsMobileToolsOpen,
         addImages,
+        addBase64Image,
         removeImage,
         clearWorkspace,
         restoreSavedSession,
@@ -753,6 +954,9 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setCurrentParams,
         sendToUtility,
         executeActiveUtility,
+        executeBatchUtility,
+        cancelBatch,
+        retryFailedImage,
         downloadImage,
         dismissToast,
       }}
@@ -769,4 +973,3 @@ export const useSession = () => {
   }
   return context;
 };
-

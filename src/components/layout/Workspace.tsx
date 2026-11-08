@@ -8,13 +8,14 @@ import { GatedFeatureCard } from '../auth/GatedFeatureCard';
 import { ControlRack } from './ControlRack';
 import { BatchDrawer } from './BatchDrawer';
 import { ToolSidebar } from './ToolSidebar';
-import { Sliders } from 'lucide-react';
+import { Sliders, Sparkles, Download, Layers, X } from 'lucide-react';
 
 export const Workspace: React.FC = () => {
-  const { images, activeImage, activeUtilityId, toastMessage, dismissToast } = useSession();
+  const { images, activeImage, activeUtilityId, downloadImage, toastMessage, dismissToast, isMobileToolsOpen, setIsMobileToolsOpen } = useSession();
   const { isUtilityUnlocked } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showMobileControls, setShowMobileControls] = useState(false);
+  const [showMobileBatch, setShowMobileBatch] = useState(false);
 
   const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
   const isUnlocked = isUtilityUnlocked(activeUtilityId);
@@ -36,14 +37,16 @@ export const Workspace: React.FC = () => {
 
       {/* Main Studio Area: Left Vertical Navigation Sidebar + Center Canvas Viewport + Right Control Rack */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Vertical Tool Navigation Sidebar */}
+        {/* Left Vertical Tool Navigation Sidebar (Desktop Rail / Expanded) */}
         <ToolSidebar
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
         />
 
         {/* Center Canvas Viewport */}
-        <main className="flex-1 flex flex-col items-center justify-center overflow-hidden bg-transparent relative p-2 sm:p-4">
+        <main className={`flex-1 flex flex-col items-center justify-center overflow-hidden bg-transparent relative p-2 sm:p-4 ${
+          images.length > 0 ? 'pb-24 sm:pb-4' : ''
+        }`}>
           {images.length === 0 ? (
             <LandingWorkspace />
           ) : !isUnlocked ? (
@@ -68,37 +71,110 @@ export const Workspace: React.FC = () => {
           )}
         </main>
 
-        {/* Right Utility Configuration Rack */}
+        {/* Right Utility Configuration Rack (Desktop) */}
         {images.length > 0 && isUnlocked && <ControlRack />}
       </div>
 
-      {/* Mobile Floating Controls Button */}
+      {/* Mobile Floating Command Dock */}
       {images.length > 0 && isUnlocked && (
-        <div className="md:hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+        <div className="md:hidden fixed bottom-3 left-3 right-3 z-40 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-2xl rounded-2xl p-1.5 flex items-center justify-between gap-1.5 pointer-events-auto">
+          {/* Active Tool Picker Button */}
+          <button
+            onClick={() => setIsMobileToolsOpen(true)}
+            className="flex-1 py-2 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 flex items-center justify-center gap-1.5 transition text-xs font-semibold cursor-pointer min-h-[44px]"
+            title="Switch Tool"
+          >
+            <Sparkles className="w-4 h-4 text-violet-600 shrink-0" />
+            <span className="truncate max-w-[100px]">{activeUtility.name}</span>
+          </button>
+
+          {/* Parameters Sheet Button */}
           <button
             onClick={() => setShowMobileControls(true)}
-            className="px-5 py-2 rounded-full bg-neutral-900 text-white font-medium text-xs shadow-lg flex items-center gap-2 border border-neutral-700 cursor-pointer active:scale-95 transition"
+            className="flex-1 py-2 px-3 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white flex items-center justify-center gap-1.5 transition text-xs font-bold shadow-sm shadow-violet-600/25 cursor-pointer min-h-[44px]"
+            title="Adjust Settings"
           >
-            <Sliders className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Parameters</span>
+            <Sliders className="w-4 h-4 shrink-0" />
+            <span>Settings</span>
           </button>
+
+          {/* Quick Download Button (When Result Exists) */}
+          {activeImage?.processedBlob && (
+            <button
+              onClick={() => downloadImage(activeImage.id)}
+              className="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white flex items-center justify-center gap-1 transition text-xs font-bold shadow-sm shadow-emerald-600/20 cursor-pointer min-h-[44px]"
+              title="Download Processed Result"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Batch Queue Button */}
+          {images.length > 1 && (
+            <button
+              onClick={() => setShowMobileBatch(true)}
+              className="py-2 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 flex items-center justify-center gap-1 text-xs font-semibold cursor-pointer min-h-[44px]"
+              title="View Image Queue"
+            >
+              <Layers className="w-4 h-4 text-neutral-500" />
+              <span className="text-[10px] font-mono font-bold bg-neutral-200 px-1.5 py-0.2 rounded-full">
+                {images.length}
+              </span>
+            </button>
+          )}
         </div>
       )}
 
-      {/* Mobile Slide-Up Controls Sheet */}
-      {images.length > 0 && isUnlocked && showMobileControls && (
+      {/* Mobile Slide-Up Tool Picker Sheet (Accessible anytime) */}
+      {isMobileToolsOpen && (
         <div 
-          className="md:hidden fixed inset-0 z-50 flex flex-col justify-end bg-black/50 backdrop-blur-xs animate-in fade-in duration-150"
+          className="md:hidden fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setIsMobileToolsOpen(false)}
+        >
+          <div className="w-full max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
+            <ToolSidebar isMobileDrawer={true} onCloseMobile={() => setIsMobileToolsOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Slide-Up Parameters Sheet */}
+      {showMobileControls && (
+        <div 
+          className="md:hidden fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
           onClick={() => setShowMobileControls(false)}
         >
-          <div className="w-full" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
             <ControlRack isMobileDrawer={true} onCloseMobile={() => setShowMobileControls(false)} />
           </div>
         </div>
       )}
 
-      {/* Bottom Batch Image Queue Drawer */}
-      {images.length > 0 && <BatchDrawer />}
+      {/* Mobile Slide-Up Batch Queue Sheet */}
+      {showMobileBatch && (
+        <div 
+          className="md:hidden fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setShowMobileBatch(false)}
+        >
+          <div className="w-full max-h-[85vh] bg-white rounded-t-3xl shadow-2xl p-4 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 mb-3">
+              <span className="text-xs font-bold text-neutral-900">Batch Queue ({images.length} items)</span>
+              <button 
+                onClick={() => setShowMobileBatch(false)} 
+                className="p-1.5 text-neutral-400 hover:text-neutral-900 rounded-lg cursor-pointer"
+                aria-label="Close batch queue"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <BatchDrawer isMobileModal={true} onCloseMobile={() => setShowMobileBatch(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Bottom Batch Image Queue Drawer */}
+      <div className="hidden md:block">
+        {images.length > 0 && <BatchDrawer />}
+      </div>
     </div>
   );
 };
