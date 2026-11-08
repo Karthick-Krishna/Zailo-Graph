@@ -4,6 +4,8 @@ import { UTILITIES } from '../types/utility';
 import { auth, googleProvider } from '../services/firebase';
 import { 
   onAuthStateChanged, 
+  signInWithRedirect,
+  getRedirectResult,
   signInWithPopup, 
   signOut, 
   User as FirebaseUser 
@@ -90,9 +92,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const tier: UserTier = user ? 'free_registered' : 'guest';
   const entitlements = user ? REGISTERED_ENTITLEMENTS : ANONYMOUS_ENTITLEMENTS;
 
-  // Synchronize Firebase Auth state changes
+  // Synchronize Firebase Auth state changes and handle redirect credentials from zailograph.firebaseapp.com
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (fbUser: any) => {
+    // Process redirect result if returning from zailograph.firebaseapp.com
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          const mapped = mapFirebaseUser(result.user);
+          setUser(mapped);
+          try {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
+          } catch {}
+          closeAuthModal();
+        }
+      })
+      .catch((err: any) => {
+        console.warn('Redirect auth result warning:', err);
+        if (err.code === 'auth/unauthorized-domain') {
+          setAuthError('Domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
+        } else if (err.message) {
+          setAuthError(err.message);
+        }
+      });
+
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
         const mapped = mapFirebaseUser(fbUser);
         setUser(mapped);
@@ -136,30 +159,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     setAuthError(null);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      if (result.user) {
-        const mapped = mapFirebaseUser(result.user);
-        setUser(mapped);
-        try {
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
-        } catch {}
-        closeAuthModal();
-      }
+      // Redirect to zailograph.firebaseapp.com OAuth handler
+      await signInWithRedirect(auth, googleProvider);
     } catch (err: any) {
-      console.warn('Google Sign-In prompt error:', err);
-      if (err.code === 'auth/popup-closed-by-user') {
-        setAuthError('Sign-in window was closed before finishing. Click below to continue to ZailoGraph.');
-      } else if (err.code === 'auth/cancelled-popup-request') {
-        setAuthError('Another sign-in window was opened. Please check your browser tabs.');
-      } else if (err.code === 'auth/unauthorized-domain') {
-        setAuthError('This domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
-      } else if (err.code === 'auth/popup-blocked') {
-        setAuthError('Browser blocked the sign-in popup. Please allow popups for ZailoGraph.');
-      } else {
-        setAuthError(err.message || 'Failed to sign in with Google. Please try again.');
+      console.warn('Google Sign-In Redirect error, trying popup fallback:', err);
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        if (result.user) {
+          const mapped = mapFirebaseUser(result.user);
+          setUser(mapped);
+          try {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
+          } catch {}
+          closeAuthModal();
+        }
+      } catch (popupErr: any) {
+        console.error('Google Sign-In error:', popupErr);
+        if (popupErr.code === 'auth/popup-closed-by-user') {
+          setAuthError('Sign-in window was closed before finishing. Click below to continue to ZailoGraph.');
+        } else if (popupErr.code === 'auth/cancelled-popup-request') {
+          setAuthError('Another sign-in window was opened. Please check your browser tabs.');
+        } else if (popupErr.code === 'auth/unauthorized-domain') {
+          setAuthError('This domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
+        } else if (popupErr.code === 'auth/popup-blocked') {
+          setAuthError('Browser blocked the sign-in popup. Please allow popups for ZailoGraph.');
+        } else {
+          setAuthError(popupErr.message || err.message || 'Failed to sign in with Google. Please try again.');
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
