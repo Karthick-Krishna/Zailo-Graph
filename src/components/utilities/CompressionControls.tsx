@@ -305,9 +305,9 @@ export const CompressionControls: React.FC = () => {
       <button
         onClick={() => handleApply()}
         disabled={isProcessing}
-        className="w-full py-2.5 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 active:scale-[0.98] text-white font-semibold text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+        className="w-full py-2.5 px-4 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white font-bold text-xs tracking-wide transition shadow-md shadow-violet-600/25 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
       >
-        <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+        <Sparkles className="w-3.5 h-3.5 text-white" />
         <span>Compress with {format.replace('image/', '').toUpperCase()} ({mode === 'target_size' ? `≤ ${targetKb}KB` : `${Math.round(quality * 100)}%`})</span>
       </button>
 

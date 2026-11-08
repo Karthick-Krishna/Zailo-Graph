@@ -288,16 +288,16 @@ export const AiSuiteControls: React.FC = () => {
       <button
         onClick={() => handleApplyAi()}
         disabled={isProcessing}
-        className="w-full py-3 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 disabled:bg-neutral-400 text-white font-semibold text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+        className="w-full py-3 px-4 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 disabled:opacity-50 text-white font-bold text-xs tracking-wide transition shadow-md shadow-violet-600/25 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
       >
         {isProcessing ? (
           <>
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
             <span>Processing Neural Inference...</span>
           </>
         ) : (
           <>
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <Sparkles className="w-3.5 h-3.5 text-white" />
             <span>Re-Run AI Inference</span>
           </>
         )}

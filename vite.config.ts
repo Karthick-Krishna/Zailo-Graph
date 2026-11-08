@@ -18,6 +18,10 @@ export default defineConfig({
     format: 'es',
   },
   server: {
+    watch: {
+      usePolling: true,
+      interval: 100,
+    },
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',
