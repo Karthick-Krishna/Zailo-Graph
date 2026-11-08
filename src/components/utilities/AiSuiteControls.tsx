@@ -1,26 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '../../context/SessionContext';
-import { useAuth } from '../../context/AuthContext';
-import { Sparkles, Cpu, Cloud, Eraser, Zap, SunMedium, Wand2, ShieldCheck, Check, Loader2 } from 'lucide-react';
-import { EphemeralCloudModal } from '../cloud/EphemeralCloudModal';
+import { Sparkles, Cpu, Zap, ShieldCheck, Loader2, Info } from 'lucide-react';
+import { detectAiCapabilities, AiSystemCapabilities } from '../../utils/aiCapabilities';
 
 export const AiSuiteControls: React.FC = () => {
   const { activeImage, activeUtilityId, executeActiveUtility, setCurrentParams, isProcessing } = useSession();
-  const { user } = useAuth();
 
-  // Execution Hardware Provider & Ephemeral Cloud Consent
-  const [hardwareProvider, setHardwareProvider] = useState<'webgpu' | 'cloud'>('webgpu');
-  const [showCloudConsentModal, setShowCloudConsentModal] = useState(false);
-  const [hasCloudConsent, setHasCloudConsent] = useState(false);
+  // Engine selection: Instant local heuristic vs ONNX Neural Web
+  const [engineMode, setEngineMode] = useState<'heuristic' | 'onnx'>('heuristic');
+  const [capabilities, setCapabilities] = useState<AiSystemCapabilities | null>(null);
 
   // Background Removal State (Utility 09)
-  const [bgFeather, setBgFeather] = useState<number>(2);
+  const [bgFeather, setBgFeather] = useState<number>(4);
   const [bgMode, setBgMode] = useState<'transparent' | 'white' | 'gray'>('transparent');
 
   // Upscale State (Utility 08)
-  const [upscaleScale, setUpscaleScale] = useState<number>(4);
+  const [upscaleScale, setUpscaleScale] = useState<number>(2);
   const [upscaleModel, setUpscaleModel] = useState<'photo' | 'anime'>('photo');
-  const [denoiseStrength, setDenoiseStrength] = useState<number>(50);
 
   // Inpainting State (Utility 18)
   const [brushSize, setBrushSize] = useState<number>(36);
@@ -31,16 +27,19 @@ export const AiSuiteControls: React.FC = () => {
 
   const initialRunRef = useRef<string | null>(null);
 
+  useEffect(() => {
+    detectAiCapabilities().then(setCapabilities);
+  }, []);
+
   if (!activeImage) return null;
 
   const handleApplyAi = (overrideParams?: any) => {
     const params = {
-      provider: hardwareProvider,
+      engineMode,
       bgFeather,
       bgMode,
       upscaleScale,
       upscaleModel,
-      denoiseStrength,
       brushSize,
       colorIntensity,
       colorTone,
@@ -53,53 +52,76 @@ export const AiSuiteControls: React.FC = () => {
 
   // Auto-run when tool mounts or switches so user immediately sees the live preview result
   useEffect(() => {
-    const runKey = `${activeImage.id}_${activeUtilityId}`;
+    const runKey = `${activeImage.id}_${activeUtilityId}_${engineMode}`;
     if (initialRunRef.current !== runKey) {
       initialRunRef.current = runKey;
       handleApplyAi();
     }
-  }, [activeUtilityId, activeImage.id]);
+  }, [activeUtilityId, activeImage.id, engineMode]);
 
   return (
     <div className="space-y-5">
-      {/* Hardware Acceleration Provider */}
+      {/* Hardware Runtime Telemetry */}
+      <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 space-y-1.5">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-neutral-500 font-medium">Browser Inference Backend:</span>
+          {capabilities?.hasWebGPU ? (
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[10px]">
+              <Zap className="w-3 h-3 text-emerald-600" />
+              <span>WebGPU Hardware</span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 font-semibold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-md border border-cyan-200 text-[10px]">
+              <Cpu className="w-3 h-3 text-cyan-600" />
+              <span>WebAssembly (WASM)</span>
+            </span>
+          )}
+        </div>
+        {capabilities?.gpuAdapterName && (
+          <p className="text-[10px] text-neutral-400 font-mono truncate">
+            Device: {capabilities.gpuAdapterName}
+          </p>
+        )}
+      </div>
+
+      {/* Engine Selection */}
       <div>
-        <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Compute Runtime Engine</label>
+        <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Processing Pipeline</label>
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => setHardwareProvider('webgpu')}
+            onClick={() => {
+              setEngineMode('heuristic');
+              handleApplyAi({ engineMode: 'heuristic' });
+            }}
             className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
-              hardwareProvider === 'webgpu'
+              engineMode === 'heuristic'
                 ? 'border-neutral-900 bg-neutral-50 ring-1 ring-neutral-900/10'
                 : 'border-neutral-200/80 bg-white hover:border-neutral-300'
             }`}
           >
             <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-900">
-              <Cpu className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Local WebGPU</span>
+              <Zap className="w-3.5 h-3.5 text-amber-600" />
+              <span>Instant Heuristic</span>
             </div>
-            <p className="text-[10px] text-neutral-500 mt-0.5">Runs on device GPU (100% Private)</p>
+            <p className="text-[10px] text-neutral-500 mt-0.5">0MB download • Fast WASM math</p>
           </button>
 
           <button
             onClick={() => {
-              if (!hasCloudConsent) {
-                setShowCloudConsentModal(true);
-              } else {
-                setHardwareProvider('cloud');
-              }
+              setEngineMode('onnx');
+              handleApplyAi({ engineMode: 'onnx' });
             }}
             className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
-              hardwareProvider === 'cloud'
+              engineMode === 'onnx'
                 ? 'border-neutral-900 bg-neutral-50 ring-1 ring-neutral-900/10'
                 : 'border-neutral-200/80 bg-white hover:border-neutral-300'
             }`}
           >
             <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-900">
-              <Cloud className="w-3.5 h-3.5 text-blue-600" />
-              <span>Ephemeral Cloud</span>
+              <Cpu className="w-3.5 h-3.5 text-violet-600" />
+              <span>ONNX Web (AI)</span>
             </div>
-            <p className="text-[10px] text-neutral-500 mt-0.5">Volatile RAM pipe (Zero disk write)</p>
+            <p className="text-[10px] text-neutral-500 mt-0.5">Client-side neural inference</p>
           </button>
         </div>
       </div>
@@ -139,7 +161,7 @@ export const AiSuiteControls: React.FC = () => {
             <input
               type="range"
               min="0"
-              max="10"
+              max="15"
               value={bgFeather}
               onChange={(e) => {
                 const val = parseInt(e.target.value);
@@ -149,6 +171,15 @@ export const AiSuiteControls: React.FC = () => {
               className="w-full accent-neutral-900 cursor-pointer"
             />
           </div>
+
+          <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 text-[11px] text-neutral-500 flex items-start gap-2">
+            <Info className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+            <span>
+              {engineMode === 'heuristic'
+                ? 'Local Algorithmic Mode: Evaluates perimeter edge pixels, centroid foreground weights, and applies smooth alpha transitions.'
+                : 'ONNX Neural Mode: Runs client-side salient segmentation in browser memory via ONNX Runtime Web.'}
+            </span>
+          </div>
         </div>
       )}
 
@@ -156,7 +187,7 @@ export const AiSuiteControls: React.FC = () => {
       {activeUtilityId === 'ai-upscale' && (
         <div className="space-y-4 pt-2 border-t border-neutral-100">
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Upscaling Multiplier</label>
+            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Upscaling Factor</label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => {
@@ -167,7 +198,7 @@ export const AiSuiteControls: React.FC = () => {
                   upscaleScale === 2 ? 'bg-neutral-900 text-white shadow-sm' : 'bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50'
                 }`}
               >
-                2× Resolution (2K/4K)
+                2× Resolution
               </button>
               <button
                 onClick={() => {
@@ -178,13 +209,13 @@ export const AiSuiteControls: React.FC = () => {
                   upscaleScale === 4 ? 'bg-neutral-900 text-white shadow-sm' : 'bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50'
                 }`}
               >
-                4× Super-Resolution (8K)
+                4× Super-Resolution
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Model Architecture</label>
+            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Target Optimization</label>
             <div className="grid grid-cols-2 gap-1.5 p-1 bg-neutral-100 rounded-xl">
               <button
                 onClick={() => {
@@ -195,7 +226,7 @@ export const AiSuiteControls: React.FC = () => {
                   upscaleModel === 'photo' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-900'
                 }`}
               >
-                Real-ESRGAN Photo
+                Photo / Detail
               </button>
               <button
                 onClick={() => {
@@ -206,9 +237,18 @@ export const AiSuiteControls: React.FC = () => {
                   upscaleModel === 'anime' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-900'
                 }`}
               >
-                Illustration / Anime
+                Graphic / Art
               </button>
             </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 text-[11px] text-neutral-500 flex items-start gap-2">
+            <Info className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+            <span>
+              {engineMode === 'heuristic'
+                ? 'Multi-stage Lanczos3 and bicubic resampling with unsharp-mask high-frequency detail synthesis.'
+                : 'ONNX Web local super-resolution tensor evaluation via WebGPU / WASM.'}
+            </span>
           </div>
         </div>
       )}
@@ -226,13 +266,20 @@ export const AiSuiteControls: React.FC = () => {
               min="12"
               max="120"
               value={brushSize}
-              onChange={(e) => setBrushSize(parseInt(e.target.value))}
-              className="w-full accent-neutral-900"
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                setBrushSize(val);
+                handleApplyAi({ brushSize: val });
+              }}
+              className="w-full accent-neutral-900 cursor-pointer"
             />
           </div>
-          <p className="text-[11px] text-neutral-500 leading-relaxed">
-            Paint directly on unwanted objects or watermarks on the canvas. LaMa will fill the area contextually.
-          </p>
+          <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 text-[11px] text-neutral-500 flex items-start gap-2">
+            <Info className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+            <span>
+              Applies bi-directional Navier-Stokes spatial pixel diffusion and edge blending across masked coordinates.
+            </span>
+          </div>
         </div>
       )}
 
@@ -281,6 +328,13 @@ export const AiSuiteControls: React.FC = () => {
               ))}
             </div>
           </div>
+
+          <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 text-[11px] text-neutral-500 flex items-start gap-2">
+            <Info className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+            <span>
+              Calculates luminance distribution histograms and synthesizes perceptual chromaticity values locally.
+            </span>
+          </div>
         </div>
       )}
 
@@ -293,41 +347,21 @@ export const AiSuiteControls: React.FC = () => {
         {isProcessing ? (
           <>
             <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-            <span>Processing Neural Inference...</span>
+            <span>Processing In-Browser...</span>
           </>
         ) : (
           <>
             <Sparkles className="w-3.5 h-3.5 text-white" />
-            <span>Re-Run AI Inference</span>
+            <span>Re-Run Processing</span>
           </>
         )}
       </button>
 
-      {/* Model Weight & Privacy Guarantee */}
+      {/* Privacy Guarantee */}
       <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-500 flex items-start gap-2">
         <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-        <span>Quantized ONNX models are cached locally in your browser storage. Zero inference data is shared.</span>
+        <span>100% Client-Side. Images never leave your device. Zero external cloud servers.</span>
       </div>
-
-      {/* Ephemeral Cloud Consent Dialog */}
-      <EphemeralCloudModal
-        isOpen={showCloudConsentModal}
-        onClose={() => setShowCloudConsentModal(false)}
-        onConfirmConsent={() => {
-          setHasCloudConsent(true);
-          setHardwareProvider('cloud');
-        }}
-        targetTaskName={
-          activeUtilityId === 'ai-bg-removal'
-            ? 'AI Background Removal'
-            : activeUtilityId === 'ai-upscale'
-            ? '4× Super-Resolution'
-            : activeUtilityId === 'ai-inpainting'
-            ? 'AI Object Inpainting'
-            : 'AI Colorization'
-        }
-      />
     </div>
   );
 };
-

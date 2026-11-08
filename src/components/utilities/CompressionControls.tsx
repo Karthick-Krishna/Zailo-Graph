@@ -4,7 +4,7 @@ import { formatBytes, calculateSavings } from '../../utils/formatters';
 import { Zap, CheckCircle2, Sliders, Target, Layers, Sparkles } from 'lucide-react';
 
 export const CompressionControls: React.FC = () => {
-  const { images, activeImage, executeActiveUtility, setCurrentParams, isProcessing } = useSession();
+  const { images, activeImage, executeActiveUtility, executeBatchUtility, setCurrentParams, isProcessing } = useSession();
 
   const [mode, setMode] = useState<'quality' | 'target_size'>('quality');
   const [format, setFormat] = useState<'image/avif' | 'image/webp' | 'image/jpeg' | 'image/png'>('image/webp');
@@ -52,7 +52,7 @@ export const CompressionControls: React.FC = () => {
     setIsBatchCompressing(true);
     try {
       const params = getEffectiveParams();
-      await executeActiveUtility(params);
+      await executeBatchUtility(params);
     } finally {
       setIsBatchCompressing(false);
     }

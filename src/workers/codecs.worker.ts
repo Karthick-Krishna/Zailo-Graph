@@ -69,7 +69,7 @@ export interface RedactParams {
 }
 
 self.onmessage = async (e: MessageEvent) => {
-  const { taskId, type, imageBitmap, params } = e.data;
+  const { taskId, type, imageBitmap, extraBitmaps, params } = e.data;
 
   try {
     let resultBlob: Blob;
@@ -107,7 +107,7 @@ self.onmessage = async (e: MessageEvent) => {
         resultBlob = await processPrivacyRedact(imageBitmap, params);
         break;
       case 'favicon_pack':
-        resultBlob = await generateFavicon(imageBitmap, params?.size || 32);
+        resultBlob = await generateFavicon(imageBitmap, params);
         break;
       case 'ai_bg_removal':
         resultBlob = await processAiBackgroundRemoval(imageBitmap, params);
@@ -127,7 +127,7 @@ self.onmessage = async (e: MessageEvent) => {
         extraData = { svgString: vecRes.svgString };
         break;
       case 'collage':
-        resultBlob = await processCollage(imageBitmap, params);
+        resultBlob = await processCollage(imageBitmap, params, extraBitmaps);
         break;
       case 'camera_raw':
         resultBlob = await processCameraRaw(imageBitmap, params);
@@ -154,9 +154,19 @@ self.onmessage = async (e: MessageEvent) => {
     });
   } finally {
     // Immediate GPU / texture deallocation to prevent memory leaks and mobile tab crashes
-    try {
-      imageBitmap?.close?.();
-    } catch {}
+    if (imageBitmap && typeof imageBitmap.close === 'function') {
+      try { imageBitmap.close(); } catch {}
+    }
+    if (extraBitmaps && Array.isArray(extraBitmaps)) {
+      extraBitmaps.forEach((b: any) => {
+        if (b && typeof b.close === 'function') {
+          try { b.close(); } catch {}
+        }
+      });
+    }
+    if (params?.logoBitmap && typeof params.logoBitmap.close === 'function') {
+      try { params.logoBitmap.close(); } catch {}
+    }
   }
 };
 
@@ -241,7 +251,11 @@ async function processResize(bitmap: ImageBitmap, params: any): Promise<Blob> {
   try {
     return await canvas.convertToBlob({ type: format, quality });
   } catch {
-    return await canvas.convertToBlob({ type: 'image/png' });
+    try {
+      return await canvas.convertToBlob({ type: 'image/webp', quality });
+    } catch {
+      return await canvas.convertToBlob({ type: 'image/png' });
+    }
   }
 }
 
@@ -256,7 +270,7 @@ async function processCompress(bitmap: ImageBitmap, params: any): Promise<Blob> 
   const pngColors = params?.pngColors || 256;
 
   if (format === 'image/jpeg') {
-    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = params?.bgColor || '#FFFFFF';
     ctx.fillRect(0, 0, bitmap.width, bitmap.height);
   }
 
@@ -311,11 +325,17 @@ async function processCompress(bitmap: ImageBitmap, params: any): Promise<Blob> 
       quality: quality,
     });
   } catch {
-    // Graceful fallback to WebP if browser engine lacks direct AVIF encode in OffscreenCanvas
-    return await canvas.convertToBlob({
-      type: 'image/webp',
-      quality: quality,
-    });
+    // Graceful fallback to WebP, then PNG
+    try {
+      return await canvas.convertToBlob({
+        type: 'image/webp',
+        quality: quality,
+      });
+    } catch {
+      return await canvas.convertToBlob({
+        type: 'image/png',
+      });
+    }
   }
 }
 
@@ -365,68 +385,147 @@ async function processWatermark(bitmap: ImageBitmap, params: any): Promise<Blob>
 
   ctx.drawImage(bitmap, 0, 0);
 
-  const text = params?.text || 'Zailo Graph';
+  const text = params?.text || 'Imazora';
   const fontSize = params?.fontSize || Math.max(16, Math.round(bitmap.width * 0.04));
-  const opacity = params?.opacity !== undefined ? params.opacity : 0.7;
+  const opacity = params?.opacity !== undefined ? params.opacity : 0.75;
   const color = params?.color || '#FFFFFF';
   const position = params?.position || 'bottom-right';
   const rotation = params?.rotation || 0;
+  const logoBitmap: ImageBitmap | undefined = params?.logoBitmap;
 
   ctx.save();
   ctx.globalAlpha = opacity;
-  ctx.fillStyle = color;
-  ctx.font = `600 ${fontSize}px sans-serif`;
 
-  const textMetrics = ctx.measureText(text);
   const padding = fontSize * 1.5;
 
-  if (position === 'tile') {
-    // Repeated pattern across the canvas
-    const stepX = textMetrics.width + padding * 2;
-    const stepY = fontSize + padding * 2;
+  if (logoBitmap) {
+    // Logo watermark mode
+    const logoScale = params?.logoScale || 0.18;
+    const targetLogoW = Math.max(32, Math.round(bitmap.width * logoScale));
+    const targetLogoH = Math.round((logoBitmap.height * targetLogoW) / logoBitmap.width);
 
-    for (let y = padding; y < bitmap.height; y += stepY) {
-      for (let x = padding; x < bitmap.width; x += stepX) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate((-25 * Math.PI) / 180);
-        ctx.fillText(text, 0, 0);
-        ctx.restore();
-      }
-    }
-  } else {
     let posX = padding;
-    let posY = padding + fontSize;
+    let posY = padding;
 
     switch (position) {
-      case 'center':
-        posX = (bitmap.width - textMetrics.width) / 2;
-        posY = (bitmap.height + fontSize) / 2;
-        break;
       case 'top-left':
         posX = padding;
-        posY = padding + fontSize;
+        posY = padding;
+        break;
+      case 'top':
+        posX = (bitmap.width - targetLogoW) / 2;
+        posY = padding;
         break;
       case 'top-right':
-        posX = bitmap.width - textMetrics.width - padding;
-        posY = padding + fontSize;
+        posX = bitmap.width - targetLogoW - padding;
+        posY = padding;
+        break;
+      case 'left':
+        posX = padding;
+        posY = (bitmap.height - targetLogoH) / 2;
+        break;
+      case 'center':
+        posX = (bitmap.width - targetLogoW) / 2;
+        posY = (bitmap.height - targetLogoH) / 2;
+        break;
+      case 'right':
+        posX = bitmap.width - targetLogoW - padding;
+        posY = (bitmap.height - targetLogoH) / 2;
         break;
       case 'bottom-left':
         posX = padding;
-        posY = bitmap.height - padding;
+        posY = bitmap.height - targetLogoH - padding;
+        break;
+      case 'bottom':
+        posX = (bitmap.width - targetLogoW) / 2;
+        posY = bitmap.height - targetLogoH - padding;
         break;
       case 'bottom-right':
-        posX = bitmap.width - textMetrics.width - padding;
-        posY = bitmap.height - padding;
+      default:
+        posX = bitmap.width - targetLogoW - padding;
+        posY = bitmap.height - targetLogoH - padding;
         break;
     }
 
     if (rotation !== 0) {
-      ctx.translate(posX + textMetrics.width / 2, posY - fontSize / 2);
+      ctx.translate(posX + targetLogoW / 2, posY + targetLogoH / 2);
       ctx.rotate((rotation * Math.PI) / 180);
-      ctx.fillText(text, -textMetrics.width / 2, fontSize / 2);
+      ctx.drawImage(logoBitmap, -targetLogoW / 2, -targetLogoH / 2, targetLogoW, targetLogoH);
     } else {
-      ctx.fillText(text, posX, posY);
+      ctx.drawImage(logoBitmap, posX, posY, targetLogoW, targetLogoH);
+    }
+  } else {
+    // Text watermark mode
+    ctx.fillStyle = color;
+    ctx.font = `600 ${fontSize}px sans-serif`;
+
+    const textMetrics = ctx.measureText(text);
+
+    if (position === 'tile') {
+      // Repeated diagonal pattern across the canvas
+      const stepX = textMetrics.width + padding * 2.5;
+      const stepY = fontSize * 3.5;
+
+      for (let y = padding; y < bitmap.height + stepY; y += stepY) {
+        for (let x = -padding; x < bitmap.width + stepX; x += stepX) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate((-25 * Math.PI) / 180);
+          ctx.fillText(text, 0, 0);
+          ctx.restore();
+        }
+      }
+    } else {
+      let posX = padding;
+      let posY = padding + fontSize;
+
+      switch (position) {
+        case 'top-left':
+          posX = padding;
+          posY = padding + fontSize;
+          break;
+        case 'top':
+          posX = (bitmap.width - textMetrics.width) / 2;
+          posY = padding + fontSize;
+          break;
+        case 'top-right':
+          posX = bitmap.width - textMetrics.width - padding;
+          posY = padding + fontSize;
+          break;
+        case 'left':
+          posX = padding;
+          posY = (bitmap.height + fontSize) / 2;
+          break;
+        case 'center':
+          posX = (bitmap.width - textMetrics.width) / 2;
+          posY = (bitmap.height + fontSize) / 2;
+          break;
+        case 'right':
+          posX = bitmap.width - textMetrics.width - padding;
+          posY = (bitmap.height + fontSize) / 2;
+          break;
+        case 'bottom-left':
+          posX = padding;
+          posY = bitmap.height - padding;
+          break;
+        case 'bottom':
+          posX = (bitmap.width - textMetrics.width) / 2;
+          posY = bitmap.height - padding;
+          break;
+        case 'bottom-right':
+        default:
+          posX = bitmap.width - textMetrics.width - padding;
+          posY = bitmap.height - padding;
+          break;
+      }
+
+      if (rotation !== 0) {
+        ctx.translate(posX + textMetrics.width / 2, posY - fontSize / 2);
+        ctx.rotate((rotation * Math.PI) / 180);
+        ctx.fillText(text, -textMetrics.width / 2, fontSize / 2);
+      } else {
+        ctx.fillText(text, posX, posY);
+      }
     }
   }
 
@@ -688,16 +787,71 @@ async function processPrivacyRedact(bitmap: ImageBitmap, params: any): Promise<B
   return await canvas.convertToBlob({ type: 'image/png' });
 }
 
-async function generateFavicon(bitmap: ImageBitmap, size = 32): Promise<Blob> {
-  const canvas = new OffscreenCanvas(size, size);
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Canvas context unavailable');
+function buildIcoBlob(images: { width: number; height: number; bytes: Uint8Array }[]): Blob {
+  const numImages = images.length;
+  const headerSize = 6;
+  const directoryEntrySize = 16;
+  const directorySize = numImages * directoryEntrySize;
+  let currentOffset = headerSize + directorySize;
 
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(bitmap, 0, 0, size, size);
+  const totalSize = currentOffset + images.reduce((acc, img) => acc + img.bytes.byteLength, 0);
+  const buffer = new ArrayBuffer(totalSize);
+  const view = new DataView(buffer);
+  const uint8 = new Uint8Array(buffer);
 
-  return await canvas.convertToBlob({ type: 'image/png' });
+  // ICONDIR Header
+  view.setUint16(0, 0, true); // Reserved (must be 0)
+  view.setUint16(2, 1, true); // Type (1 = ICO, 2 = CUR)
+  view.setUint16(4, numImages, true); // Number of images
+
+  let entryOffset = headerSize;
+  for (const img of images) {
+    const w = img.width >= 256 ? 0 : img.width;
+    const h = img.height >= 256 ? 0 : img.height;
+    view.setUint8(entryOffset, w);
+    view.setUint8(entryOffset + 1, h);
+    view.setUint8(entryOffset + 2, 0); // Palette count
+    view.setUint8(entryOffset + 3, 0); // Reserved
+    view.setUint16(entryOffset + 4, 1, true); // Color planes (1)
+    view.setUint16(entryOffset + 6, 32, true); // Bits per pixel (32-bit RGBA)
+    view.setUint32(entryOffset + 8, img.bytes.byteLength, true); // Image data size
+    view.setUint32(entryOffset + 12, currentOffset, true); // Offset to image data
+
+    uint8.set(img.bytes, currentOffset);
+    currentOffset += img.bytes.byteLength;
+    entryOffset += directoryEntrySize;
+  }
+
+  return new Blob([buffer], { type: 'image/x-icon' });
+}
+
+async function generateFavicon(bitmap: ImageBitmap, params?: any): Promise<Blob> {
+  const size = params?.size || 32;
+  const asIco = params?.asIco || false;
+
+  const renderPngAtSize = async (s: number): Promise<{ width: number; height: number; bytes: Uint8Array; blob: Blob }> => {
+    const canvas = new OffscreenCanvas(s, s);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas context unavailable');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bitmap, 0, 0, s, s);
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    return { width: s, height: s, bytes, blob };
+  };
+
+  if (asIco) {
+    const [p16, p32, p48] = await Promise.all([
+      renderPngAtSize(16),
+      renderPngAtSize(32),
+      renderPngAtSize(48),
+    ]);
+    return buildIcoBlob([p16, p32, p48]);
+  }
+
+  const single = await renderPngAtSize(size);
+  return single.blob;
 }
 
 async function processAiBackgroundRemoval(bitmap: ImageBitmap, params: any): Promise<Blob> {
@@ -1074,7 +1228,7 @@ async function processVectorize(bitmap: ImageBitmap, params: any): Promise<{ blo
   return { blob, svgString };
 }
 
-async function processCollage(bitmap: ImageBitmap, params: any): Promise<Blob> {
+async function processCollage(bitmap: ImageBitmap, params: any, extraBitmaps?: ImageBitmap[]): Promise<Blob> {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas context unavailable');
@@ -1087,7 +1241,10 @@ async function processCollage(bitmap: ImageBitmap, params: any): Promise<Blob> {
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, bitmap.width, bitmap.height);
 
-  const drawCell = (x: number, y: number, w: number, h: number) => {
+  const allBitmaps = [bitmap, ...(extraBitmaps || [])];
+
+  const drawCell = (x: number, y: number, w: number, h: number, cellIndex: number) => {
+    const currentBmp = allBitmaps[cellIndex % allBitmaps.length];
     ctx.save();
     if (radius > 0 && typeof ctx.roundRect === 'function') {
       ctx.beginPath();
@@ -1096,19 +1253,19 @@ async function processCollage(bitmap: ImageBitmap, params: any): Promise<Blob> {
     }
     // Draw image cropped to fill cell
     const cellAspect = w / h;
-    const imgAspect = bitmap.width / bitmap.height;
-    let sW = bitmap.width;
-    let sH = bitmap.height;
+    const imgAspect = currentBmp.width / currentBmp.height;
+    let sW = currentBmp.width;
+    let sH = currentBmp.height;
     let sX = 0;
     let sY = 0;
     if (imgAspect > cellAspect) {
-      sW = bitmap.height * cellAspect;
-      sX = (bitmap.width - sW) / 2;
+      sW = currentBmp.height * cellAspect;
+      sX = (currentBmp.width - sW) / 2;
     } else {
-      sH = bitmap.width / cellAspect;
-      sY = (bitmap.height - sH) / 2;
+      sH = currentBmp.width / cellAspect;
+      sY = (currentBmp.height - sH) / 2;
     }
-    ctx.drawImage(bitmap, sX, sY, sW, sH, x, y, w, h);
+    ctx.drawImage(currentBmp, sX, sY, sW, sH, x, y, w, h);
     ctx.restore();
   };
 
@@ -1118,29 +1275,29 @@ async function processCollage(bitmap: ImageBitmap, params: any): Promise<Blob> {
   if (layout === '2-vert') {
     const colW = (W - gap * 3) / 2;
     const colH = H - gap * 2;
-    drawCell(gap, gap, colW, colH);
-    drawCell(gap * 2 + colW, gap, colW, colH);
+    drawCell(gap, gap, colW, colH, 0);
+    drawCell(gap * 2 + colW, gap, colW, colH, 1);
   } else if (layout === '2-horiz') {
     const rowW = W - gap * 2;
     const rowH = (H - gap * 3) / 2;
-    drawCell(gap, gap, rowW, rowH);
-    drawCell(gap, gap * 2 + rowH, rowW, rowH);
+    drawCell(gap, gap, rowW, rowH, 0);
+    drawCell(gap, gap * 2 + rowH, rowW, rowH, 1);
   } else if (layout === '3-editorial') {
     const mainW = (W - gap * 3) * 0.6;
     const sideW = (W - gap * 3) * 0.4;
     const fullH = H - gap * 2;
     const halfH = (H - gap * 3) / 2;
-    drawCell(gap, gap, mainW, fullH);
-    drawCell(gap * 2 + mainW, gap, sideW, halfH);
-    drawCell(gap * 2 + mainW, gap * 2 + halfH, sideW, halfH);
+    drawCell(gap, gap, mainW, fullH, 0);
+    drawCell(gap * 2 + mainW, gap, sideW, halfH, 1);
+    drawCell(gap * 2 + mainW, gap * 2 + halfH, sideW, halfH, 2);
   } else {
     // 4-grid (2x2 quad)
     const cellW = (W - gap * 3) / 2;
     const cellH = (H - gap * 3) / 2;
-    drawCell(gap, gap, cellW, cellH);
-    drawCell(gap * 2 + cellW, gap, cellW, cellH);
-    drawCell(gap, gap * 2 + cellH, cellW, cellH);
-    drawCell(gap * 2 + cellW, gap * 2 + cellH, cellW, cellH);
+    drawCell(gap, gap, cellW, cellH, 0);
+    drawCell(gap * 2 + cellW, gap, cellW, cellH, 1);
+    drawCell(gap, gap * 2 + cellH, cellW, cellH, 2);
+    drawCell(gap * 2 + cellW, gap * 2 + cellH, cellW, cellH, 3);
   }
 
   return await canvas.convertToBlob({ type: 'image/png' });

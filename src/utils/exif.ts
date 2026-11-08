@@ -66,8 +66,7 @@ export async function stripJpegMetadataLossless(file: Blob): Promise<Blob> {
   const dataView = new DataView(arrayBuffer);
 
   // Validate SOI (Start of Image) marker: 0xFFD8
-  if (dataView.getUint16(0) !== 0xFFD8) {
-    // Not a valid JPEG, fallback to returning original blob
+  if (dataView.byteLength < 4 || dataView.getUint16(0) !== 0xFFD8) {
     return file;
   }
 
@@ -75,9 +74,7 @@ export async function stripJpegMetadataLossless(file: Blob): Promise<Blob> {
   let offset = 2; // Past SOI marker
   let lastKeptOffset = 0;
 
-  while (offset < dataView.byteLength) {
-    if (offset + 1 >= dataView.byteLength) break;
-
+  while (offset < dataView.byteLength - 1) {
     // Find next marker (0xFF)
     if (dataView.getUint8(offset) !== 0xFF) {
       offset++;
@@ -108,7 +105,6 @@ export async function stripJpegMetadataLossless(file: Blob): Promise<Blob> {
 
     // Metadata markers to strip:
     // 0xE1 = APP1 (EXIF / XMP)
-    // 0xE2 = APP2 (ICC / FlashPix) - optional, strip EXIF but preserve if user wanted
     // 0xED = APP13 (Photoshop IRB / IPTC)
     // 0xFE = COM (Comment)
     if (marker === 0xE1 || marker === 0xED || marker === 0xFE) {
@@ -130,5 +126,73 @@ export async function stripJpegMetadataLossless(file: Blob): Promise<Blob> {
   }
 
   return new Blob(chunks, { type: 'image/jpeg' });
+}
+
+/**
+ * Losslessly removes metadata chunks (tEXt, zTXt, iTXt, eXIf) from a PNG file
+ * by parsing chunk headers and omitting non-critical metadata chunks without recompressing pixels.
+ */
+export async function stripPngMetadataLossless(file: Blob): Promise<Blob> {
+  const arrayBuffer = await file.arrayBuffer();
+  const dataView = new DataView(arrayBuffer);
+
+  // PNG magic number check: 89 50 4E 47 0D 0A 1A 0A
+  if (dataView.byteLength < 8) return file;
+  const isPng =
+    dataView.getUint8(0) === 0x89 &&
+    dataView.getUint8(1) === 0x50 &&
+    dataView.getUint8(2) === 0x4E &&
+    dataView.getUint8(3) === 0x47 &&
+    dataView.getUint8(4) === 0x0D &&
+    dataView.getUint8(5) === 0x0A &&
+    dataView.getUint8(6) === 0x1A &&
+    dataView.getUint8(7) === 0x0A;
+
+  if (!isPng) return file;
+
+  const chunks: ArrayBuffer[] = [];
+  let offset = 8; // Past PNG header signature
+  let lastKeptOffset = 0;
+
+  const textDecoder = new TextDecoder('ascii');
+  const metadataChunkTypes = new Set(['tEXt', 'zTXt', 'iTXt', 'eXIf', 'tIME']);
+
+  while (offset + 8 <= dataView.byteLength) {
+    const chunkLength = dataView.getUint32(offset);
+    const typeBytes = new Uint8Array(arrayBuffer, offset + 4, 4);
+    const chunkType = textDecoder.decode(typeBytes);
+    const fullChunkLength = 4 + 4 + chunkLength + 4; // length + type + data + crc
+
+    if (offset + fullChunkLength > dataView.byteLength) break;
+
+    if (metadataChunkTypes.has(chunkType)) {
+      if (offset > lastKeptOffset) {
+        chunks.push(arrayBuffer.slice(lastKeptOffset, offset));
+      }
+      offset += fullChunkLength;
+      lastKeptOffset = offset;
+    } else {
+      offset += fullChunkLength;
+      if (chunkType === 'IEND') break;
+    }
+  }
+
+  if (lastKeptOffset < arrayBuffer.byteLength) {
+    chunks.push(arrayBuffer.slice(lastKeptOffset));
+  }
+
+  return new Blob(chunks, { type: 'image/png' });
+}
+
+/**
+ * Strips metadata across all formats losslessly where possible (JPEG, PNG).
+ */
+export async function stripAllImageMetadata(file: Blob): Promise<Blob> {
+  if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
+    return await stripJpegMetadataLossless(file);
+  } else if (file.type === 'image/png') {
+    return await stripPngMetadataLossless(file);
+  }
+  return file;
 }
 

@@ -4,7 +4,7 @@ import { Repeat, CheckCircle2, Sliders, Layers, Sparkles, FileImage } from 'luci
 import { formatBytes } from '../../utils/formatters';
 
 export const WebpToRasterControls: React.FC = () => {
-  const { images, activeImage, executeActiveUtility, setCurrentParams, isProcessing } = useSession();
+  const { images, activeImage, executeActiveUtility, executeBatchUtility, setCurrentParams, isProcessing } = useSession();
 
   const [toFormat, setToFormat] = useState<'image/png' | 'image/jpeg'>('image/png');
   const [quality, setQuality] = useState<number>(0.92);
@@ -31,7 +31,7 @@ export const WebpToRasterControls: React.FC = () => {
     setIsBatchConverting(true);
     try {
       const params = getEffectiveParams();
-      await executeActiveUtility(params);
+      await executeBatchUtility(params);
     } finally {
       setIsBatchConverting(false);
     }

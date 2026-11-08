@@ -4,7 +4,7 @@ import { Smartphone, CheckCircle2, Sliders, Layers, Sparkles, ShieldCheck } from
 import { formatBytes } from '../../utils/formatters';
 
 export const HeicControls: React.FC = () => {
-  const { images, activeImage, executeActiveUtility, setCurrentParams, isProcessing } = useSession();
+  const { images, activeImage, executeActiveUtility, executeBatchUtility, setCurrentParams, isProcessing } = useSession();
 
   const [toFormat, setToFormat] = useState<'image/jpeg' | 'image/png'>('image/jpeg');
   const [quality, setQuality] = useState<number>(0.92);
@@ -36,7 +36,7 @@ export const HeicControls: React.FC = () => {
     setIsBatchConverting(true);
     try {
       const params = getEffectiveParams();
-      await executeActiveUtility(params);
+      await executeBatchUtility(params);
     } finally {
       setIsBatchConverting(false);
     }

@@ -23,15 +23,21 @@ import {
   CheckCircle2,
   Sliders,
   Share2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  X
 } from 'lucide-react';
+import { Base64Controls } from '../utilities/Base64Controls';
 
 export const LandingWorkspace: React.FC = () => {
-  const { addImages, setActiveUtilityId, savedSessionCount, restoreSavedSession, clearSavedSession } = useSession();
+  const { addImages, activeUtilityId, setActiveUtilityId, savedSessionCount, restoreSavedSession, clearSavedSession, setIsMobileToolsOpen } = useSession();
   const { user, openAuthModal } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<UtilityCategory | 'all'>('all');
+  const [showBase64Modal, setShowBase64Modal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -202,13 +208,21 @@ export const LandingWorkspace: React.FC = () => {
     : UTILITIES.filter(u => u.category === selectedFilter);
 
   return (
-    <div className="w-full flex-1 overflow-y-auto px-6 py-10 flex flex-col items-center">
-      {/* Hidden File Input */}
+    <div className="w-full flex-1 overflow-y-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col items-center">
+      {/* Hidden File Inputs */}
       <input
         ref={fileInputRef}
         type="file"
         multiple
         accept="image/*,.heic,.heif,.cr2,.cr3,.nef,.arw,.dng,.svg"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
         onChange={handleFileChange}
         className="hidden"
       />
@@ -228,12 +242,39 @@ export const LandingWorkspace: React.FC = () => {
             <ZailoGraphLogo size="xl" showText={true} showTagline={true} className="relative drop-shadow-xl" />
           </div>
 
-          {/* Privacy Trust Pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200/80 text-neutral-800 text-xs font-semibold shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 animate-pulse"></span>
-            <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
-            <span>100% Private • High-Speed Processing • Built by Zorquelz</span>
+          {/* Privacy Trust Pill & Mobile 26 Tools Navigation Shortcut */}
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200/80 text-neutral-800 text-xs font-semibold shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 animate-pulse"></span>
+              <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
+              <span>100% Private • High-Speed Processing • Built by Zorquelz</span>
+            </div>
+
+            {/* Mobile Direct Navigation Button */}
+            <button
+              onClick={() => setIsMobileToolsOpen(true)}
+              className="md:hidden inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white text-xs font-bold shadow-md shadow-violet-600/20 transition cursor-pointer active:scale-95"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Browse 26 Tools</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
+
+          {/* Active Primed Tool Badge (if non-default) */}
+          {activeUtilityId && activeUtilityId !== 'workflow-recipes' && (
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-50 border border-violet-200 text-violet-900 text-xs font-semibold animate-in fade-in">
+              <span className="w-2 h-2 rounded-full bg-violet-600 animate-pulse"></span>
+              <span>Primed for: <strong>{activeUtility.name}</strong></span>
+              <button 
+                onClick={() => setActiveUtilityId('workflow-recipes')}
+                className="text-violet-500 hover:text-violet-900 font-bold ml-1 text-sm cursor-pointer"
+                title="Reset to default"
+              >
+                &times;
+              </button>
+            </div>
+          )}
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.08]">
             Your images. Your workflow. <br className="hidden sm:inline" />
@@ -298,7 +339,7 @@ export const LandingWorkspace: React.FC = () => {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`relative w-full rounded-3xl border-2 border-dashed p-10 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white/85 backdrop-blur-xl shadow-lg ${
+          className={`relative w-full rounded-3xl border-2 border-dashed p-6 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white/85 backdrop-blur-xl shadow-lg ${
             isDragOver
               ? 'border-violet-600 bg-violet-50/50 scale-[1.01] shadow-2xl shadow-violet-500/15'
               : 'border-violet-300/80 hover:border-violet-500 hover:shadow-xl hover:shadow-violet-500/10'
@@ -308,23 +349,41 @@ export const LandingWorkspace: React.FC = () => {
           <div className="absolute inset-0 bg-radial from-violet-50/40 via-transparent to-transparent opacity-70 pointer-events-none rounded-3xl"></div>
 
           {/* Central Cloud Icon with Logo Tint */}
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neutral-100 to-neutral-50 text-neutral-800 flex items-center justify-center mb-5 group-hover:from-violet-600 group-hover:to-cyan-600 group-hover:text-white transition duration-300 shadow-xs border border-neutral-200/60 group-hover:border-transparent">
-            <UploadCloud className="w-8 h-8" />
+          <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-gradient-to-br from-neutral-100 to-neutral-50 text-neutral-800 flex items-center justify-center mb-4 sm:mb-5 group-hover:from-violet-600 group-hover:to-cyan-600 group-hover:text-white transition duration-300 shadow-xs border border-neutral-200/60 group-hover:border-transparent">
+            <UploadCloud className="w-7 sm:w-8 h-7 sm:h-8" />
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
-            Drop your images here, paste with <kbd className="px-2 py-0.5 rounded-md bg-neutral-100 border border-neutral-300 font-mono text-xs text-neutral-700">Ctrl + V</kbd>, or <span className="underline decoration-violet-300 underline-offset-4 group-hover:decoration-violet-600 transition">browse files</span>
+          <h2 className="text-lg sm:text-2xl font-bold text-neutral-900 mb-2">
+            Drop your images here, paste with <kbd className="px-1.5 py-0.5 rounded-md bg-neutral-100 border border-neutral-300 font-mono text-xs text-neutral-700">Ctrl + V</kbd>, or <span className="underline decoration-violet-300 underline-offset-4 group-hover:decoration-violet-600 transition">browse files</span>
           </h2>
-          <p className="text-xs text-neutral-500 max-w-md mb-6 leading-relaxed">
+          <p className="text-xs text-neutral-500 max-w-md mb-5 leading-relaxed">
             Drag single files or an entire batch. Supports high-res AVIF, JPEG, PNG, WebP, SVG, Apple HEIC, and Camera RAW (Canon CR2/CR3, Nikon NEF, Sony ARW, Adobe DNG).
           </p>
 
+          {/* Mobile Direct Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-6" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white font-bold text-xs shadow-md shadow-violet-600/25 flex items-center gap-2 cursor-pointer transition min-h-[44px]"
+            >
+              <UploadCloud className="w-4 h-4" />
+              <span>Choose Images</span>
+            </button>
+            <button
+              onClick={() => cameraInputRef.current?.click()}
+              className="px-4 py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 font-semibold text-xs border border-neutral-300/80 flex items-center gap-2 cursor-pointer transition min-h-[44px]"
+            >
+              <Camera className="w-4 h-4 text-violet-600" />
+              <span>Take Photo</span>
+            </button>
+          </div>
+
           {/* Supported Format Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-lg mb-8">
+          <div className="flex flex-wrap items-center justify-center gap-1 max-w-lg mb-6 sm:mb-8">
             {['NEXT-GEN AVIF', 'WEBP', 'JPEG / JPG', 'PNG', 'SVG', 'APPLE HEIC', 'CANON CR2/CR3', 'NIKON NEF', 'SONY ARW', 'ADOBE DNG'].map((fmt) => (
               <span
                 key={fmt}
-                className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium border ${
+                className={`px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-medium border ${
                   fmt === 'NEXT-GEN AVIF' 
                     ? 'bg-gradient-to-r from-violet-50 to-cyan-50 text-violet-700 border-violet-200/80 font-bold' 
                     : 'bg-neutral-100 text-neutral-600 border-neutral-200/60'
@@ -337,35 +396,35 @@ export const LandingWorkspace: React.FC = () => {
 
           {/* Instant 1-Click Test Drive Row */}
           <div 
-            className="w-full pt-6 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-4"
+            className="w-full pt-5 sm:pt-6 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>No image on hand? Test drive with an instant sample:</span>
+              <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>No image on hand? Try instant sample:</span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 no-scrollbar">
               <button
                 onClick={() => loadDemoSample('photo')}
-                className="px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shrink-0 min-h-[40px]"
                 title="4K Landscape photo for MozJPEG compression and sharpening"
               >
-                <span>🏔️ Landscape (Codecs)</span>
+                <span>🏔️ Landscape</span>
               </button>
               <button
                 onClick={() => loadDemoSample('portrait')}
-                className="px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shrink-0 min-h-[40px]"
                 title="Portrait shot for AI background removal & passport studio"
               >
-                <span>👤 Portrait (AI & Crop)</span>
+                <span>👤 Portrait</span>
               </button>
               <button
                 onClick={() => loadDemoSample('vector')}
-                className="px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shrink-0 min-h-[40px]"
                 title="Graphic design for SVG vectorization and palette extraction"
               >
-                <span>🎨 Logo (Vector & Palette)</span>
+                <span>🎨 Logo Art</span>
               </button>
             </div>
           </div>
@@ -460,6 +519,8 @@ export const LandingWorkspace: React.FC = () => {
                     setActiveUtilityId(u.id);
                     if (isLocked) {
                       openAuthModal('pro_feature', u.id);
+                    } else if (u.id === 'base64-to-image') {
+                      setShowBase64Modal(true);
                     } else {
                       fileInputRef.current?.click();
                     }
@@ -512,6 +573,40 @@ export const LandingWorkspace: React.FC = () => {
         </div>
 
       </div>
+
+      {/* Base64 to Image Decoder Modal */}
+      {(showBase64Modal || activeUtilityId === 'base64-to-image') && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => {
+            setShowBase64Modal(false);
+            if (activeUtilityId === 'base64-to-image') {
+              setActiveUtilityId('compression');
+            }
+          }}
+        >
+          <div
+            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-neutral-200 p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+              <h3 className="text-base font-bold text-neutral-900">Base64 to Image Decoder</h3>
+              <button
+                onClick={() => {
+                  setShowBase64Modal(false);
+                  if (activeUtilityId === 'base64-to-image') {
+                    setActiveUtilityId('compression');
+                  }
+                }}
+                className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-xl transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <Base64Controls />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

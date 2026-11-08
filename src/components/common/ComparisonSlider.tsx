@@ -17,7 +17,8 @@ import {
   Crop,
   Undo2,
   Redo2,
-  Crosshair
+  Crosshair,
+  Maximize2
 } from 'lucide-react';
 
 export type ViewMode = 'slider' | 'side_by_side' | 'result' | 'original';
@@ -437,6 +438,13 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
             >
               <RotateCcw className="w-3 h-3" />
             </button>
+            <button 
+              onClick={resetZoom}
+              className="p-1 text-neutral-400 hover:text-neutral-800 rounded-lg transition cursor-pointer"
+              title="Fit to Screen"
+            >
+              <Maximize2 className="w-3 h-3" />
+            </button>
           </div>
 
           {/* Canvas Backdrop Theme Toggle (Light Corporate vs Dark Studio) */}
@@ -547,14 +555,37 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
                 </div>
               )}
 
-              {/* Glowing Draggable Split Handle Line */}
+              {/* Glowing Draggable & Keyboard-Accessible Split Handle Line */}
               {processedUrl && (
                 <div 
-                  className="absolute top-0 bottom-0 w-[2px] bg-white pointer-events-none z-10 shadow-sm"
+                  className="absolute top-0 bottom-0 w-[2px] bg-white z-10 shadow-sm pointer-events-none"
                   style={{ left: `${sliderPosition}%` }}
                 >
-                  <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-neutral-900 border-2 border-white flex items-center justify-center text-white cursor-ew-resize transform transition-transform hover:scale-110 active:scale-95 shadow-md">
-                    <ArrowLeftRight className="w-3 h-3 stroke-[2.5]" />
+                  <div
+                    role="slider"
+                    aria-label="Image comparison split slider"
+                    aria-valuenow={Math.round(sliderPosition)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        setSliderPosition(prev => Math.max(0, prev - (e.shiftKey ? 10 : 2)));
+                      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        setSliderPosition(prev => Math.min(100, prev + (e.shiftKey ? 10 : 2)));
+                      } else if (e.key === 'Home') {
+                        e.preventDefault();
+                        setSliderPosition(0);
+                      } else if (e.key === 'End') {
+                        e.preventDefault();
+                        setSliderPosition(100);
+                      }
+                    }}
+                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-neutral-900 border-2 border-white flex items-center justify-center text-white cursor-ew-resize transform transition-transform hover:scale-110 focus:scale-110 focus:ring-2 focus:ring-violet-500 focus:outline-none active:scale-95 shadow-md pointer-events-auto touch-none"
+                  >
+                    <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2.5]" />
                   </div>
                 </div>
               )}

@@ -3,7 +3,7 @@ import { useSession } from '../../context/SessionContext';
 import { Lock, Unlock, Percent, Maximize2, Sparkles, Layers, Sliders } from 'lucide-react';
 
 export const ResizeControls: React.FC = () => {
-  const { images, activeImage, executeActiveUtility, setCurrentParams, isProcessing } = useSession();
+  const { images, activeImage, executeActiveUtility, executeBatchUtility, setCurrentParams, isProcessing } = useSession();
 
   const [width, setWidth] = useState<number>(activeImage?.width || 1920);
   const [height, setHeight] = useState<number>(activeImage?.height || 1080);
@@ -86,7 +86,7 @@ export const ResizeControls: React.FC = () => {
     setIsBatchApplying(true);
     try {
       const params = getEffectiveParams();
-      await executeActiveUtility(params);
+      await executeBatchUtility(params);
     } finally {
       setIsBatchApplying(false);
     }

@@ -4,7 +4,7 @@ import { Sparkles, CheckCircle2, Sliders, Layers, Zap } from 'lucide-react';
 import { formatBytes, calculateSavings } from '../../utils/formatters';
 
 export const RasterToWebpControls: React.FC = () => {
-  const { images, activeImage, executeActiveUtility, setCurrentParams, isProcessing } = useSession();
+  const { images, activeImage, executeActiveUtility, executeBatchUtility, setCurrentParams, isProcessing } = useSession();
 
   const [isLossless, setIsLossless] = useState<boolean>(false);
   const [quality, setQuality] = useState<number>(0.85);
@@ -29,7 +29,7 @@ export const RasterToWebpControls: React.FC = () => {
     setIsBatchConverting(true);
     try {
       const params = getEffectiveParams();
-      await executeActiveUtility(params);
+      await executeBatchUtility(params);
     } finally {
       setIsBatchConverting(false);
     }

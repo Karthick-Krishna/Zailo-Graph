@@ -96,16 +96,45 @@ export const ControlRack: React.FC<ControlRackProps> = ({
   const { activeImage, activeUtilityId, executeActiveUtility, downloadImage, sendToUtility, isProcessing } = useSession();
   const { isUtilityUnlocked } = useAuth();
 
+  const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
+  const isUnlocked = isUtilityUnlocked(activeUtilityId);
+
+  const containerClasses = isMobileDrawer
+    ? "w-full max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col justify-between overflow-y-auto border-t border-neutral-200 animate-in slide-in-from-bottom duration-200 relative z-30"
+    : "hidden md:flex w-80 lg:w-88 h-full bg-white border-l border-neutral-200 flex-col justify-between overflow-y-auto shrink-0 relative z-20 shadow-xs";
+
   if (!activeImage) {
+    if (activeUtilityId === 'base64-to-image') {
+      return (
+        <aside className={containerClasses}>
+          <div className="p-5 sm:p-6 space-y-5">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Settings</span>
+                <span className="text-[10px] font-semibold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md border border-neutral-200/80 uppercase">
+                  {activeUtility.category}
+                </span>
+              </div>
+              <h3 className="text-base font-bold text-neutral-900 tracking-tight">
+                {activeUtility.name}
+              </h3>
+              <p className="text-[11px] text-neutral-500 mt-0.5 leading-relaxed">
+                {activeUtility.description}
+              </p>
+            </div>
+            <div className="pt-2 border-t border-neutral-100">
+              <Base64Controls />
+            </div>
+          </div>
+        </aside>
+      );
+    }
     return (
       <aside className="w-full md:w-84 h-full bg-white border-l border-neutral-200/80 p-6 flex flex-col items-center justify-center text-center">
         <p className="text-xs text-neutral-400">Select or drop an image to configure utility parameters.</p>
       </aside>
     );
   }
-
-  const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
-  const isUnlocked = isUtilityUnlocked(activeUtilityId);
 
   const renderActiveControls = () => {
     switch (activeUtilityId) {
@@ -164,28 +193,27 @@ export const ControlRack: React.FC<ControlRackProps> = ({
     }
   };
 
-  const containerClasses = isMobileDrawer
-    ? "w-full max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col justify-between overflow-y-auto border-t border-neutral-200 animate-in slide-in-from-bottom duration-200 relative z-30"
-    : "hidden md:flex w-80 lg:w-88 h-full bg-white border-l border-neutral-200 flex-col justify-between overflow-y-auto shrink-0 relative z-20 shadow-xs";
-
   return (
     <aside className={containerClasses}>
       {/* Top Section: Active Tool Parameters */}
       <div className="p-5 sm:p-6 space-y-5">
         {/* Mobile Pull Handle & Close Header */}
         {isMobileDrawer && (
-          <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
-            <div className="flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-violet-600" />
-              <span className="text-xs font-bold text-neutral-900">Adjust Settings</span>
+          <div className="flex flex-col items-center pb-3 border-b border-neutral-100">
+            <div className="w-12 h-1.5 rounded-full bg-neutral-300 mb-2"></div>
+            <div className="w-full flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-violet-600" />
+                <span className="text-xs font-bold text-neutral-900">Adjust Settings</span>
+              </div>
+              <button
+                onClick={onCloseMobile}
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition cursor-pointer"
+                aria-label="Close mobile controls"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <button
-              onClick={onCloseMobile}
-              className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition cursor-pointer"
-              aria-label="Close mobile controls"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
         )}
 
@@ -221,7 +249,7 @@ export const ControlRack: React.FC<ControlRackProps> = ({
       </div>
 
       {/* Bottom Action Rack & "Send To..." Workflow Bus - 100% Solid Pure White */}
-      <div className="p-4 sm:p-5 border-t border-neutral-200 bg-white space-y-2.5 relative z-10 shrink-0">
+      <div className="p-4 sm:p-5 pb-8 sm:pb-5 border-t border-neutral-200 bg-white space-y-2.5 relative z-10 shrink-0">
         {/* Process Button - Vibrant, punchy, active primary CTA */}
         <button
           onClick={() => {
