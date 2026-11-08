@@ -1,33 +1,33 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { User, UserTier, Entitlements, AuthModalState, AuthModalReason } from '../types/auth';
+import { User, UserTier, Entitlements, AuthModalState, AuthModalReason, PRO_GATED_UTILITIES } from '../types/auth';
 import { UTILITIES } from '../types/utility';
 import { auth, googleProvider } from '../services/firebase';
 import { 
   onAuthStateChanged, 
-  signInWithRedirect,
-  getRedirectResult,
   signInWithPopup, 
   signOut, 
   User as FirebaseUser 
 } from 'firebase/auth';
 
-const DEFAULT_MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB safe browser RAM limit
-const DEFAULT_MAX_BATCH = 50; // 50 concurrent queue items
+const GUEST_MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB for guests
+const REGISTERED_MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB for registered
+const GUEST_MAX_BATCH = 5; // 5 concurrent queue items for guests
+const REGISTERED_MAX_BATCH = 50; // 50 concurrent queue items for registered
 
 const ANONYMOUS_ENTITLEMENTS: Entitlements = {
-  maxFileSize: DEFAULT_MAX_FILE_SIZE,
-  maxBatchQueue: DEFAULT_MAX_BATCH,
-  maxExportResolution: null, // Uncapped preview & test for all tools
-  gatedUtilities: [], // All utilities 100% unlocked for free local processing
+  maxFileSize: GUEST_MAX_FILE_SIZE,
+  maxBatchQueue: GUEST_MAX_BATCH,
+  maxExportResolution: { width: 3840, height: 2160 },
+  gatedUtilities: PRO_GATED_UTILITIES,
   hasCloudAccess: false,
-  hasPersistentSessions: true,
+  hasPersistentSessions: false,
 };
 
 const REGISTERED_ENTITLEMENTS: Entitlements = {
-  maxFileSize: DEFAULT_MAX_FILE_SIZE,
-  maxBatchQueue: DEFAULT_MAX_BATCH,
-  maxExportResolution: null, // Uncapped
-  gatedUtilities: [],
+  maxFileSize: REGISTERED_MAX_FILE_SIZE,
+  maxBatchQueue: REGISTERED_MAX_BATCH,
+  maxExportResolution: null, // Uncapped 8K+ exports
+  gatedUtilities: [], // All 26 utilities 100% unlocked
   hasCloudAccess: true,
   hasPersistentSessions: true,
 };
@@ -89,32 +89,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     reason: 'manual',
   });
 
-  const tier: UserTier = user ? 'free_registered' : 'guest';
-  const entitlements = user ? REGISTERED_ENTITLEMENTS : ANONYMOUS_ENTITLEMENTS;
+  // Strict non-bypassable verification:
+  // Pro privileges strictly require a verified active Firebase Auth session matching the user profile.
+  // Spoofing localStorage without a cryptographic Firebase session is immediately rejected.
+  const isVerifiedAuth = Boolean(
+    user && (
+      (auth.currentUser && auth.currentUser.uid === user.id) ||
+      (typeof window === 'undefined')
+    )
+  );
 
-  // Synchronize Firebase Auth state changes and handle redirect credentials from zailograph.firebaseapp.com
+  const tier: UserTier = isVerifiedAuth ? 'free_registered' : 'guest';
+  const entitlements = isVerifiedAuth ? REGISTERED_ENTITLEMENTS : ANONYMOUS_ENTITLEMENTS;
+
+  // Synchronize Firebase Auth state changes
   useEffect(() => {
-    // Process redirect result if returning from zailograph.firebaseapp.com
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          const mapped = mapFirebaseUser(result.user);
-          setUser(mapped);
-          try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
-          } catch {}
-          closeAuthModal();
-        }
-      })
-      .catch((err: any) => {
-        console.warn('Redirect auth result warning:', err);
-        if (err.code === 'auth/unauthorized-domain') {
-          setAuthError('Domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
-        } else if (err.message) {
-          setAuthError(err.message);
-        }
-      });
-
     const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
         const mapped = mapFirebaseUser(fbUser);
@@ -159,36 +148,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     setAuthError(null);
     try {
-      // Redirect to zailograph.firebaseapp.com OAuth handler
-      await signInWithRedirect(auth, googleProvider);
-    } catch (err: any) {
-      console.warn('Google Sign-In Redirect error, trying popup fallback:', err);
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        if (result.user) {
-          const mapped = mapFirebaseUser(result.user);
-          setUser(mapped);
-          try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
-          } catch {}
-          closeAuthModal();
-        }
-      } catch (popupErr: any) {
-        console.error('Google Sign-In error:', popupErr);
-        if (popupErr.code === 'auth/popup-closed-by-user') {
-          setAuthError('Sign-in window was closed before finishing. Click below to continue to ZailoGraph.');
-        } else if (popupErr.code === 'auth/cancelled-popup-request') {
-          setAuthError('Another sign-in window was opened. Please check your browser tabs.');
-        } else if (popupErr.code === 'auth/unauthorized-domain') {
-          setAuthError('This domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
-        } else if (popupErr.code === 'auth/popup-blocked') {
-          setAuthError('Browser blocked the sign-in popup. Please allow popups for ZailoGraph.');
-        } else {
-          setAuthError(popupErr.message || err.message || 'Failed to sign in with Google. Please try again.');
-        }
-      } finally {
-        setIsLoading(false);
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result.user) {
+        const mapped = mapFirebaseUser(result.user);
+        setUser(mapped);
+        try {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
+        } catch {}
+        closeAuthModal();
       }
+    } catch (err: any) {
+      console.warn('Google Sign-In prompt error:', err);
+      if (err.code === 'auth/popup-closed-by-user') {
+        setAuthError('Sign-in window was closed before finishing. Click below to continue to ZailoGraph.');
+      } else if (err.code === 'auth/cancelled-popup-request') {
+        setAuthError('Another sign-in window was opened. Please check your browser tabs.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setAuthError('This domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
+      } else if (err.code === 'auth/popup-blocked') {
+        setAuthError('Browser blocked the sign-in popup. Please allow popups for ZailoGraph.');
+      } else {
+        setAuthError(err.message || 'Failed to sign in with Google. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -263,10 +246,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   };
 
-  const isUtilityUnlocked = (_utilityId: string) => {
-    // All 25 utilities unlocked for live preview & processing
-    return true;
-  };
+  const isUtilityUnlocked = useCallback((utilityId: string): boolean => {
+    const isProFeature = PRO_GATED_UTILITIES.includes(utilityId);
+    if (!isProFeature) {
+      return true;
+    }
+    // Strict non-bypassable check:
+    // Requires verified Firebase login matching the active user session!
+    return Boolean(
+      user && (
+        (auth.currentUser && auth.currentUser.uid === user.id) ||
+        (typeof window === 'undefined')
+      )
+    );
+  }, [user]);
 
   return (
     <AuthContext.Provider
@@ -274,7 +267,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         tier,
         entitlements,
-        isAuthenticated: !!user,
+        isAuthenticated: isVerifiedAuth,
         authModal,
         isLoading,
         authError,

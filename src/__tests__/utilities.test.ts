@@ -22,40 +22,29 @@ describe('UTILITIES catalog', () => {
     }
   });
 
-  it('includes key required utilities', () => {
-    const required = [
-      'workflow-recipes',
-      'batch-resize',
-      'compression',
-      'heic-converter',
-      'webp-to-raster',
-      'raster-to-webp',
-      'svg-to-png',
-      'png-to-svg',
-      'ai-upscale',
-      'ai-bg-removal',
-      'sharpen-enhance',
-      'avatar-crop',
-      'social-presets',
-      'watermark',
-      'collage-maker',
-      'color-palette',
-      'passport-photo',
-      'ai-colorization',
-      'ai-inpainting',
-      'exif-viewer',
-      'exif-remover',
-      'privacy-redact',
-      'favicon-studio',
-      'image-to-base64',
-      'base64-to-image',
-      'camera-raw',
-    ];
+  it('correctly categorizes Pro utilities and Free utilities', () => {
+    const proUtilities = UTILITIES.filter(u => u.isCompetitorPaid);
+    const freeUtilities = UTILITIES.filter(u => !u.isCompetitorPaid);
 
-    const ids = UTILITIES.map(u => u.id);
-    for (const r of required) {
-      expect(ids).toContain(r);
-    }
+    expect(proUtilities.length).toBe(14);
+    expect(freeUtilities.length).toBe(12);
+
+    // Verify key Pro features
+    const proIds = proUtilities.map(u => u.id);
+    expect(proIds).toContain('workflow-recipes');
+    expect(proIds).toContain('watermark');
+    expect(proIds).toContain('collage-maker');
+    expect(proIds).toContain('passport-photo');
+    expect(proIds).toContain('exif-remover');
+    expect(proIds).toContain('privacy-redact');
+    expect(proIds).toContain('favicon-studio');
+    expect(proIds).toContain('svg-to-png');
+    expect(proIds).toContain('png-to-svg');
+    expect(proIds).toContain('ai-upscale');
+    expect(proIds).toContain('ai-bg-removal');
+    expect(proIds).toContain('ai-colorization');
+    expect(proIds).toContain('ai-inpainting');
+    expect(proIds).toContain('camera-raw');
   });
 });
 

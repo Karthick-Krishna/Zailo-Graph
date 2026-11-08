@@ -92,10 +92,10 @@ export const AuthModal: React.FC = () => {
         <div className="p-6 space-y-6">
           <div className="text-center space-y-1.5">
             <h4 className="text-base font-semibold text-neutral-900">
-              Continue to ZailoGraph
+              Sign in with Google
             </h4>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">
-              Sign in with Google to continue to ZailoGraph and unlock full session persistence and all 26 local image tools.
+              Continue to ZailoGraph to access full session persistence, unrestricted batch queueing, and all 26 local image tools.
             </p>
           </div>
 
@@ -110,7 +110,7 @@ export const AuthModal: React.FC = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 text-violet-600 animate-spin" />
-                  <span>Redirecting to Google...</span>
+                  <span>Connecting to Google...</span>
                 </>
               ) : (
                 <>
@@ -133,13 +133,13 @@ export const AuthModal: React.FC = () => {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                     />
                   </svg>
-                  <span className="text-neutral-800 font-medium">Continue with Google</span>
+                  <span className="text-neutral-800 font-medium">Continue to ZailoGraph</span>
                 </>
               )}
             </button>
 
             <p className="text-[11px] text-center text-neutral-400">
-              Redirects to Google OAuth • No password needed
+              One-click instant access • No password needed
             </p>
           </div>
 

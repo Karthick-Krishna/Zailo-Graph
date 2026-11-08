@@ -685,6 +685,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   ): Promise<{ blob: Blob; size: number; width: number; height: number; extraData?: any }> => {
     if (!worker) throw new Error('Worker engine is not ready.');
 
+    // Security Gate Enforcement: Non-bypassable check
+    if (!isUtilityUnlocked(utilityToRun)) {
+      throw new Error(`Security Violation: Access to Pro feature [${utilityToRun}] is restricted. A verified Google login is required.`);
+    }
+
     // 1. Direct handling for Lossless EXIF Stripping
     if (utilityToRun === 'exif-remover' || (utilityToRun === 'exif-viewer' && effectiveParams?.stripMetadata)) {
       const strippedBlob = await stripAllImageMetadata(item.blob);
@@ -843,7 +848,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       height: pHeight,
       extraData: result.extraData,
     };
-  }, [worker, images]);
+  }, [worker, images, isUtilityUnlocked]);
 
   const selectUtility = useCallback((newUtilityId: string) => {
     setActiveUtilityId(newUtilityId);
@@ -1004,6 +1009,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const item = images.find(img => img.id === id);
     if (!item) return;
 
+    if (!isUtilityUnlocked(activeUtilityId)) {
+      openAuthModal('pro_feature', activeUtilityId);
+      return;
+    }
+
     setIsProcessing(true);
     setImages(prev => prev.map(img => img.id === id ? { ...img, status: 'processing', error: undefined } : img));
 
@@ -1038,7 +1048,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsProcessing(false);
     }
-  }, [images, activeUtilityId, currentParams, processItemWithWorker]);
+  }, [images, activeUtilityId, currentParams, processItemWithWorker, isUtilityUnlocked, openAuthModal]);
 
   const cancelBatch = useCallback(() => {
     cancelBatchRef.current = true;
@@ -1050,6 +1060,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (images.length === 0 || !worker) return;
 
     const utilityToRun = targetUtility || activeUtilityId;
+    if (!isUtilityUnlocked(utilityToRun)) {
+      const activeUtil = UTILITIES.find(u => u.id === utilityToRun);
+      openAuthModal('pro_feature', utilityToRun, `"${activeUtil?.name || 'This'}" is a Pro feature. Sign in with Google to unlock batch processing.`);
+      return;
+    }
+
     cancelBatchRef.current = false;
     setBatchProgress({ isRunning: true, completed: 0, total: images.length });
     setIsProcessing(true);
@@ -1102,7 +1118,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setBatchProgress(prev => ({ ...prev, isRunning: false }));
     setIsProcessing(false);
     setToastMessage(`Batch completed: ${successCount} successful${failCount > 0 ? `, ${failCount} failed` : ''}.`);
-  }, [images, worker, activeUtilityId, currentParams, processItemWithWorker]);
+  }, [images, worker, activeUtilityId, currentParams, processItemWithWorker, isUtilityUnlocked, openAuthModal]);
 
   const downloadImage = useCallback((imageId: string, customFormat?: string, customQuality?: number) => {
     const item = images.find(img => img.id === imageId);

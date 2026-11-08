@@ -31,7 +31,8 @@ import {
   AppWindow, 
   Binary, 
   FileCode, 
-  Camera 
+  Camera,
+  Lock
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
@@ -94,7 +95,7 @@ export const ControlRack: React.FC<ControlRackProps> = ({
   onCloseMobile,
 }) => {
   const { activeImage, activeUtilityId, executeActiveUtility, downloadImage, sendToUtility, isProcessing } = useSession();
-  const { isUtilityUnlocked } = useAuth();
+  const { isUtilityUnlocked, openAuthModal } = useAuth();
 
   const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
   const isUnlocked = isUtilityUnlocked(activeUtilityId);
@@ -242,37 +243,69 @@ export const ControlRack: React.FC<ControlRackProps> = ({
           </div>
         </div>
 
-        {/* Dynamic Tool Controls */}
+        {/* Dynamic Tool Controls or Pro Lock Message */}
         <div className="pt-2 border-t border-neutral-100">
-          {renderActiveControls()}
+          {!isUnlocked ? (
+            <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200/90 text-center space-y-3">
+              <div className="w-9 h-9 rounded-full bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto shadow-2xs">
+                <Lock className="w-4 h-4" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-neutral-900">
+                  {activeUtility.name} is a Pro Feature
+                </h4>
+                <p className="text-[11px] text-neutral-600 leading-relaxed max-w-xs mx-auto">
+                  Sign in with Google to unlock instant, unrestricted access to all 14 Pro features. 100% Free forever.
+                </p>
+              </div>
+              <button
+                onClick={() => openAuthModal('pro_feature', activeUtilityId)}
+                className="w-full py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>Unlock for Free</span>
+              </button>
+            </div>
+          ) : (
+            renderActiveControls()
+          )}
         </div>
       </div>
 
       {/* Bottom Action Rack & "Send To..." Workflow Bus - 100% Solid Pure White */}
       <div className="p-4 sm:p-5 pb-8 sm:pb-5 border-t border-neutral-200 bg-white space-y-2.5 relative z-10 shrink-0">
-        {/* Process Button - Vibrant, punchy, active primary CTA */}
-        <button
-          onClick={() => {
-            executeActiveUtility();
-            if (isMobileDrawer && onCloseMobile) {
-              // On mobile, keep drawer or let user inspect result
-            }
-          }}
-          disabled={isProcessing}
-          className="w-full py-3 px-4 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white font-bold text-xs tracking-wide transition-all shadow-md shadow-violet-600/25 hover:shadow-lg hover:shadow-violet-600/35 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
-        >
-          {isProcessing ? (
-            <span className="flex items-center gap-2 text-white font-semibold">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-300 animate-ping"></span>
-              <span>Processing with WebAssembly...</span>
-            </span>
-          ) : (
-            <>
-              <Play className="w-3.5 h-3.5 fill-white text-white group-hover:scale-110 transition-transform" />
-              <span className="text-white font-bold">Apply Transformation</span>
-            </>
-          )}
-        </button>
+        {!isUnlocked ? (
+          <button
+            onClick={() => openAuthModal('pro_feature', activeUtilityId)}
+            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-[0.99] text-white font-bold text-xs tracking-wide transition-all shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 cursor-pointer group"
+          >
+            <Lock className="w-4 h-4 text-white" />
+            <span>Unlock {activeUtility.name} (Pro)</span>
+          </button>
+        ) : (
+          /* Process Button - Vibrant, punchy, active primary CTA */
+          <button
+            onClick={() => {
+              executeActiveUtility();
+              if (isMobileDrawer && onCloseMobile) {
+                // On mobile, keep drawer or let user inspect result
+              }
+            }}
+            disabled={isProcessing}
+            className="w-full py-3 px-4 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white font-bold text-xs tracking-wide transition-all shadow-md shadow-violet-600/25 hover:shadow-lg hover:shadow-violet-600/35 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
+          >
+            {isProcessing ? (
+              <span className="flex items-center gap-2 text-white font-semibold">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-300 animate-ping"></span>
+                <span>Processing with WebAssembly...</span>
+              </span>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 fill-white text-white group-hover:scale-110 transition-transform" />
+                <span className="text-white font-bold">Apply Transformation</span>
+              </>
+            )}
+          </button>
+        )}
 
         {/* Download Button (when result exists) */}
         {activeImage.processedBlob && (

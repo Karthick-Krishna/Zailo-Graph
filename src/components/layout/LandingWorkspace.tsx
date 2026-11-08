@@ -30,7 +30,7 @@ import { Base64Controls } from '../utilities/Base64Controls';
 
 export const LandingWorkspace: React.FC = () => {
   const { addImages, activeUtilityId, setActiveUtilityId, savedSessionCount, restoreSavedSession, clearSavedSession, setIsMobileToolsOpen } = useSession();
-  const { user, openAuthModal } = useAuth();
+  const { user, openAuthModal, isUtilityUnlocked } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<UtilityCategory | 'all'>('all');
   const [showBase64Modal, setShowBase64Modal] = useState(false);
@@ -511,7 +511,7 @@ export const LandingWorkspace: React.FC = () => {
           {/* Utility Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3.5">
             {filteredUtilities.map((u) => {
-              const isLocked = u.isCompetitorPaid && !user;
+              const isLocked = !isUtilityUnlocked(u.id);
               return (
                 <div
                   key={u.id}

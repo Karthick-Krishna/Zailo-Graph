@@ -139,7 +139,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
 
   const renderToolButton = (u: UtilityDefinition) => {
     const isSelected = u.id === activeUtilityId;
-    const isLocked = u.isCompetitorPaid && !user;
+    const isLocked = !isUtilityUnlocked(u.id);
     const IconComponent = ICON_MAP[u.icon] || Sparkles;
 
     if (isCollapsed) {

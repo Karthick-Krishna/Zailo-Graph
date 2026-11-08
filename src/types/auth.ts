@@ -1,5 +1,22 @@
 export type UserTier = 'guest' | 'free_registered';
 
+export const PRO_GATED_UTILITIES: string[] = [
+  'workflow-recipes',
+  'svg-to-png',
+  'png-to-svg',
+  'ai-upscale',
+  'ai-bg-removal',
+  'ai-colorization',
+  'ai-inpainting',
+  'camera-raw',
+  'watermark',
+  'collage-maker',
+  'passport-photo',
+  'exif-remover',
+  'privacy-redact',
+  'favicon-studio',
+];
+
 export interface User {
   id: string;
   email: string;
