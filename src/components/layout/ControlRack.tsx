@@ -108,8 +108,8 @@ export const ControlRack: React.FC<ControlRackProps> = ({
   };
 
   const containerClasses = isMobileDrawer
-    ? "w-full max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col justify-between overflow-y-auto border-t border-neutral-200 animate-in slide-in-from-bottom duration-200"
-    : "hidden md:flex w-84 h-full bg-white border-l border-neutral-200/80 flex-col justify-between overflow-y-auto";
+    ? "w-full max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col justify-between overflow-y-auto border-t border-neutral-200 animate-in slide-in-from-bottom duration-200 relative z-30"
+    : "hidden md:flex w-80 lg:w-88 h-full bg-white border-l border-neutral-200 flex-col justify-between overflow-y-auto shrink-0 relative z-20 shadow-xs";
 
   return (
     <aside className={containerClasses}>
@@ -153,9 +153,9 @@ export const ControlRack: React.FC<ControlRackProps> = ({
         </div>
       </div>
 
-      {/* Bottom Action Rack & "Send To..." Workflow Bus */}
-      <div className="p-4 sm:p-5 border-t border-neutral-200/80 bg-neutral-50/70 space-y-2.5">
-        {/* Process Button */}
+      {/* Bottom Action Rack & "Send To..." Workflow Bus - 100% Solid Pure White */}
+      <div className="p-4 sm:p-5 border-t border-neutral-200 bg-white space-y-2.5 relative z-10 shrink-0">
+        {/* Process Button - Vibrant, punchy, active primary CTA */}
         <button
           onClick={() => {
             executeActiveUtility();
@@ -164,17 +164,17 @@ export const ControlRack: React.FC<ControlRackProps> = ({
             }
           }}
           disabled={isProcessing}
-          className="w-full py-2.5 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white font-semibold text-xs transition shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border border-neutral-800"
+          className="w-full py-3 px-4 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white font-bold text-xs tracking-wide transition-all shadow-md shadow-violet-600/25 hover:shadow-lg hover:shadow-violet-600/35 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
         >
           {isProcessing ? (
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-              <span>Processing locally...</span>
+            <span className="flex items-center gap-2 text-white font-semibold">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-300 animate-ping"></span>
+              <span>Processing with WebAssembly...</span>
             </span>
           ) : (
             <>
-              <Play className="w-3.5 h-3.5 fill-current" />
-              <span>Apply Transformation</span>
+              <Play className="w-3.5 h-3.5 fill-white text-white group-hover:scale-110 transition-transform" />
+              <span className="text-white font-bold">Apply Transformation</span>
             </>
           )}
         </button>
@@ -183,7 +183,7 @@ export const ControlRack: React.FC<ControlRackProps> = ({
         {activeImage.processedBlob && (
           <button
             onClick={() => downloadImage(activeImage.id)}
-            className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs transition shadow-sm hover:shadow-md hover:shadow-emerald-600/20 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Download Result ({formatBytes(activeImage.processedSize!)})</span>
@@ -192,32 +192,32 @@ export const ControlRack: React.FC<ControlRackProps> = ({
 
         {/* Connected Workflow "Send to..." Menu */}
         {activeImage.processedBlob && (
-          <div className="pt-2 border-t border-neutral-200/60">
-            <span className="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">
+          <div className="pt-2 border-t border-neutral-200">
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
               Continue Workflow in...
             </span>
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={() => sendToUtility('watermark')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-2 px-2.5 rounded-lg bg-neutral-50 hover:bg-neutral-100/90 border border-neutral-200 text-[11px] font-semibold text-neutral-800 transition truncate cursor-pointer text-left shadow-2xs hover:border-neutral-300 active:scale-[0.98]"
               >
                 &rarr; Watermark
               </button>
               <button
                 onClick={() => sendToUtility('avatar-crop')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-2 px-2.5 rounded-lg bg-neutral-50 hover:bg-neutral-100/90 border border-neutral-200 text-[11px] font-semibold text-neutral-800 transition truncate cursor-pointer text-left shadow-2xs hover:border-neutral-300 active:scale-[0.98]"
               >
                 &rarr; Circular Crop
               </button>
               <button
                 onClick={() => sendToUtility('batch-resize')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-2 px-2.5 rounded-lg bg-neutral-50 hover:bg-neutral-100/90 border border-neutral-200 text-[11px] font-semibold text-neutral-800 transition truncate cursor-pointer text-left shadow-2xs hover:border-neutral-300 active:scale-[0.98]"
               >
                 &rarr; Batch Resize
               </button>
               <button
                 onClick={() => sendToUtility('social-presets')}
-                className="py-1.5 px-2 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 text-[11px] font-medium text-neutral-700 transition truncate cursor-pointer text-left"
+                className="py-2 px-2.5 rounded-lg bg-neutral-50 hover:bg-neutral-100/90 border border-neutral-200 text-[11px] font-semibold text-neutral-800 transition truncate cursor-pointer text-left shadow-2xs hover:border-neutral-300 active:scale-[0.98]"
               >
                 &rarr; Social Preset
               </button>

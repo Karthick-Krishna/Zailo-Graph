@@ -155,12 +155,13 @@ export const ZailoGraphLogo: React.FC<ZailoGraphLogoProps> = ({
               Zailo
             </span>
 
-            {/* 'graph' with Electric Neon Magenta to Cyan Gradient (Generous padding to prevent 'g' left-bowl and descender clipping) */}
+            {/* 'graph' with Electric Neon Magenta to Cyan Gradient (Generous padding & clone box-decoration to prevent 'g' left-bowl, ear, and descender clipping across all displays) */}
             <span 
-              className="inline-block bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent font-black pl-1.5 pr-1.5 py-1 -ml-0.5 overflow-visible"
+              className="inline-block bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent font-black px-2 py-1 -ml-1.5 overflow-visible"
               style={{
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
+                WebkitBoxDecorationBreak: 'clone',
               }}
             >
               graph

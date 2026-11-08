@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#FAFAFA]/90 backdrop-blur-md border-b border-neutral-200/80">
+    <header className="sticky top-0 z-30 w-full bg-white border-b border-neutral-200 select-none">
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
         {/* Brand with Official Vector Logo */}
         <div className="flex items-center gap-3">

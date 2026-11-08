@@ -57,7 +57,7 @@ export const BatchDrawer: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-white/95 backdrop-blur-md border-t border-neutral-200/80 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4 z-30 shadow-sm">
+    <div className="w-full bg-white border-t border-neutral-200 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4 z-30 shadow-md relative">
       {/* Hidden File Input */}
       <input
         ref={fileInputRef}
