@@ -27,6 +27,7 @@ import {
   X
 } from 'lucide-react';
 import { Base64Controls } from '../utilities/Base64Controls';
+import { Footer } from './Footer';
 
 export const LandingWorkspace: React.FC = () => {
   const { addImages, activeUtilityId, setActiveUtilityId, savedSessionCount, restoreSavedSession, clearSavedSession, setIsMobileToolsOpen } = useSession();
@@ -489,8 +490,8 @@ export const LandingWorkspace: React.FC = () => {
                 { id: 'all', label: 'All 25' },
                 { id: 'optimize', label: 'Optimize' },
                 { id: 'convert', label: 'Convert' },
-                { id: 'ai', label: 'AI Suite' },
                 { id: 'edit', label: 'Edit & Crop' },
+                { id: 'social', label: 'Social & Share' },
                 { id: 'metadata', label: 'Metadata' },
               ].map(cat => (
                 <button
@@ -563,7 +564,7 @@ export const LandingWorkspace: React.FC = () => {
         </div>
 
         {/* Footer Trust Bar */}
-        <div className="w-full pt-8 pb-12 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400 font-mono">
+        <div className="w-full pt-8 pb-4 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400 font-mono">
           <div>ZAILO GRAPH • ZORQUELZ OPEN PRODUCT ECOSYSTEM</div>
           <div className="flex items-center gap-4">
             <span>ZERO CLOUD TRANSMISSION</span>
@@ -573,6 +574,9 @@ export const LandingWorkspace: React.FC = () => {
         </div>
 
       </div>
+
+      {/* Comprehensive Navigation Footer */}
+      <Footer />
 
       {/* Base64 to Image Decoder Modal */}
       {(showBase64Modal || activeUtilityId === 'base64-to-image') && (

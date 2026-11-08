@@ -34,7 +34,10 @@ import {
   PanelLeftClose,
   PanelLeft,
   ChevronDown,
-  Layers
+  Layers,
+  RotateCw,
+  Type,
+  Grid
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
@@ -63,15 +66,18 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   Binary,
   FileCode,
   Camera,
+  RotateCw,
+  Type,
+  Grid,
 };
 
 const CATEGORIES: Array<{ id: UtilityCategory | 'all'; label: string }> = [
-  { id: 'all', label: 'All Tools' },
+  { id: 'all', label: 'All (25)' },
   { id: 'recipes', label: 'Recipes' },
   { id: 'optimize', label: 'Optimize' },
   { id: 'convert', label: 'Convert' },
-  { id: 'ai', label: 'AI Suite' },
   { id: 'edit', label: 'Edit & Crop' },
+  { id: 'social', label: 'Social & Share' },
   { id: 'metadata', label: 'Metadata' },
 ];
 
@@ -130,8 +136,8 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
       '1-Click Automation': UTILITIES.filter(u => u.category === 'recipes'),
       'Optimize & Compress': UTILITIES.filter(u => u.category === 'optimize'),
       'Convert & Vectorize': UTILITIES.filter(u => u.category === 'convert'),
-      'AI Neural Suite': UTILITIES.filter(u => u.category === 'ai'),
-      'Creative Studio & Crop': UTILITIES.filter(u => u.category === 'edit' || u.category === 'social'),
+      'Creative Studio & Crop': UTILITIES.filter(u => u.category === 'edit'),
+      'Social & Sharing': UTILITIES.filter(u => u.category === 'social'),
       'Privacy & Metadata': UTILITIES.filter(u => u.category === 'metadata'),
     };
     return groups;
@@ -306,7 +312,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
               <Layers className="w-4 h-4 text-neutral-700" />
               <span className="text-xs font-bold text-neutral-900 tracking-tight">Toolbox</span>
               <span className="text-[10px] font-mono text-neutral-400 px-1.5 py-0.2 rounded bg-neutral-100 border border-neutral-200/60 font-semibold">
-                26
+                25
               </span>
             </div>
           )}
@@ -334,7 +340,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search 26 tools... (/)"
+              placeholder="Search 25 tools... (/)"
               className="w-full pl-8 pr-7 py-1.5 text-xs bg-neutral-50 hover:bg-neutral-100/80 focus:bg-white focus:ring-1 focus:ring-neutral-400 focus:outline-none rounded-xl border border-neutral-200 text-neutral-800 placeholder:text-neutral-400 transition"
             />
             {searchQuery && (

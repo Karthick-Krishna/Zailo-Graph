@@ -107,10 +107,12 @@ export const getDefaultParamsForUtility = (utilityId: string, image: { width: nu
       return { scaleMultiplier: 2, dpi: 300, transparentBackground: true };
     case 'png-to-svg':
       return { mode: 'color', colorCount: 8, filterSpeckle: 4 };
-    case 'ai-upscale':
-      return { upscaleScale: 2, upscaleModel: 'photo', mode: 'algorithmic' };
-    case 'ai-bg-removal':
-      return { bgMode: 'transparent', bgFeather: 4, mode: 'algorithmic' };
+    case 'rotate-flip':
+      return { angle: 90, flipH: false, flipV: false, quality: 92, format: 'image/png' };
+    case 'meme-generator':
+      return { topText: 'TOP TEXT', bottomText: 'BOTTOM TEXT', fontSize: 48, fontColor: '#FFFFFF', strokeColor: '#000000', strokeWidth: 6, allCaps: true, quality: 92, format: 'image/png' };
+    case 'image-splitter':
+      return { rows: 3, cols: 3, format: 'image/jpeg', quality: 90 };
     case 'sharpen-enhance':
       return { sharpen: 1.5, contrast: 1.05, brightness: 1.0, saturation: 1.05 };
     case 'avatar-crop':
@@ -147,10 +149,6 @@ export const getDefaultParamsForUtility = (utilityId: string, image: { width: nu
         targetHeightMm: 51,
         whitenedBackground: true,
       };
-    case 'ai-colorization':
-      return { colorIntensity: 85, colorTone: 'neutral', mode: 'algorithmic' };
-    case 'ai-inpainting':
-      return { brushSize: 36, mode: 'algorithmic' };
     case 'exif-viewer':
       return {};
     case 'exif-remover':
@@ -242,7 +240,27 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { validateFileSize, validateBatchCount, isUtilityUnlocked, openAuthModal } = useAuth();
   const [images, setImages] = useState<ImageItem[]>([]);
   const [activeImageId, setActiveImageId] = useState<string | null>(null);
-  const [activeUtilityId, setActiveUtilityId] = useState<string>('workflow-recipes');
+  const [activeUtilityId, setActiveUtilityId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const match = window.location.hash.match(/tool=([a-z0-9-]+)/i);
+      if (match && match[1]) return match[1];
+      const params = new URLSearchParams(window.location.search);
+      const queryTool = params.get('tool');
+      if (queryTool) return queryTool;
+    }
+    return 'workflow-recipes';
+  });
+
+  useEffect(() => {
+    const handleHash = () => {
+      const match = window.location.hash.match(/tool=([a-z0-9-]+)/i);
+      if (match && match[1]) {
+        setActiveUtilityId(match[1]);
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
   const [currentParams, setCurrentParams] = useState<any>({});
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [isMobileToolsOpen, setIsMobileToolsOpen] = useState<boolean>(false);
@@ -760,10 +778,9 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     else if (utilityToRun === 'color-palette') taskType = 'extract_palette';
     else if (utilityToRun === 'privacy-redact') taskType = 'privacy_redact';
     else if (utilityToRun === 'favicon-studio') taskType = 'favicon_pack';
-    else if (utilityToRun === 'ai-bg-removal') taskType = 'ai_bg_removal';
-    else if (utilityToRun === 'ai-upscale') taskType = 'ai_upscale';
-    else if (utilityToRun === 'ai-inpainting') taskType = 'ai_inpainting';
-    else if (utilityToRun === 'ai-colorization') taskType = 'ai_colorization';
+    else if (utilityToRun === 'rotate-flip') taskType = 'rotate_flip';
+    else if (utilityToRun === 'image-splitter') taskType = 'split_grid';
+    else if (utilityToRun === 'meme-generator') taskType = 'meme_text';
     else if (utilityToRun === 'png-to-svg') taskType = 'vectorize';
     else if (utilityToRun === 'collage-maker') taskType = 'collage';
     else if (utilityToRun === 'camera-raw') taskType = 'camera_raw';

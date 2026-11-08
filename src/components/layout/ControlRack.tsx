@@ -82,8 +82,10 @@ import { Base64Controls } from '../utilities/Base64Controls';
 import { SvgControls } from '../utilities/SvgControls';
 import { CollageControls } from '../utilities/CollageControls';
 import { CameraRawControls } from '../utilities/CameraRawControls';
-import { AiSuiteControls } from '../utilities/AiSuiteControls';
 import { RecipeControls } from '../utilities/RecipeControls';
+import { RotateFlipControls } from '../utilities/RotateFlipControls';
+import { MemeControls } from '../utilities/MemeControls';
+import { ImageSplitterControls } from '../utilities/ImageSplitterControls';
 
 interface ControlRackProps {
   isMobileDrawer?: boolean;
@@ -180,11 +182,12 @@ export const ControlRack: React.FC<ControlRackProps> = ({
         return <CollageControls />;
       case 'camera-raw':
         return <CameraRawControls />;
-      case 'ai-bg-removal':
-      case 'ai-upscale':
-      case 'ai-inpainting':
-      case 'ai-colorization':
-        return <AiSuiteControls />;
+      case 'rotate-flip':
+        return <RotateFlipControls />;
+      case 'meme-generator':
+        return <MemeControls />;
+      case 'image-splitter':
+        return <ImageSplitterControls />;
       default:
         return (
           <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 text-center">

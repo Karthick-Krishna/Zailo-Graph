@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
   return (
     <header className="sticky top-0 z-30 w-full bg-white border-b border-neutral-200 select-none">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2 sm:gap-4">
-        {/* Brand with Official Vector Logo & Mobile Tools (26) Launcher */}
+        {/* Brand with Official Vector Logo & Mobile Tools (25) Launcher */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <ZailoGraphLogo size="sm" showText={true} />
           <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-400 pl-2 border-l border-neutral-200">
@@ -25,11 +25,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
           <button
             onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
             className="md:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-50 hover:bg-violet-100 active:bg-violet-200 text-violet-900 border border-violet-200 text-xs font-bold transition cursor-pointer shadow-2xs ml-1"
-            title="Browse all 26 Studio Tools"
-            aria-label="Open 26 Studio Tools Navigation"
+            title="Browse all 25 Studio Tools"
+            aria-label="Open 25 Studio Tools Navigation"
           >
             <Layers className="w-3.5 h-3.5 text-violet-600" />
-            <span>Tools (26)</span>
+            <span>Tools (25)</span>
           </button>
         </div>
 

@@ -135,6 +135,17 @@ self.onmessage = async (e: MessageEvent) => {
       case 'workflow_recipe':
         resultBlob = await processWorkflowRecipe(imageBitmap, params);
         break;
+      case 'rotate_flip':
+        resultBlob = await processRotateFlip(imageBitmap, params);
+        break;
+      case 'split_grid':
+        const splitRes = await processSplitGrid(imageBitmap, params);
+        resultBlob = splitRes.previewBlob;
+        extraData = splitRes.extraData;
+        break;
+      case 'meme_text':
+        resultBlob = await processMemeText(imageBitmap, params);
+        break;
       default:
         throw new Error(`Unsupported worker task: ${type}`);
     }
@@ -1466,4 +1477,148 @@ async function processWorkflowRecipe(bitmap: ImageBitmap, params: any): Promise<
   if (!ctx) throw new Error('OffscreenCanvas 2D unavailable');
   ctx.drawImage(bitmap, 0, 0);
   return await canvas.convertToBlob({ type: 'image/png' });
+}
+
+async function processRotateFlip(
+  bitmap: ImageBitmap,
+  params: { angle?: number; flipH?: boolean; flipV?: boolean; quality?: number; format?: string }
+): Promise<Blob> {
+  const angle = params?.angle || 0;
+  const flipH = !!params?.flipH;
+  const flipV = !!params?.flipV;
+  const rad = (angle * Math.PI) / 180;
+
+  // Calculate new bounding box dimensions for arbitrary angle
+  const cos = Math.abs(Math.cos(rad));
+  const sin = Math.abs(Math.sin(rad));
+  const newWidth = Math.max(1, Math.round(bitmap.width * cos + bitmap.height * sin));
+  const newHeight = Math.max(1, Math.round(bitmap.width * sin + bitmap.height * cos));
+
+  const canvas = new OffscreenCanvas(newWidth, newHeight);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('OffscreenCanvas 2D unavailable');
+
+  ctx.save();
+  ctx.translate(newWidth / 2, newHeight / 2);
+  ctx.rotate(rad);
+  ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+  ctx.drawImage(bitmap, -bitmap.width / 2, -bitmap.height / 2);
+  ctx.restore();
+
+  const mime = params?.format || 'image/png';
+  return await canvas.convertToBlob({ type: mime, quality: (params?.quality || 92) / 100 });
+}
+
+async function processMemeText(
+  bitmap: ImageBitmap,
+  params: {
+    topText?: string;
+    bottomText?: string;
+    fontSize?: number;
+    fontColor?: string;
+    strokeColor?: string;
+    strokeWidth?: number;
+    allCaps?: boolean;
+    format?: string;
+    quality?: number;
+  }
+): Promise<Blob> {
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('OffscreenCanvas 2D unavailable');
+  ctx.drawImage(bitmap, 0, 0);
+
+  const top = (params?.topText || '').trim();
+  const bottom = (params?.bottomText || '').trim();
+
+  if (top || bottom) {
+    const scaleFactor = bitmap.width / 800;
+    const baseSize = (params?.fontSize || 48) * Math.max(0.5, scaleFactor);
+    ctx.font = `900 ${Math.round(baseSize)}px Impact, "Arial Black", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = params?.fontColor || '#FFFFFF';
+    ctx.strokeStyle = params?.strokeColor || '#000000';
+    ctx.lineWidth = (params?.strokeWidth || 6) * Math.max(0.5, scaleFactor);
+    ctx.lineJoin = 'round';
+
+    const drawText = (text: string, y: number, baseline: CanvasTextBaseline) => {
+      ctx.textBaseline = baseline;
+      const t = params?.allCaps !== false ? text.toUpperCase() : text;
+      const maxWidth = bitmap.width - 40 * Math.max(1, scaleFactor);
+      const words = t.split(' ');
+      const lines: string[] = [];
+      let currentLine = '';
+
+      for (const w of words) {
+        const testLine = currentLine ? `${currentLine} ${w}` : w;
+        if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = w;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+
+      const lineHeight = baseSize * 1.15;
+      const totalH = lines.length * lineHeight;
+      let startY = baseline === 'top' ? y : y - totalH + lineHeight;
+
+      for (let i = 0; i < lines.length; i++) {
+        const lineY = startY + i * lineHeight;
+        ctx.strokeText(lines[i], bitmap.width / 2, lineY);
+        ctx.fillText(lines[i], bitmap.width / 2, lineY);
+      }
+    };
+
+    if (top) {
+      drawText(top, 24 * Math.max(1, scaleFactor), 'top');
+    }
+    if (bottom) {
+      drawText(bottom, bitmap.height - 24 * Math.max(1, scaleFactor), 'bottom');
+    }
+  }
+
+  const mime = params?.format || 'image/png';
+  return await canvas.convertToBlob({ type: mime, quality: (params?.quality || 92) / 100 });
+}
+
+async function processSplitGrid(
+  bitmap: ImageBitmap,
+  params: { rows?: number; cols?: number; format?: string; quality?: number }
+): Promise<{ previewBlob: Blob; extraData: { rows: number; cols: number; totalTiles: number } }> {
+  const rows = Math.max(1, Math.min(10, params?.rows || 3));
+  const cols = Math.max(1, Math.min(10, params?.cols || 3));
+  const tileW = Math.floor(bitmap.width / cols);
+  const tileH = Math.floor(bitmap.height / rows);
+
+  const previewCanvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const pCtx = previewCanvas.getContext('2d');
+  if (!pCtx) throw new Error('OffscreenCanvas 2D unavailable');
+  pCtx.drawImage(bitmap, 0, 0);
+
+  pCtx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+  pCtx.lineWidth = Math.max(2, Math.round(bitmap.width / 300));
+  pCtx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = c * tileW;
+      const y = r * tileH;
+      pCtx.strokeRect(x, y, tileW, tileH);
+      const num = r * cols + c + 1;
+      pCtx.fillRect(x + 10, y + 10, 36, 26);
+      pCtx.fillStyle = '#FFFFFF';
+      pCtx.font = 'bold 15px sans-serif';
+      pCtx.fillText(`${num}`, x + 20, y + 28);
+      pCtx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    }
+  }
+
+  const mime = params?.format || 'image/jpeg';
+  const previewBlob = await previewCanvas.convertToBlob({ type: mime, quality: 0.9 });
+  return {
+    previewBlob,
+    extraData: { rows, cols, totalTiles: rows * cols }
+  };
 }

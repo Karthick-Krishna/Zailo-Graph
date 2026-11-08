@@ -2,7 +2,6 @@ export type UtilityCategory =
   | 'recipes'
   | 'convert'
   | 'optimize'
-  | 'ai'
   | 'edit'
   | 'social'
   | 'metadata';
@@ -121,33 +120,29 @@ export const UTILITIES: UtilityDefinition[] = [
     outputFormats: ['image/svg+xml'],
     supportsBatch: false,
   },
-  // 8. AI Super-Resolution and 4x Upscaling
+  // 8. Rotate and Flip Studio
   {
-    id: 'ai-upscale',
-    name: 'AI 4x Super-Resolution',
-    description: 'Enhance details, eliminate noise, and upscale photos up to 4x resolution using Real-ESRGAN.',
-    category: 'ai',
-    isCompetitorPaid: true,
-    badge: 'Pro Unlocked',
-    icon: 'Zap',
+    id: 'rotate-flip',
+    name: 'Rotate & Flip Studio',
+    description: 'Rotate images by 90°, 180°, 270°, or fine degree angles with canvas auto-bounds, plus horizontal & vertical flipping.',
+    category: 'edit',
+    isCompetitorPaid: false,
+    icon: 'RotateCw',
     inputFormats: ['image/jpeg', 'image/png', 'image/webp'],
-    outputFormats: ['image/png', 'image/jpeg'],
-    supportsBatch: false,
-    isCloudHybrid: true,
+    outputFormats: ['image/png', 'image/jpeg', 'image/webp'],
+    supportsBatch: true,
   },
-  // 9. AI Background Removal
+  // 9. Meme & Text Caption Studio
   {
-    id: 'ai-bg-removal',
-    name: 'AI Background Removal',
-    description: 'Automatically segment subjects and remove backgrounds with crisp edge feathering via RMBG-1.4.',
-    category: 'ai',
-    isCompetitorPaid: true,
-    badge: 'Pro Unlocked',
-    icon: 'Eraser',
+    id: 'meme-generator',
+    name: 'Meme & Caption Studio',
+    description: 'Add classic bold impact typography, top/bottom viral meme captions, and stroke outlines to any image.',
+    category: 'edit',
+    isCompetitorPaid: false,
+    icon: 'Type',
     inputFormats: ['image/jpeg', 'image/png', 'image/webp'],
-    outputFormats: ['image/png', 'image/webp'],
-    supportsBatch: false,
-    isCloudHybrid: true,
+    outputFormats: ['image/png', 'image/jpeg', 'image/webp'],
+    supportsBatch: true,
   },
   // 10. Image Sharpening and Enhancement
   {
@@ -236,33 +231,17 @@ export const UTILITIES: UtilityDefinition[] = [
     outputFormats: ['image/jpeg', 'image/png'],
     supportsBatch: false,
   },
-  // 17. Black-and-White Photo Colorization
+  // 17. Image Grid Splitter
   {
-    id: 'ai-colorization',
-    name: 'B&W Photo Colorization',
-    description: 'Restore vintage black-and-white photos with natural, AI-inferred realistic color tones.',
-    category: 'ai',
-    isCompetitorPaid: true,
-    badge: 'Pro Unlocked',
-    icon: 'SunMedium',
+    id: 'image-splitter',
+    name: 'Image Grid Splitter',
+    description: 'Slice photos into 3×3 Instagram grids, 3×1 panoramic carousels, or custom row × column tile arrays with instant ZIP export.',
+    category: 'social',
+    isCompetitorPaid: false,
+    icon: 'Grid',
     inputFormats: ['image/jpeg', 'image/png', 'image/webp'],
-    outputFormats: ['image/png', 'image/jpeg'],
+    outputFormats: ['image/png', 'image/jpeg', 'application/zip'],
     supportsBatch: false,
-    isCloudHybrid: true,
-  },
-  // 18. AI Object Removal and Inpainting
-  {
-    id: 'ai-inpainting',
-    name: 'AI Object Removal & Inpaint',
-    description: 'Erase unwanted objects, bystanders, or logos using an intuitive brush mask powered by LaMa.',
-    category: 'ai',
-    isCompetitorPaid: true,
-    badge: 'Pro Unlocked',
-    icon: 'Wand2',
-    inputFormats: ['image/jpeg', 'image/png', 'image/webp'],
-    outputFormats: ['image/png', 'image/jpeg'],
-    supportsBatch: false,
-    isCloudHybrid: true,
   },
   // 19. EXIF Metadata Viewer and Extractor
   {
