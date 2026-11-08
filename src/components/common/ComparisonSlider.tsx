@@ -1,5 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { formatBytes, formatDimensions, calculateSavings } from '../../utils/formatters';
+import { useSession } from '../../context/SessionContext';
+import { InteractiveCropOverlay } from './InteractiveCropOverlay';
 import { 
   ZoomIn, 
   ZoomOut, 
@@ -10,7 +12,12 @@ import {
   Sparkles, 
   SplitSquareVertical,
   Sun,
-  Moon
+  Moon,
+  Search,
+  Crop,
+  Undo2,
+  Redo2,
+  Crosshair
 } from 'lucide-react';
 
 export type ViewMode = 'slider' | 'side_by_side' | 'result' | 'original';
@@ -41,6 +48,31 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
   imageName,
   activeUtilityId,
 }) => {
+  const { 
+    currentParams, 
+    setCurrentParams, 
+    executeActiveUtility, 
+    undo, 
+    redo, 
+    canUndo, 
+    canRedo 
+  } = useSession();
+
+  // Pixel Inspection Loupe State
+  const [isLoupeActive, setIsLoupeActive] = useState<boolean>(false);
+  const [loupeZoom, setLoupeZoom] = useState<2 | 4>(2);
+  const [loupePos, setLoupePos] = useState({ x: 0, y: 0 });
+  const [isHoveringImage, setIsHoveringImage] = useState(false);
+  const [imageScreenRect, setImageScreenRect] = useState<DOMRect | null>(null);
+
+  // Interactive Crop Mode State
+  const isCropTool = activeUtilityId === 'avatar-crop';
+  const [showCropHandles, setShowCropHandles] = useState(isCropTool);
+
+  useEffect(() => {
+    setShowCropHandles(activeUtilityId === 'avatar-crop');
+  }, [activeUtilityId]);
+
   // Determine if aspect ratios differ significantly
   const isAspectMismatched = Boolean(
     processedWidth && 
@@ -82,6 +114,26 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
   // Ref on the actual image frame for accurate pixel-to-pixel split wipe
   const imageFrameRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Loupe hotkeys: Z toggles loupe, X switches zoom level
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return;
+      }
+      if (e.key.toLowerCase() === 'z' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setIsLoupeActive(prev => !prev);
+      }
+      if (e.key.toLowerCase() === 'x' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setLoupeZoom(prev => prev === 2 ? 4 : 2);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
 
   // Auto-switch away from split slider if aspect ratio changes so outputs never look smashed or letterboxed
   useEffect(() => {
@@ -142,6 +194,22 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
   };
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    setLoupePos({ x: e.clientX, y: e.clientY });
+
+    // Measure frame for loupe tracking
+    const frame = imageFrameRef.current;
+    if (frame) {
+      const rect = frame.getBoundingClientRect();
+      setImageScreenRect(rect);
+      const isInside = (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      );
+      setIsHoveringImage(isInside);
+    }
+
     if (isPanning) {
       setPanOffset({
         x: e.clientX - panStartRef.current.x,
@@ -261,6 +329,59 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           </button>
         </div>
 
+        {/* Pixel Inspection Loupe (2× / 4× Magnifier) */}
+        <div className="flex items-center gap-1 pl-1 border-l border-neutral-200">
+          <button
+            onClick={() => setIsLoupeActive(prev => !prev)}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
+              isLoupeActive
+                ? 'bg-violet-600 border-violet-600 text-white shadow-xs'
+                : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200'
+            }`}
+            title="Toggle Pixel Inspection Loupe (Hotkey: Z)"
+          >
+            <Search className="w-3 h-3 text-cyan-400" />
+            <span>Loupe</span>
+          </button>
+
+          {isLoupeActive && (
+            <div className="flex items-center p-0.5 rounded-lg bg-neutral-100 border border-neutral-200 text-[10px] font-mono">
+              <button
+                onClick={() => setLoupeZoom(2)}
+                className={`px-1.5 py-0.5 rounded font-bold transition cursor-pointer ${
+                  loupeZoom === 2 ? 'bg-white text-violet-700 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900'
+                }`}
+              >
+                2×
+              </button>
+              <button
+                onClick={() => setLoupeZoom(4)}
+                className={`px-1.5 py-0.5 rounded font-bold transition cursor-pointer ${
+                  loupeZoom === 4 ? 'bg-white text-violet-700 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900'
+                }`}
+              >
+                4×
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Interactive Canvas Crop Toggle (When Crop tool active) */}
+        {isCropTool && (
+          <button
+            onClick={() => setShowCropHandles(prev => !prev)}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
+              showCropHandles
+                ? 'bg-neutral-900 border-neutral-900 text-white'
+                : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200'
+            }`}
+            title="Toggle Interactive Draggable Crop Overlay on Canvas"
+          >
+            <Crop className="w-3 h-3 text-cyan-400" />
+            <span>Crop Box {showCropHandles ? 'Active' : 'Hidden'}</span>
+          </button>
+        )}
+
         {/* 1:1 Pixel Inspection Button */}
         <button
           onClick={togglePixelInspection}
@@ -274,6 +395,26 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           <Sparkles className="w-3 h-3 text-cyan-500" />
           <span>{zoomLevel >= 2 ? 'Exit 100%' : '1:1 Pixels'}</span>
         </button>
+
+        {/* Quick Undo / Redo in Canvas Deck */}
+        <div className="flex items-center gap-0.5 pl-1 border-l border-neutral-200">
+          <button
+            onClick={undo}
+            disabled={!canUndo}
+            className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+            title="Undo transformation (Ctrl+Z)"
+          >
+            <Undo2 className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={redo}
+            disabled={!canRedo}
+            className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+            title="Redo transformation (Ctrl+Y)"
+          >
+            <Redo2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
 
         {/* Concept 1: Ambient Adaptive Aura Toggle */}
         <button
@@ -486,7 +627,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           </div>
         )}
 
-        {/* VIEW MODE 3: RESULT ONLY (Full Frame View) */}
+        {/* VIEW MODE 3: RESULT ONLY (Full Frame View with Optional Interactive Crop Overlay) */}
         {viewMode === 'result' && (
           <div 
             className="relative w-full h-full transition-transform duration-75 flex items-center justify-center p-3 overflow-hidden"
@@ -502,15 +643,43 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
               </span>
             )}
 
-            <img
-              src={isPeekingOriginal ? originalUrl : (processedUrl || originalUrl)}
-              alt="Processed Result"
-              className="max-w-full max-h-full object-contain select-none transition-all duration-75 drop-shadow-md rounded-lg"
-              draggable={false}
-            />
+            <div 
+              ref={imageFrameRef}
+              className={`relative inline-flex items-center justify-center max-w-full max-h-full rounded-xl overflow-hidden shadow-xl border ${
+                canvasTheme === 'light' ? 'border-neutral-300/80' : 'border-white/10'
+              }`}
+              style={{
+                aspectRatio: `${originalWidth} / ${originalHeight}`,
+              }}
+            >
+              <img
+                src={showCropHandles && isCropTool ? originalUrl : (isPeekingOriginal ? originalUrl : (processedUrl || originalUrl))}
+                alt="Active Viewport"
+                className="w-full h-full object-contain select-none transition-all duration-75 drop-shadow-md rounded-lg pointer-events-none"
+                draggable={false}
+              />
+
+              {/* Live Interactive Draggable Crop Overlay */}
+              {isCropTool && showCropHandles && (
+                <InteractiveCropOverlay
+                  originalWidth={originalWidth}
+                  originalHeight={originalHeight}
+                  isCircle={currentParams?.isCircle}
+                  aspectPreset={currentParams?.aspectPreset || '1:1'}
+                  initialParams={currentParams}
+                  onCropChange={(crop) => {
+                    setCurrentParams((prev: any) => ({ ...prev, ...crop }));
+                  }}
+                  onCropCommit={(crop) => {
+                    setCurrentParams((prev: any) => ({ ...prev, ...crop }));
+                    executeActiveUtility({ ...currentParams, ...crop });
+                  }}
+                />
+              )}
+            </div>
 
             {/* Quick Hold to Compare Button */}
-            {processedUrl && (
+            {processedUrl && !showCropHandles && (
               <button
                 onMouseDown={() => setIsPeekingOriginal(true)}
                 onMouseUp={() => setIsPeekingOriginal(false)}
@@ -590,6 +759,47 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
               )}
             </div>
           </>
+        )}
+        {/* Pixel Inspection Loupe (Floating 2× / 4× Lens) */}
+        {isLoupeActive && isHoveringImage && imageScreenRect && (
+          <div
+            className="fixed pointer-events-none z-50 rounded-full border-2 border-white shadow-2xl overflow-hidden ring-2 ring-violet-500/50 backdrop-blur-xs"
+            style={{
+              width: 170,
+              height: 170,
+              left: loupePos.x - 85,
+              top: loupePos.y - 85,
+            }}
+          >
+            {/* Magnified Image Background */}
+            <div
+              className="w-full h-full rounded-full"
+              style={{
+                backgroundImage: `url(${viewMode === 'result' && processedUrl ? processedUrl : originalUrl})`,
+                backgroundSize: `${imageScreenRect.width * loupeZoom}px ${imageScreenRect.height * loupeZoom}px`,
+                backgroundPosition: `${-((loupePos.x - imageScreenRect.left) * loupeZoom - 85)}px ${-((loupePos.y - imageScreenRect.top) * loupeZoom - 85)}px`,
+                backgroundRepeat: 'no-repeat',
+                imageRendering: loupeZoom === 4 ? 'pixelated' : 'auto',
+              }}
+            />
+
+            {/* Precision Crosshair Reticle */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-6 h-[1.5px] bg-cyan-400 drop-shadow-sm opacity-90" />
+              <div className="h-6 w-[1.5px] bg-cyan-400 drop-shadow-sm opacity-90 absolute" />
+              <div className="w-3 h-3 rounded-full border border-cyan-300/80 absolute" />
+            </div>
+
+            {/* Magnification Badge */}
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-neutral-900/90 text-cyan-300 font-mono text-[9px] font-bold border border-white/20 shadow-md">
+              {loupeZoom}.0× Inspection
+            </div>
+
+            {/* Quick Toggle Tip */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-neutral-900/80 text-neutral-300 font-mono text-[8px] whitespace-nowrap border border-white/10">
+              [Z] Toggle • [X] Zoom
+            </div>
+          </div>
         )}
       </div>
     </div>

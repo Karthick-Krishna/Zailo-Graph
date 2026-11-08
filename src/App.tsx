@@ -9,7 +9,18 @@ import { ActiveAuroraBackground } from './components/common/ActiveAuroraBackgrou
 
 const AppContent: React.FC = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
-  const { images, activeImage, executeActiveUtility, downloadImage, clearWorkspace, setActiveUtilityId } = useSession();
+  const { 
+    images, 
+    activeImage, 
+    executeActiveUtility, 
+    downloadImage, 
+    clearWorkspace, 
+    setActiveUtilityId,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  } = useSession();
 
   // Global Keyboard Shortcuts
   useEffect(() => {
@@ -30,6 +41,20 @@ const AppContent: React.FC = () => {
       // 'Escape' closes Shortcuts HUD
       if (e.key === 'Escape') {
         setIsShortcutsOpen(false);
+        return;
+      }
+
+      // Cmd/Ctrl + Z: Undo
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (canUndo) undo();
+        return;
+      }
+
+      // Cmd/Ctrl + Y or Cmd/Ctrl + Shift + Z: Redo
+      if ((e.metaKey || e.ctrlKey) && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        if (canRedo) redo();
         return;
       }
 
@@ -73,7 +98,7 @@ const AppContent: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [images, activeImage, executeActiveUtility, downloadImage, clearWorkspace, setActiveUtilityId]);
+  }, [images, activeImage, executeActiveUtility, downloadImage, clearWorkspace, setActiveUtilityId, undo, redo, canUndo, canRedo]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F9FB] text-[#09090B] relative overflow-hidden">

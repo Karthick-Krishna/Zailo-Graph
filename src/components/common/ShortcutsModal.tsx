@@ -10,12 +10,15 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
   if (!isOpen) return null;
 
   const shortcuts = [
-    { key: '⌘ / Ctrl + O', desc: 'Browse and open images from disk' },
+    { key: '⌘ / Ctrl + Z', desc: 'Undo last transformation step' },
+    { key: '⌘ / Ctrl + Y', desc: 'Redo transformation step' },
+    { key: 'Z', desc: 'Toggle Pixel Inspection Loupe (2× / 4×)' },
+    { key: 'X', desc: 'Switch Loupe magnification level' },
+    { key: 'Space (Hold)', desc: 'Quick-peek original unedited image' },
     { key: '⌘ / Ctrl + Enter', desc: 'Apply active utility transformation' },
     { key: '⌘ / Ctrl + D', desc: 'Download current processed image' },
-    { key: '⌘ / Ctrl + ⌫', desc: 'Clear all images from workspace' },
+    { key: '⌘ / Ctrl + V', desc: 'Paste image directly from clipboard' },
     { key: '1 – 6', desc: 'Quick switch between tool categories' },
-    { key: '← / →', desc: 'Navigate previous / next image in queue' },
     { key: '?', desc: 'Toggle this keyboard shortcuts menu' },
     { key: 'Esc', desc: 'Close open dialogs and drawers' },
   ];

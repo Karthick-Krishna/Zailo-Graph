@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSession } from '../../context/SessionContext';
 import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
-import { Shield, Trash2, LogOut, ChevronDown, Keyboard } from 'lucide-react';
+import { Shield, Trash2, LogOut, ChevronDown, Keyboard, Undo2, Redo2 } from 'lucide-react';
 
 interface HeaderProps {
   onOpenShortcuts?: () => void;
@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
   const { user, logout, openAuthModal } = useAuth();
-  const { images, clearWorkspace } = useSession();
+  const { images, clearWorkspace, undo, redo, canUndo, canRedo, activeHistory, activeHistoryIndex } = useSession();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
@@ -44,6 +44,35 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
 
         {/* Right: Actions & Account */}
         <div className="flex items-center gap-2">
+          {/* History Undo / Redo */}
+          {images.length > 0 && (
+            <div className="flex items-center gap-0.5 px-1 py-0.5 rounded-lg bg-neutral-100/90 border border-neutral-200 shadow-2xs">
+              <button
+                onClick={undo}
+                disabled={!canUndo}
+                className="p-1 rounded-md text-neutral-600 hover:text-neutral-900 hover:bg-white disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+                title="Undo transformation (Ctrl+Z)"
+                aria-label="Undo"
+              >
+                <Undo2 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={redo}
+                disabled={!canRedo}
+                className="p-1 rounded-md text-neutral-600 hover:text-neutral-900 hover:bg-white disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+                title="Redo transformation (Ctrl+Y)"
+                aria-label="Redo"
+              >
+                <Redo2 className="w-3.5 h-3.5" />
+              </button>
+              {activeHistory.length > 1 && (
+                <span className="text-[10px] font-mono text-neutral-500 px-1 border-l border-neutral-200">
+                  {activeHistoryIndex + 1}/{activeHistory.length}
+                </span>
+              )}
+            </div>
+          )}
+
           {onOpenShortcuts && (
             <button
               onClick={onOpenShortcuts}

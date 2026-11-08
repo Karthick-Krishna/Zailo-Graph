@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { ImageItem } from '../types/image';
 import { useAuth } from './AuthContext';
+import { UTILITIES } from '../types/utility';
 import { parseImageMetadata, stripJpegMetadataLossless } from '../utils/exif';
 import { extractEmbeddedRawPreview } from '../utils/rawExtractor';
 import { convertHeicToRaster } from '../utils/heic';
@@ -18,6 +19,18 @@ interface SavedSessionItem {
   savedAt: number;
 }
 
+export interface HistoryStep {
+  id: string;
+  blob: Blob;
+  url: string;
+  size: number;
+  width: number;
+  height: number;
+  utilityId: string;
+  utilityName: string;
+  timestamp: number;
+}
+
 interface SessionContextType {
   images: ImageItem[];
   activeImageId: string | null;
@@ -27,6 +40,14 @@ interface SessionContextType {
   toastMessage: string | null;
   currentParams: any;
   savedSessionCount: number;
+  
+  // Multi-step History Stack
+  canUndo: boolean;
+  canRedo: boolean;
+  undo: () => void;
+  redo: () => void;
+  activeHistory: HistoryStep[];
+  activeHistoryIndex: number;
   
   // Actions
   addImages: (files: File[]) => Promise<void>;
@@ -152,6 +173,10 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [worker, setWorker] = useState<Worker | null>(null);
+
+  // Multi-step History Stack Map (by Image ID)
+  const [historyMap, setHistoryMap] = useState<Record<string, HistoryStep[]>>({});
+  const [historyIndexMap, setHistoryIndexMap] = useState<Record<string, number>>({});
 
   const [savedSessionCount, setSavedSessionCount] = useState<number>(() => {
     try {
@@ -373,6 +398,34 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     if (newItems.length > 0) {
       setImages(prev => [...prev, ...newItems]);
+      
+      // Initialize history stack for every image
+      setHistoryMap(hPrev => {
+        const nextH = { ...hPrev };
+        newItems.forEach(item => {
+          nextH[item.id] = [{
+            id: 'step_init_' + Math.random().toString(36).substring(2, 9),
+            blob: item.blob,
+            url: item.url,
+            size: item.size,
+            width: item.width,
+            height: item.height,
+            utilityId: 'original',
+            utilityName: 'Original Upload',
+            timestamp: Date.now(),
+          }];
+        });
+        return nextH;
+      });
+
+      setHistoryIndexMap(iPrev => {
+        const nextI = { ...iPrev };
+        newItems.forEach(item => {
+          nextI[item.id] = 0;
+        });
+        return nextI;
+      });
+
       if (!activeImageId) {
         setActiveImageId(newItems[0].id);
       }
@@ -497,6 +550,33 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setImages(prev => prev.map(img => {
       if (img.id === targetId && img.processedBlob) {
         const nextUrl = URL.createObjectURL(img.processedBlob);
+        
+        // Push step onto multi-step history stack
+        const stepName = UTILITIES.find(u => u.id === activeUtilityId)?.name || activeUtilityId;
+        const newStep: HistoryStep = {
+          id: 'step_' + Math.random().toString(36).substring(2, 9),
+          blob: img.processedBlob,
+          url: nextUrl,
+          size: img.processedSize || img.processedBlob.size,
+          width: img.processedWidth || img.width,
+          height: img.processedHeight || img.height,
+          utilityId: activeUtilityId,
+          utilityName: stepName,
+          timestamp: Date.now(),
+        };
+
+        setHistoryMap(hPrev => {
+          const currentList = hPrev[targetId] || [];
+          const currentIdx = historyIndexMap[targetId] !== undefined ? historyIndexMap[targetId] : currentList.length - 1;
+          const truncated = currentList.slice(0, currentIdx + 1);
+          return { ...hPrev, [targetId]: [...truncated, newStep] };
+        });
+
+        setHistoryIndexMap(iPrev => {
+          const currentIdx = iPrev[targetId] !== undefined ? iPrev[targetId] : 0;
+          return { ...iPrev, [targetId]: currentIdx + 1 };
+        });
+
         return {
           ...img,
           blob: img.processedBlob,
@@ -732,6 +812,90 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [activeImage?.id, activeImage?.status, activeUtilityId, worker, executeActiveUtility]);
 
+  // Multi-step History Stack Computations
+  const activeHistory = (activeImageId && historyMap[activeImageId]) ? historyMap[activeImageId] : [];
+  const activeHistoryIndex = (activeImageId && historyIndexMap[activeImageId] !== undefined) ? historyIndexMap[activeImageId] : -1;
+  const canUndo = Boolean(activeImage?.processedBlob) || activeHistoryIndex > 0;
+  const canRedo = activeHistoryIndex >= 0 && activeHistoryIndex < activeHistory.length - 1;
+
+  const undo = useCallback(() => {
+    if (!activeImageId) return;
+
+    // 1. If an uncommitted processed output exists, undoing resets it
+    if (activeImage?.processedBlob) {
+      if (activeImage.processedUrl) URL.revokeObjectURL(activeImage.processedUrl);
+      setImages(prev => prev.map(img => img.id === activeImageId ? {
+        ...img,
+        processedBlob: undefined,
+        processedUrl: undefined,
+        processedSize: undefined,
+        status: 'idle',
+      } : img));
+      setToastMessage('Reverted current transformation preview.');
+      return;
+    }
+
+    // 2. Otherwise step back in history stack
+    const currentSteps = historyMap[activeImageId] || [];
+    const currentIdx = historyIndexMap[activeImageId] !== undefined ? historyIndexMap[activeImageId] : 0;
+
+    if (currentIdx > 0) {
+      const prevStep = currentSteps[currentIdx - 1];
+      setHistoryIndexMap(prev => ({ ...prev, [activeImageId]: currentIdx - 1 }));
+
+      setImages(prev => prev.map(img => {
+        if (img.id === activeImageId) {
+          return {
+            ...img,
+            blob: prevStep.blob,
+            url: prevStep.url,
+            size: prevStep.size,
+            width: prevStep.width,
+            height: prevStep.height,
+            processedBlob: undefined,
+            processedUrl: undefined,
+            processedSize: undefined,
+            status: 'idle',
+          };
+        }
+        return img;
+      }));
+
+      setToastMessage(`↩ Undid to: ${prevStep.utilityName}`);
+    }
+  }, [activeImageId, activeImage, historyMap, historyIndexMap]);
+
+  const redo = useCallback(() => {
+    if (!activeImageId) return;
+    const currentSteps = historyMap[activeImageId] || [];
+    const currentIdx = historyIndexMap[activeImageId] !== undefined ? historyIndexMap[activeImageId] : 0;
+
+    if (currentIdx < currentSteps.length - 1) {
+      const nextStep = currentSteps[currentIdx + 1];
+      setHistoryIndexMap(prev => ({ ...prev, [activeImageId]: currentIdx + 1 }));
+
+      setImages(prev => prev.map(img => {
+        if (img.id === activeImageId) {
+          return {
+            ...img,
+            blob: nextStep.blob,
+            url: nextStep.url,
+            size: nextStep.size,
+            width: nextStep.width,
+            height: nextStep.height,
+            processedBlob: undefined,
+            processedUrl: undefined,
+            processedSize: undefined,
+            status: 'idle',
+          };
+        }
+        return img;
+      }));
+
+      setToastMessage(`↪ Redid: ${nextStep.utilityName}`);
+    }
+  }, [activeImageId, historyMap, historyIndexMap]);
+
   return (
     <SessionContext.Provider
       value={{
@@ -743,6 +907,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         toastMessage,
         currentParams,
         savedSessionCount,
+        canUndo,
+        canRedo,
+        undo,
+        redo,
+        activeHistory,
+        activeHistoryIndex,
         addImages,
         removeImage,
         clearWorkspace,
