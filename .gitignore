@@ -42,6 +42,8 @@ coverage/
 # Large model binaries / downloaded test fixtures
 public/models/*.onnx
 test-fixtures/raw-samples/
+test_worker_tasks.mjs
+pdf_preview_*.png
 
 
 *.tsbuildinfo

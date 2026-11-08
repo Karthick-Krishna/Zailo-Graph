@@ -264,3 +264,4 @@ export const InteractiveCropOverlay: React.FC<InteractiveCropOverlayProps> = ({
     </div>
   );
 };
+

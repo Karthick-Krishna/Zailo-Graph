@@ -164,6 +164,62 @@ export const getDefaultParamsForUtility = (utilityId: string, image: { width: nu
   }
 };
 
+/**
+ * Native vector rasterizer for SVG files.
+ * Renders directly at target pixel dimensions via HTMLImageElement into Canvas,
+ * guaranteeing crisp vector curves without low-resolution pixelation.
+ */
+async function rasterizeSvgToBlob(
+  svgBlob: Blob,
+  scaleMultiplier = 2,
+  transparentBackground = true,
+  format = 'image/png'
+): Promise<Blob> {
+  const url = URL.createObjectURL(svgBlob);
+  try {
+    const img = new Image();
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('Failed to parse vector SVG bitstream'));
+      img.src = url;
+    });
+
+    const naturalW = img.naturalWidth || 800;
+    const naturalH = img.naturalHeight || 600;
+    const targetW = Math.max(1, Math.round(naturalW * scaleMultiplier));
+    const targetH = Math.max(1, Math.round(naturalH * scaleMultiplier));
+
+    // Clamp to 8192px max dimension to prevent GPU texture exhaustion
+    const MAX_DIM = 8192;
+    const boundedW = Math.min(targetW, MAX_DIM);
+    const boundedH = Math.min(targetH, MAX_DIM);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = boundedW;
+    canvas.height = boundedH;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas 2D context unavailable');
+
+    if (!transparentBackground) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, boundedW, boundedH);
+    }
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, boundedW, boundedH);
+
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('Canvas raster conversion failed'));
+      }, format, 0.95);
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { validateFileSize, validateBatchCount, isUtilityUnlocked, openAuthModal } = useAuth();
   const [images, setImages] = useState<ImageItem[]>([]);
@@ -263,6 +319,34 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (recoveredItems.length > 0) {
         setImages(recoveredItems);
         setActiveImageId(recoveredItems[0].id);
+
+        // Initialize history stack for restored images
+        setHistoryMap(hPrev => {
+          const nextH = { ...hPrev };
+          recoveredItems.forEach(item => {
+            nextH[item.id] = [{
+              id: 'step_init_' + Math.random().toString(36).substring(2, 9),
+              blob: item.blob,
+              url: item.url,
+              size: item.size,
+              width: item.width,
+              height: item.height,
+              utilityId: 'original',
+              utilityName: 'Restored Image',
+              timestamp: Date.now(),
+            }];
+          });
+          return nextH;
+        });
+
+        setHistoryIndexMap(iPrev => {
+          const nextI = { ...iPrev };
+          recoveredItems.forEach(item => {
+            nextI[item.id] = 0;
+          });
+          return nextI;
+        });
+
         setToastMessage(`⚡ Restored ${recoveredItems.length} images from your private local storage.`);
       } else {
         clearSavedSession();
@@ -433,6 +517,25 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [images.length, activeImageId, validateFileSize, validateBatchCount, openAuthModal]);
 
   const removeImage = useCallback((id: string) => {
+    // Revoke history step URLs and clean up history state
+    setHistoryMap(hPrev => {
+      const steps = hPrev[id] || [];
+      steps.forEach(step => {
+        if (step.url) {
+          try { URL.revokeObjectURL(step.url); } catch {}
+        }
+      });
+      const nextH = { ...hPrev };
+      delete nextH[id];
+      return nextH;
+    });
+
+    setHistoryIndexMap(iPrev => {
+      const nextI = { ...iPrev };
+      delete nextI[id];
+      return nextI;
+    });
+
     setImages(prev => {
       const target = prev.find(img => img.id === id);
       if (target) {
@@ -454,6 +557,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [activeImageId]);
 
   const clearWorkspace = useCallback(() => {
+    // 1. Revoke active image URLs
     images.forEach(img => {
       URL.revokeObjectURL(img.url);
       if (img.previewUrl !== img.url) {
@@ -463,6 +567,20 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         URL.revokeObjectURL(img.processedUrl);
       }
     });
+
+    // 2. Revoke all history URLs across all images
+    setHistoryMap(hPrev => {
+      Object.values(hPrev).forEach(steps => {
+        steps.forEach(step => {
+          if (step.url) {
+            try { URL.revokeObjectURL(step.url); } catch {}
+          }
+        });
+      });
+      return {};
+    });
+    setHistoryIndexMap({});
+
     clearOPFSWorkspace();
     clearSavedSession();
     setImages([]);
@@ -568,6 +686,15 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setHistoryMap(hPrev => {
           const currentList = hPrev[targetId] || [];
           const currentIdx = historyIndexMap[targetId] !== undefined ? historyIndexMap[targetId] : currentList.length - 1;
+          
+          // Revoke any redone steps that are being overwritten
+          const discarded = currentList.slice(currentIdx + 1);
+          discarded.forEach(step => {
+            if (step.url && step.url !== img.url) {
+              try { URL.revokeObjectURL(step.url); } catch {}
+            }
+          });
+
           const truncated = currentList.slice(0, currentIdx + 1);
           return { ...hPrev, [targetId]: [...truncated, newStep] };
         });
@@ -614,9 +741,22 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setImages(prev => prev.map(img => img.id === activeImage.id ? { ...img, status: 'processing', progress: 10 } : img));
 
     try {
-      // Direct handling for lossless EXIF metadata stripping
+      // Direct handling for lossless EXIF metadata stripping (lossless for JPEG, clean scrub for PNG/WebP)
       if (utilityToRun === 'exif-remover' || (utilityToRun === 'exif-viewer' && effectiveParams?.stripMetadata)) {
-        const strippedBlob = await stripJpegMetadataLossless(activeImage.blob);
+        let strippedBlob: Blob;
+        const isJpeg = activeImage.type === 'image/jpeg' || activeImage.name.toLowerCase().endsWith('.jpg') || activeImage.name.toLowerCase().endsWith('.jpeg');
+        if (isJpeg) {
+          strippedBlob = await stripJpegMetadataLossless(activeImage.blob);
+        } else {
+          // Re-render raster through OffscreenCanvas to wipe all metadata chunks (EXIF/XMP/IPTC/comments)
+          const bmp = await createImageBitmap(activeImage.blob);
+          const c = new OffscreenCanvas(bmp.width, bmp.height);
+          const ctx = c.getContext('2d');
+          if (ctx) ctx.drawImage(bmp, 0, 0);
+          bmp.close();
+          const targetType = activeImage.type || 'image/png';
+          strippedBlob = await c.convertToBlob({ type: targetType });
+        }
         const processedUrl = URL.createObjectURL(strippedBlob);
         setImages(prev => prev.map(img => {
           if (img.id === activeImage.id) {
@@ -635,7 +775,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
           }
           return img;
         }));
-        setToastMessage('Losslessly stripped EXIF metadata markers.');
+        setToastMessage(isJpeg ? 'Losslessly stripped EXIF metadata markers.' : 'Scrubbed all metadata chunks from raster bitstream.');
         setIsProcessing(false);
         return;
       }
@@ -691,9 +831,42 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return;
       }
 
+      // Direct handling for SVG to High-Resolution PNG with crisp native vector rasterization
+      if (utilityToRun === 'svg-to-png' || ((activeImage.type === 'image/svg+xml' || activeImage.name.toLowerCase().endsWith('.svg')) && utilityToRun === 'batch-resize')) {
+        const mult = effectiveParams?.scaleMultiplier || 2;
+        const transparentBg = effectiveParams?.transparentBackground !== false;
+        const rasterBlob = await rasterizeSvgToBlob(activeImage.blob, mult, transparentBg);
+        const processedUrl = URL.createObjectURL(rasterBlob);
+        const resBmp = await createImageBitmap(rasterBlob);
+        const pW = resBmp.width;
+        const pH = resBmp.height;
+        resBmp.close();
+
+        setImages(prev => prev.map(img => {
+          if (img.id === activeImage.id) {
+            if (img.processedUrl) URL.revokeObjectURL(img.processedUrl);
+            return {
+              ...img,
+              processedBlob: rasterBlob,
+              processedUrl,
+              processedSize: rasterBlob.size,
+              processedWidth: pW,
+              processedHeight: pH,
+              status: 'done',
+              progress: 100,
+              lastUtilityApplied: 'svg-to-png',
+            };
+          }
+          return img;
+        }));
+        setToastMessage(`Rasterized SVG to ${mult}× high-resolution PNG.`);
+        setIsProcessing(false);
+        return;
+      }
+
       // Map utility to worker task
       let taskType = 'compress';
-      if (utilityToRun === 'batch-resize' || utilityToRun === 'svg-to-png') taskType = 'resize';
+      if (utilityToRun === 'batch-resize') taskType = 'resize';
       else if (utilityToRun === 'avatar-crop') taskType = 'crop';
       else if (utilityToRun === 'watermark') taskType = 'watermark';
       else if (utilityToRun === 'sharpen-enhance') taskType = 'filter';
@@ -718,13 +891,22 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         // Robust 45-second processing window so large super-res / WASM operations never timeout
         const timer = setTimeout(() => {
           worker.removeEventListener('message', handler);
+          worker.removeEventListener('error', errHandler);
           reject(new Error('Processing took longer than expected. Please try standard resolution.'));
         }, 45000);
+
+        const errHandler = (err: ErrorEvent) => {
+          clearTimeout(timer);
+          worker.removeEventListener('message', handler);
+          worker.removeEventListener('error', errHandler);
+          reject(new Error(err.message || 'Worker thread encountered a fatal error.'));
+        };
 
         const handler = (e: MessageEvent) => {
           if (e.data.taskId === taskId) {
             clearTimeout(timer);
             worker.removeEventListener('message', handler);
+            worker.removeEventListener('error', errHandler);
             if (e.data.success) {
               resolve({ blob: e.data.blob, size: e.data.size, extraData: e.data.extraData });
             } else {
@@ -732,7 +914,9 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             }
           }
         };
+
         worker.addEventListener('message', handler);
+        worker.addEventListener('error', errHandler);
       });
 
       worker.postMessage(

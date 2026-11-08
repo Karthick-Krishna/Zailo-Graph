@@ -76,6 +76,8 @@ export async function stripJpegMetadataLossless(file: Blob): Promise<Blob> {
   let lastKeptOffset = 0;
 
   while (offset < dataView.byteLength) {
+    if (offset + 1 >= dataView.byteLength) break;
+
     // Find next marker (0xFF)
     if (dataView.getUint8(offset) !== 0xFF) {
       offset++;
@@ -95,8 +97,14 @@ export async function stripJpegMetadataLossless(file: Blob): Promise<Blob> {
       continue;
     }
 
+    // Defensive check: ensure payload length bytes are readable
+    if (offset + 4 > dataView.byteLength) break;
+
     // Read marker payload length (big-endian 16-bit integer including the 2 length bytes)
     const segmentLength = dataView.getUint16(offset + 2);
+    if (segmentLength < 2 || offset + 2 + segmentLength > dataView.byteLength) {
+      break;
+    }
 
     // Metadata markers to strip:
     // 0xE1 = APP1 (EXIF / XMP)

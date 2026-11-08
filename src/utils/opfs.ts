@@ -1,5 +1,5 @@
 /**
- * Origin Private File System (OPFS) abstraction for sandboxed virtual disk storage.
+ * Origin Private File System (OPFS) abstraction for local virtual disk storage.
  * Keeps heavy 50 MB files off the main JavaScript heap.
  */
 

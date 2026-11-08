@@ -152,6 +152,11 @@ self.onmessage = async (e: MessageEvent) => {
       success: false,
       error: err.message || 'Worker processing failed',
     });
+  } finally {
+    // Immediate GPU / texture deallocation to prevent memory leaks and mobile tab crashes
+    try {
+      imageBitmap?.close?.();
+    } catch {}
   }
 };
 
@@ -787,8 +792,16 @@ async function processAiBackgroundRemoval(bitmap: ImageBitmap, params: any): Pro
 
 async function processAiUpscale(bitmap: ImageBitmap, params: any): Promise<Blob> {
   const scale = params?.upscaleScale || 2;
-  const targetW = bitmap.width * scale;
-  const targetH = bitmap.height * scale;
+  let targetW = bitmap.width * scale;
+  let targetH = bitmap.height * scale;
+
+  // Senior safety guard: cap max pixels to 33.5MP (approx 8192 x 4096 or 5792 x 5792) to prevent texture OOM crash
+  const MAX_PIXELS = 33_554_432;
+  if (targetW * targetH > MAX_PIXELS) {
+    const clampRatio = Math.sqrt(MAX_PIXELS / (targetW * targetH));
+    targetW = Math.max(1, Math.round(targetW * clampRatio));
+    targetH = Math.max(1, Math.round(targetH * clampRatio));
+  }
 
   const canvas = new OffscreenCanvas(targetW, targetH);
   const ctx = canvas.getContext('2d');

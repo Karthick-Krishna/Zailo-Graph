@@ -6,6 +6,7 @@ import { Workspace } from './components/layout/Workspace';
 import { AuthModal } from './components/auth/AuthModal';
 import { ShortcutsModal } from './components/common/ShortcutsModal';
 import { ActiveAuroraBackground } from './components/common/ActiveAuroraBackground';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 const AppContent: React.FC = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
@@ -115,11 +116,13 @@ const AppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <SessionProvider>
-        <AppContent />
-      </SessionProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <SessionProvider>
+          <AppContent />
+        </SessionProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };
 
