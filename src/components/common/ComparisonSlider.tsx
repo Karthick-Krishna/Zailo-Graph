@@ -244,227 +244,224 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-between p-1 sm:p-2 overflow-hidden select-none">
-      {/* Top Floating Control Deck */}
-      <div className="z-20 flex flex-wrap items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-white/95 backdrop-blur-md border border-neutral-200/90 shadow-2xs text-xs max-w-[96vw] mb-2 shrink-0">
+      {/* Top Floating Control Islands (Linear / Figma Studio Hierarchy) */}
+      <div className="z-20 w-full max-w-7xl px-2 mb-2 shrink-0 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
         
-        {/* File Telemetry */}
-        <div className="flex items-center gap-1.5 font-medium text-neutral-800">
-          <span className="font-semibold truncate max-w-[120px] sm:max-w-[180px]">{imageName}</span>
-          <span className="text-neutral-300">|</span>
-          <span className="font-mono text-neutral-500 text-[11px]">{formatBytes(originalSize)}</span>
+        {/* Island 1: File Telemetry & Quick Undo/Redo */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200/90 shadow-2xs text-xs shrink-0">
+          <div className="flex items-center gap-1.5 font-medium text-neutral-800">
+            <span className="font-semibold truncate max-w-[110px] sm:max-w-[160px] tracking-tight">{imageName}</span>
+            <span className="text-neutral-300">|</span>
+            <span className="font-mono text-neutral-500 text-[11px]">{formatBytes(originalSize)}</span>
+          </div>
+
+          {processedSize && (
+            <div className="flex items-center gap-1.5 pl-1.5 border-l border-neutral-200">
+              <span className="text-neutral-400 font-bold">&rarr;</span>
+              <span className="font-mono text-neutral-900 font-semibold text-[11px]">
+                {formatBytes(processedSize)}
+              </span>
+              {savings && (
+                <span className={`font-mono text-[10px] px-1.5 py-0.2 rounded-md font-semibold ${
+                  savings.isSaved 
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' 
+                    : 'bg-neutral-100 text-neutral-700'
+                }`}>
+                  {savings.isSaved ? `-${savings.percent}%` : `+${savings.percent}%`}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Inline Undo / Redo */}
+          <div className="flex items-center gap-0.5 pl-1.5 border-l border-neutral-200">
+            <button
+              onClick={undo}
+              disabled={!canUndo}
+              className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer"
+              title="Undo transformation (Ctrl+Z)"
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={redo}
+              disabled={!canRedo}
+              className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer"
+              title="Redo transformation (Ctrl+Y)"
+            >
+              <Redo2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
-        {/* Processed Stats Badge */}
-        {processedSize && (
-          <div className="flex items-center gap-1.5 pl-1 border-l border-neutral-200">
-            <span className="text-neutral-400 font-bold">&rarr;</span>
-            <span className="font-mono text-neutral-900 font-semibold text-[11px]">
-              {formatBytes(processedSize)}
-            </span>
-            {savings && (
-              <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded-md font-semibold ${
-                savings.isSaved 
-                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' 
-                  : 'bg-neutral-100 text-neutral-700'
-              }`}>
-                {savings.isSaved ? `-${savings.percent}%` : `+${savings.percent}%`}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Mode Selector Segmented Control */}
-        <div className="flex items-center gap-0.5 p-0.5 bg-neutral-100/90 rounded-lg border border-neutral-200/80">
+        {/* Island 2: Mode Selector Segmented Control */}
+        <div className="flex items-center gap-0.5 p-1 rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200/90 shadow-2xs text-xs shrink-0">
           {!isAspectMismatched ? (
             <button
               onClick={() => setViewMode('slider')}
-              className={`px-2 py-1 rounded-md text-[11px] font-medium transition cursor-pointer flex items-center gap-1 ${
-                viewMode === 'slider' ? 'bg-white text-neutral-900 font-semibold shadow-2xs border border-neutral-200/70' : 'text-neutral-500 hover:text-neutral-800'
+              className={`px-2.5 py-1 rounded-xl text-[11px] font-medium transition cursor-pointer flex items-center gap-1.5 ${
+                viewMode === 'slider' ? 'bg-neutral-900 text-white font-semibold shadow-xs' : 'text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/80'
               }`}
-              title="Split comparison slider"
+              title="Split comparison wipe slider"
             >
-              <SplitSquareVertical className="w-3 h-3 text-neutral-600" />
+              <SplitSquareVertical className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Split</span>
             </button>
-          ) : (
-            <span 
-              className="px-2 py-1 text-[10px] text-neutral-400 font-medium italic flex items-center gap-1 cursor-help"
-              title="Split wipe requires matching aspect ratios."
-            >
-              <SplitSquareVertical className="w-3 h-3 opacity-40" />
-              <span className="hidden sm:inline">Split (Aspect Differs)</span>
-            </span>
-          )}
+          ) : null}
 
           <button
             onClick={() => setViewMode('result')}
-            className={`px-2 py-1 rounded-md text-[11px] font-medium transition cursor-pointer flex items-center gap-1 ${
-              viewMode === 'result' ? 'bg-white text-neutral-900 font-semibold shadow-2xs border border-neutral-200/70' : 'text-neutral-500 hover:text-neutral-800'
+            className={`px-2.5 py-1 rounded-xl text-[11px] font-medium transition cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'result' ? 'bg-neutral-900 text-white font-semibold shadow-xs' : 'text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/80'
             }`}
             title="Show Processed Result"
           >
-            <Eye className="w-3 h-3 text-neutral-600" />
+            <Eye className="w-3.5 h-3.5" />
             <span>Result</span>
           </button>
 
           <button
             onClick={() => setViewMode('side_by_side')}
-            className={`px-2 py-1 rounded-md text-[11px] font-medium transition cursor-pointer flex items-center gap-1 ${
-              viewMode === 'side_by_side' ? 'bg-white text-neutral-900 font-semibold shadow-2xs border border-neutral-200/70' : 'text-neutral-500 hover:text-neutral-800'
+            className={`px-2.5 py-1 rounded-xl text-[11px] font-medium transition cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'side_by_side' ? 'bg-neutral-900 text-white font-semibold shadow-xs' : 'text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/80'
             }`}
             title="Side-by-side comparison"
           >
-            <Columns className="w-3 h-3" />
+            <Columns className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Side by Side</span>
           </button>
 
           <button
             onClick={() => setViewMode('original')}
-            className={`px-2 py-1 rounded-md text-[11px] font-medium transition cursor-pointer flex items-center gap-1 ${
-              viewMode === 'original' ? 'bg-white text-neutral-900 font-semibold shadow-2xs border border-neutral-200/70' : 'text-neutral-500 hover:text-neutral-800'
+            className={`px-2.5 py-1 rounded-xl text-[11px] font-medium transition cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'original' ? 'bg-neutral-900 text-white font-semibold shadow-xs' : 'text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/80'
             }`}
             title="Show Original"
           >
             <span className="hidden sm:inline">Original</span>
           </button>
-        </div>
 
-        {/* Pixel Inspection Loupe (2× / 4× Magnifier) */}
-        <div className="flex items-center gap-1 pl-1 border-l border-neutral-200">
-          <button
-            onClick={() => setIsLoupeActive(prev => !prev)}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
-              isLoupeActive
-                ? 'bg-violet-600 border-violet-600 text-white shadow-xs'
-                : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200'
-            }`}
-            title="Toggle Pixel Inspection Loupe (Hotkey: Z)"
-          >
-            <Search className="w-3 h-3 text-cyan-400" />
-            <span>Loupe</span>
-          </button>
-
-          {isLoupeActive && (
-            <div className="flex items-center p-0.5 rounded-lg bg-neutral-100 border border-neutral-200 text-[10px] font-mono">
-              <button
-                onClick={() => setLoupeZoom(2)}
-                className={`px-1.5 py-0.5 rounded font-bold transition cursor-pointer ${
-                  loupeZoom === 2 ? 'bg-white text-violet-700 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900'
-                }`}
-              >
-                2×
-              </button>
-              <button
-                onClick={() => setLoupeZoom(4)}
-                className={`px-1.5 py-0.5 rounded font-bold transition cursor-pointer ${
-                  loupeZoom === 4 ? 'bg-white text-violet-700 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900'
-                }`}
-              >
-                4×
-              </button>
-            </div>
+          {/* Interactive Canvas Crop Toggle (When Crop tool active) */}
+          {isCropTool && (
+            <button
+              onClick={() => setShowCropHandles(prev => !prev)}
+              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 ml-1 border ${
+                showCropHandles
+                  ? 'bg-violet-600 border-violet-600 text-white shadow-xs'
+                  : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200'
+              }`}
+              title="Toggle Interactive Draggable Crop Overlay on Canvas"
+            >
+              <Crop className="w-3 h-3 text-cyan-300" />
+              <span>Crop Box</span>
+            </button>
           )}
         </div>
 
-        {/* Interactive Canvas Crop Toggle (When Crop tool active) */}
-        {isCropTool && (
+        {/* Island 3: Optics, Inspection & Viewport Controls */}
+        <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200/90 shadow-2xs text-xs shrink-0">
+          {/* Pixel Inspection Loupe (2× / 4× Magnifier) */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setIsLoupeActive(prev => !prev)}
+              className={`px-2 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border ${
+                isLoupeActive
+                  ? 'bg-violet-600 border-violet-600 text-white shadow-xs'
+                  : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200'
+              }`}
+              title="Toggle Pixel Inspection Loupe (Hotkey: Z)"
+            >
+              <Search className="w-3 h-3 text-cyan-400" />
+              <span>Loupe</span>
+            </button>
+
+            {isLoupeActive && (
+              <div className="flex items-center p-0.5 rounded-lg bg-neutral-100 border border-neutral-200 text-[10px] font-mono">
+                <button
+                  onClick={() => setLoupeZoom(2)}
+                  className={`px-1.5 py-0.5 rounded font-bold transition cursor-pointer ${
+                    loupeZoom === 2 ? 'bg-white text-violet-700 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
+                >
+                  2×
+                </button>
+                <button
+                  onClick={() => setLoupeZoom(4)}
+                  className={`px-1.5 py-0.5 rounded font-bold transition cursor-pointer ${
+                    loupeZoom === 4 ? 'bg-white text-violet-700 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
+                >
+                  4×
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 1:1 Pixel Inspection Button */}
           <button
-            onClick={() => setShowCropHandles(prev => !prev)}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
-              showCropHandles
-                ? 'bg-neutral-900 border-neutral-900 text-white'
+            onClick={togglePixelInspection}
+            className={`px-2 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border ${
+              zoomLevel >= 2
+                ? 'bg-neutral-900 border-neutral-900 text-white shadow-xs'
                 : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200'
             }`}
-            title="Toggle Interactive Draggable Crop Overlay on Canvas"
+            title="Inspect 1:1 actual pixel resolution (100% scale)"
           >
-            <Crop className="w-3 h-3 text-cyan-400" />
-            <span>Crop Box {showCropHandles ? 'Active' : 'Hidden'}</span>
+            <Sparkles className="w-3 h-3 text-cyan-500" />
+            <span className="hidden sm:inline">{zoomLevel >= 2 ? 'Exit 100%' : '1:1'}</span>
           </button>
-        )}
 
-        {/* 1:1 Pixel Inspection Button */}
-        <button
-          onClick={togglePixelInspection}
-          className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border ${
-            zoomLevel >= 2
-              ? 'bg-neutral-900 border-neutral-900 text-white'
-              : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200'
-          }`}
-          title="Inspect 1:1 actual pixel resolution (100% scale)"
-        >
-          <Sparkles className="w-3 h-3 text-cyan-500" />
-          <span>{zoomLevel >= 2 ? 'Exit 100%' : '1:1 Pixels'}</span>
-        </button>
+          {/* Zoom Controls */}
+          <div className="flex items-center gap-0.5 pl-1 border-l border-neutral-200">
+            <button 
+              onClick={zoomOut}
+              className="p-1 text-neutral-400 hover:text-neutral-800 rounded-lg transition cursor-pointer"
+              title="Zoom Out"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+            <span className="text-[10px] font-mono text-neutral-600 px-1 min-w-[34px] text-center font-medium">
+              {Math.round(zoomLevel * 100)}%
+            </span>
+            <button 
+              onClick={zoomIn}
+              className="p-1 text-neutral-400 hover:text-neutral-800 rounded-lg transition cursor-pointer"
+              title="Zoom In"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+            <button 
+              onClick={resetZoom}
+              className="p-1 text-neutral-400 hover:text-neutral-800 rounded-lg transition cursor-pointer"
+              title="Reset Zoom"
+            >
+              <RotateCcw className="w-3 h-3" />
+            </button>
+          </div>
 
-        {/* Quick Undo / Redo in Canvas Deck */}
-        <div className="flex items-center gap-0.5 pl-1 border-l border-neutral-200">
-          <button
-            onClick={undo}
-            disabled={!canUndo}
-            className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
-            title="Undo transformation (Ctrl+Z)"
-          >
-            <Undo2 className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={redo}
-            disabled={!canRedo}
-            className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
-            title="Redo transformation (Ctrl+Y)"
-          >
-            <Redo2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
+          {/* Canvas Backdrop Theme Toggle (Light Corporate vs Dark Studio) */}
+          <div className="flex items-center gap-1 pl-1 border-l border-neutral-200">
+            <button
+              onClick={() => setCanvasTheme(prev => prev === 'light' ? 'dark' : 'light')}
+              className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition cursor-pointer border border-neutral-200"
+              title={canvasTheme === 'light' ? 'Switch to Dark Studio Canvas' : 'Switch to Light Corporate Canvas'}
+            >
+              {canvasTheme === 'light' ? <Moon className="w-3 h-3" /> : <Sun className="w-3 h-3" />}
+            </button>
 
-        {/* Concept 1: Ambient Adaptive Aura Toggle */}
-        <button
-          onClick={() => setShowAura(prev => !prev)}
-          className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border ${
-            showAura
-              ? 'bg-neutral-900 border-neutral-900 text-cyan-300 shadow-2xs'
-              : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-500 border-neutral-200'
-          }`}
-          title="Toggle Concept 1: Ambient Adaptive Aura (Dynamic Reactive Backlight)"
-        >
-          <span className={`w-2 h-2 rounded-full ${showAura ? 'bg-cyan-400 animate-pulse' : 'bg-neutral-400'}`}></span>
-          <span>Aura</span>
-        </button>
-
-        {/* Canvas Backdrop Theme Toggle (Light Corporate vs Dark Studio) */}
-        <button
-          onClick={() => setCanvasTheme(prev => prev === 'light' ? 'dark' : 'light')}
-          className="p-1 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition cursor-pointer border border-neutral-200"
-          title={canvasTheme === 'light' ? 'Switch to Dark Studio Canvas' : 'Switch to Light Corporate Canvas'}
-        >
-          {canvasTheme === 'light' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
-        </button>
-
-        {/* Zoom Controls */}
-        <div className="flex items-center gap-0.5 pl-1 border-l border-neutral-200">
-          <button 
-            onClick={zoomOut}
-            className="p-1 text-neutral-400 hover:text-neutral-800 rounded transition cursor-pointer"
-            title="Zoom Out"
-          >
-            <ZoomOut className="w-3.5 h-3.5" />
-          </button>
-          <span className="text-[10px] font-mono text-neutral-600 px-1 min-w-[36px] text-center">
-            {Math.round(zoomLevel * 100)}%
-          </span>
-          <button 
-            onClick={zoomIn}
-            className="p-1 text-neutral-400 hover:text-neutral-800 rounded transition cursor-pointer"
-            title="Zoom In"
-          >
-            <ZoomIn className="w-3.5 h-3.5" />
-          </button>
-          <button 
-            onClick={resetZoom}
-            className="p-1 text-neutral-400 hover:text-neutral-800 rounded transition cursor-pointer"
-            title="Reset Zoom"
-          >
-            <RotateCcw className="w-3 h-3" />
-          </button>
+            {/* Concept 1: Ambient Adaptive Aura Toggle */}
+            <button
+              onClick={() => setShowAura(prev => !prev)}
+              className={`p-1.5 rounded-lg text-[11px] font-semibold transition cursor-pointer border ${
+                showAura
+                  ? 'bg-neutral-900 border-neutral-900 text-cyan-300 shadow-2xs'
+                  : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-400 border-neutral-200'
+              }`}
+              title="Toggle Ambient Adaptive Aura"
+            >
+              <span className={`block w-2 h-2 rounded-full ${showAura ? 'bg-cyan-400 animate-pulse' : 'bg-neutral-400'}`}></span>
+            </button>
+          </div>
         </div>
       </div>
 

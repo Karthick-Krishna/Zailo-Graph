@@ -2,8 +2,8 @@
 
 @layer base {
   :root {
-    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --font-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
   }
 
   body {
@@ -11,6 +11,15 @@
     background-color: #FAFAFA;
     color: #09090B;
     overflow-x: hidden;
+    letter-spacing: -0.012em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Senior Developer / Studio Typography: Tabular figures for numbers, dimensions, and telemetry */
+  .font-mono, [data-tabular-nums] {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
 
   ::selection {

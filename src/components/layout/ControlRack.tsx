@@ -3,7 +3,64 @@ import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { UTILITIES } from '../../types/utility';
 import { formatBytes } from '../../utils/formatters';
-import { Play, Download, X, Sliders } from 'lucide-react';
+import { 
+  Play, 
+  Download, 
+  X, 
+  Sliders, 
+  Sparkles, 
+  Maximize2, 
+  FileDown, 
+  Smartphone, 
+  Repeat, 
+  FileCode2, 
+  PenTool, 
+  Zap, 
+  Eraser, 
+  Crop, 
+  Share2, 
+  Stamp, 
+  LayoutGrid, 
+  Palette, 
+  IdCard, 
+  SunMedium, 
+  Wand2, 
+  FileSearch, 
+  ShieldCheck, 
+  EyeOff, 
+  AppWindow, 
+  Binary, 
+  FileCode, 
+  Camera 
+} from 'lucide-react';
+
+const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
+  Sparkles,
+  Maximize2,
+  FileDown,
+  Smartphone,
+  Repeat,
+  FileCode2,
+  PenTool,
+  Zap,
+  Eraser,
+  Sliders,
+  Crop,
+  Share2,
+  Stamp,
+  LayoutGrid,
+  Palette,
+  IdCard,
+  SunMedium,
+  Wand2,
+  FileSearch,
+  ShieldCheck,
+  EyeOff,
+  AppWindow,
+  Binary,
+  FileCode,
+  Camera,
+};
 
 // Modular Utility Controls
 import { ResizeControls } from '../utilities/ResizeControls';
@@ -132,19 +189,29 @@ export const ControlRack: React.FC<ControlRackProps> = ({
           </div>
         )}
 
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Settings</span>
-            <span className="text-[10px] font-semibold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md border border-neutral-200/80 uppercase">
-              {activeUtility.category}
-            </span>
+        {/* Studio Active Tool Header */}
+        <div className="flex items-start gap-3 pb-4 border-b border-neutral-100">
+          <div className="w-10 h-10 rounded-2xl bg-neutral-900 text-white flex items-center justify-center shrink-0 shadow-sm border border-neutral-800">
+            {React.createElement(ICON_MAP[activeUtility.icon] || Sparkles, { className: "w-5 h-5 text-cyan-400" })}
           </div>
-          <h3 className="text-base font-bold text-neutral-900 tracking-tight">
-            {activeUtility.name}
-          </h3>
-          <p className="text-[11px] text-neutral-500 mt-0.5 leading-relaxed">
-            {activeUtility.description}
-          </p>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="text-[9px] font-mono font-semibold uppercase tracking-wider text-violet-700 bg-violet-50 px-1.5 py-0.5 rounded-md border border-violet-200/60">
+                {activeUtility.category}
+              </span>
+              {activeUtility.badge && (
+                <span className="text-[9px] font-mono text-neutral-400 px-1 py-0.5 rounded bg-neutral-100 border border-neutral-200/60 uppercase">
+                  {activeUtility.badge}
+                </span>
+              )}
+            </div>
+            <h3 className="text-sm font-bold text-neutral-900 tracking-tight truncate">
+              {activeUtility.name}
+            </h3>
+            <p className="text-[11px] text-neutral-500 mt-0.5 leading-relaxed line-clamp-2">
+              {activeUtility.description}
+            </p>
+          </div>
         </div>
 
         {/* Dynamic Tool Controls */}

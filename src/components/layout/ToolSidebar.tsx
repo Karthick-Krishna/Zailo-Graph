@@ -140,23 +140,36 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
 
     if (isCollapsed) {
       return (
-        <button
-          key={u.id}
-          onClick={() => setActiveUtilityId(u.id)}
-          className={`relative w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer group mb-1.5 ${
-            isSelected
-              ? 'bg-neutral-900 text-white shadow-xs'
-              : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100'
-          }`}
-          title={`${u.name} — ${u.description}`}
-        >
-          <IconComponent className="w-4 h-4 shrink-0" />
-          {isLocked && (
-            <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center border border-amber-200">
-              <Lock className="w-2 h-2" />
-            </span>
-          )}
-        </button>
+        <div key={u.id} className="relative group mb-1.5">
+          <button
+            onClick={() => setActiveUtilityId(u.id)}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+              isSelected
+                ? 'bg-neutral-900 text-cyan-300 shadow-sm ring-1 ring-neutral-800'
+                : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100'
+            }`}
+            aria-label={u.name}
+          >
+            <IconComponent className="w-4 h-4 shrink-0" />
+            {isLocked && (
+              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center border border-amber-200">
+                <Lock className="w-2 h-2" />
+              </span>
+            )}
+          </button>
+
+          {/* Instant Floating Tooltip Popover (Senior Dev Desktop Tooling) */}
+          <div className="absolute left-full ml-2.5 top-1/2 -translate-y-1/2 z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center">
+            <div className="px-2.5 py-1 rounded-lg bg-neutral-900 text-white text-xs font-medium tracking-tight shadow-xl border border-neutral-700/60 whitespace-nowrap flex items-center gap-1.5">
+              <span>{u.name}</span>
+              {u.badge && (
+                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-neutral-800 text-cyan-300 uppercase">
+                  {u.badge}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
       );
     }
 
@@ -164,14 +177,20 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
       <button
         key={u.id}
         onClick={() => setActiveUtilityId(u.id)}
-        className={`w-full px-3 py-2 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between group mb-1 ${
+        className={`w-full px-2.5 py-2 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between group mb-1 ${
           isSelected
-            ? 'bg-neutral-900 text-white font-semibold shadow-xs'
-            : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100/80 font-medium'
+            ? 'bg-neutral-900 text-white font-medium shadow-sm'
+            : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100/80 font-normal'
         }`}
       >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? 'text-cyan-400' : 'text-neutral-500 group-hover:text-neutral-800'}`} />
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Left Active Glow Indicator Pip */}
+          <span className={`w-1 h-3.5 rounded-full transition-all shrink-0 ${
+            isSelected 
+              ? 'bg-gradient-to-b from-violet-400 to-cyan-400 opacity-100' 
+              : 'opacity-0'
+          }`} />
+          <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? 'text-cyan-300' : 'text-neutral-500 group-hover:text-neutral-800'}`} />
           <span className="text-xs truncate tracking-tight">{u.name}</span>
         </div>
 
@@ -244,23 +263,28 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
 
           {/* Category Filter Pills (When no active search) */}
           {!searchQuery && (
-            <div className="flex items-center gap-1 overflow-x-auto pt-2 pb-0.5 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
-              {CATEGORIES.map(cat => {
-                const isCatSelected = selectedCategory === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-2 py-0.8 rounded-md text-[10px] font-medium whitespace-nowrap transition cursor-pointer ${
-                      isCatSelected
-                        ? 'bg-neutral-900 text-white font-semibold'
-                        : 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/70'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                );
-              })}
+            <div className="relative pt-2">
+              <div 
+                className="flex items-center gap-1 overflow-x-auto pb-0.5 no-scrollbar" 
+                style={{ scrollbarWidth: 'none' }}
+              >
+                {CATEGORIES.map(cat => {
+                  const isCatSelected = selectedCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-medium whitespace-nowrap transition cursor-pointer ${
+                        isCatSelected
+                          ? 'bg-neutral-900 text-white font-semibold shadow-2xs'
+                          : 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/70 border border-neutral-200/50'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
