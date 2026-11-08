@@ -30,28 +30,28 @@ export const AuthModal: React.FC = () => {
       case 'resolution_limit':
         return 'Unlock Unconstrained Master Exports';
       default:
-        return 'Continue to ZailoGraph';
+        return 'Continue to Zailo Graph';
     }
   };
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={closeAuthModal}
     >
       <div 
-        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-neutral-200 overflow-hidden"
+        className="relative w-full max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-neutral-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header */}
-        <div className="p-6 pb-4 border-b border-neutral-100 flex items-start justify-between bg-neutral-50/70">
-          <div className="flex items-center gap-3">
+        <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-neutral-100 flex items-start justify-between bg-neutral-50/70">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <ZailoGraphLogo size="sm" showText={false} />
             <div>
-              <h3 className="text-xl font-bold text-neutral-900 tracking-tight">
+              <h3 className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">
                 {getReasonTitle()}
               </h3>
-              <p className="text-xs text-neutral-500 font-medium mt-0.5">
+              <p className="text-[11px] sm:text-xs text-neutral-500 font-medium mt-0.5">
                 Privacy-first image workspace • Zero passwords
               </p>
             </div>
@@ -67,7 +67,7 @@ export const AuthModal: React.FC = () => {
 
         {/* Custom trigger alert banner if triggered by a limit */}
         {authModal.customMessage && (
-          <div className="mx-6 mt-4 p-3 rounded-xl bg-amber-50/90 border border-amber-200 flex items-start gap-2.5 text-xs text-amber-900">
+          <div className="mx-4 sm:mx-6 mt-3 sm:mt-4 p-3 rounded-xl bg-amber-50/90 border border-amber-200 flex items-start gap-2.5 text-xs text-amber-900">
             <Zap className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <span>{authModal.customMessage}</span>
           </div>
@@ -75,27 +75,27 @@ export const AuthModal: React.FC = () => {
 
         {/* Auth Error Banner */}
         {authError && (
-          <div className="mx-6 mt-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-start justify-between gap-2.5 text-xs text-red-800">
+          <div className="mx-4 sm:mx-6 mt-3 sm:mt-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-start justify-between gap-2.5 text-xs text-red-800">
             <div className="flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
               <span>{authError}</span>
             </div>
             <button 
               onClick={clearAuthError}
-              className="text-red-600 hover:text-red-900 font-bold ml-1 text-sm leading-none"
+              className="text-red-600 hover:text-red-900 font-bold ml-1 text-sm leading-none cursor-pointer"
             >
               ×
             </button>
           </div>
         )}
 
-        <div className="p-6 space-y-6">
-          <div className="text-center space-y-1.5">
-            <h4 className="text-base font-semibold text-neutral-900">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+          <div className="text-center space-y-1">
+            <h4 className="text-sm sm:text-base font-semibold text-neutral-900">
               Sign in with Google
             </h4>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">
-              Continue to ZailoGraph to access full session persistence, unrestricted batch queueing, and all 26 local image tools.
+              Continue to Zailo Graph to access full session persistence, unrestricted batch queueing, and all 25 local image tools.
             </p>
           </div>
 

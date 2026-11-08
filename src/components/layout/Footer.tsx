@@ -84,23 +84,23 @@ export const Footer: React.FC = () => {
   });
 
   return (
-    <footer className="w-full bg-neutral-950 text-neutral-300 pt-16 sm:pt-20 pb-12 mt-20 border-t border-neutral-800/80 relative overflow-hidden select-none">
+    <footer className="w-full bg-neutral-950 text-neutral-300 pt-12 sm:pt-20 pb-10 sm:pb-12 mt-12 sm:mt-20 border-t border-neutral-800/80 relative overflow-hidden select-none">
       {/* Subtle Aurora Ambient Glows */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative z-10">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 space-y-10 sm:space-y-12 relative z-10">
         {/* ========================================================= */}
         {/* SECTION 1: THE 25 BROWSER UTILITIES DIRECTORY             */}
         {/* ========================================================= */}
-        <div className="space-y-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-neutral-800/80 pb-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-mono font-semibold text-neutral-300 tracking-wide uppercase">
+        <div className="space-y-5 sm:space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 border-b border-neutral-800/80 pb-5 sm:pb-6">
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 sm:py-1 rounded-full bg-neutral-900 border border-neutral-800 text-[10px] sm:text-[11px] font-mono font-semibold text-neutral-300 tracking-wide uppercase">
                 <span className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-400 to-cyan-400 animate-pulse"></span>
                 <span>Complete Studio Directory</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              <h2 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
                 The 25 Browser Utilities
               </h2>
               <p className="text-xs sm:text-sm text-neutral-400 max-w-2xl leading-relaxed">
@@ -110,24 +110,24 @@ export const Footer: React.FC = () => {
 
             {/* Quick stats badges */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="px-3 py-1 rounded-xl bg-neutral-900/90 border border-neutral-800 text-neutral-300 font-medium flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="px-2.5 py-1 rounded-xl bg-neutral-900/90 border border-neutral-800 text-neutral-300 font-medium flex items-center gap-1.5 text-[11px] sm:text-xs">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 <span>100% Client-Side RAM</span>
               </span>
-              <span className="px-3 py-1 rounded-xl bg-neutral-900/90 border border-neutral-800 text-neutral-300 font-medium flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-cyan-400" />
-                <span>WebAssembly &amp; Web Workers</span>
+              <span className="px-2.5 py-1 rounded-xl bg-neutral-900/90 border border-neutral-800 text-neutral-300 font-medium flex items-center gap-1.5 text-[11px] sm:text-xs">
+                <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span>WebAssembly &amp; Workers</span>
               </span>
             </div>
           </div>
 
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-neutral-800">
+          {/* Category Filter Pills (Edge-to-edge touch scroll on mobile) */}
+          <div className="-mx-3.5 px-3.5 sm:mx-0 sm:px-0 flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
             {filterTabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveFilter(tab.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-2 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 shrink-0 min-h-[36px] sm:min-h-[38px] ${
                   activeFilter === tab.id
                     ? 'bg-violet-600 text-white shadow-md shadow-violet-600/30'
                     : 'bg-neutral-900/90 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800'
@@ -148,7 +148,7 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Directory Grid of 25 Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-3.5">
             {filteredUtilities.map(tool => {
               const isLocked = !isUtilityUnlocked(tool.id);
               const isPro = tool.isCompetitorPaid;
@@ -158,7 +158,7 @@ export const Footer: React.FC = () => {
                   key={tool.id}
                   href={`/tools/${tool.id}.html`}
                   onClick={(e) => handleToolClick(tool, e)}
-                  className="group relative p-4 rounded-2xl bg-neutral-900/80 hover:bg-neutral-900 border border-neutral-800/90 hover:border-violet-500/50 transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer shadow-sm hover:shadow-lg hover:shadow-violet-950/20"
+                  className="group relative p-3.5 sm:p-4 rounded-2xl bg-neutral-900/80 hover:bg-neutral-900 border border-neutral-800/90 hover:border-violet-500/50 transition-all duration-200 flex flex-col justify-between space-y-2.5 sm:space-y-3 cursor-pointer shadow-sm hover:shadow-lg hover:shadow-violet-950/20 active:scale-[0.99]"
                 >
                   {/* Card Header: Category & Access Badges */}
                   <div className="flex items-center justify-between gap-2">
@@ -180,12 +180,12 @@ export const Footer: React.FC = () => {
                   </div>
 
                   {/* Card Body: Title & Exact Description */}
-                  <div className="space-y-1.5 flex-1">
+                  <div className="space-y-1 flex-1">
                     <h3 className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors flex items-center justify-between">
-                      <span>{tool.name}</span>
-                      <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-violet-400 shrink-0 ml-1" />
+                      <span className="truncate mr-1">{tool.name}</span>
+                      <ArrowRight className="w-3.5 h-3.5 opacity-70 sm:opacity-0 -translate-x-0.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-violet-400 shrink-0" />
                     </h3>
-                    <p className="text-xs text-neutral-400 leading-relaxed line-clamp-3">
+                    <p className="text-xs text-neutral-400 leading-relaxed line-clamp-2 sm:line-clamp-3">
                       {tool.description}
                     </p>
                   </div>
@@ -209,14 +209,14 @@ export const Footer: React.FC = () => {
         {/* ========================================================= */}
         {/* SECTION 2: BRAND, COLLABORATION & SPECS                   */}
         {/* ========================================================= */}
-        <div className="pt-8 border-t border-neutral-800 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+        <div className="pt-6 sm:pt-8 border-t border-neutral-800 flex flex-col lg:flex-row lg:items-center justify-between gap-6 sm:gap-8">
           {/* Brand & Collaborative Credit */}
-          <div className="space-y-3 max-w-xl">
+          <div className="space-y-2.5 sm:space-y-3 max-w-xl">
             <div className="flex items-center gap-3">
               <ZailoGraphLogo size="md" showText={true} theme="dark" />
             </div>
             
-            <div className="space-y-1">
+            <div className="space-y-0.5 sm:space-y-1">
               <p className="text-sm font-bold text-white tracking-wide">
                 Zailo Graph by Coralgenz &amp; Zorquelz
               </p>
@@ -232,7 +232,7 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Trust Guarantees & Back to Top */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
             <div className="px-3.5 py-2 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center gap-2.5 text-xs text-neutral-300">
               <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
               <div>
@@ -251,11 +251,12 @@ export const Footer: React.FC = () => {
 
             <button
               onClick={scrollToTop}
-              className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-700 text-neutral-300 hover:text-white transition cursor-pointer border border-neutral-800 shadow-sm flex items-center justify-center shrink-0 self-stretch sm:self-auto"
+              className="py-2.5 px-4 sm:p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-700 text-neutral-300 hover:text-white transition cursor-pointer border border-neutral-800 shadow-sm flex items-center justify-center gap-2 shrink-0 min-h-[44px]"
               title="Scroll to Top"
               aria-label="Scroll to top of workspace"
             >
               <ArrowUp className="w-4 h-4" />
+              <span className="sm:hidden text-xs font-semibold">Back to Top</span>
             </button>
           </div>
         </div>
@@ -263,21 +264,21 @@ export const Footer: React.FC = () => {
         {/* ========================================================= */}
         {/* SECTION 3: COPYRIGHT & LEGAL ATTRIBUTION                 */}
         {/* ========================================================= */}
-        <div className="pt-6 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
-          <p className="text-center sm:text-left">
+        <div className="pt-5 sm:pt-6 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-xs text-neutral-400 text-center sm:text-left">
+          <p>
             &copy; 2026 Zailo Graph by Coralgenz &amp; Zorquelz. A Collaborative Product by Coralgenz &amp; Zorquelz. All 25 browser utilities are 100% free forever.
           </p>
 
-          <div className="flex items-center gap-3 text-neutral-400 font-mono text-[11px]">
-            <span>Apache-2.0 License</span>
+          <div className="flex items-center justify-center gap-3 text-neutral-400 font-mono text-[11px]">
+            <span>Apache-2.0</span>
             <span>•</span>
             <span>Zero Tracking</span>
             <span>•</span>
             <button
               onClick={scrollToTop}
-              className="text-violet-400 hover:text-violet-300 transition cursor-pointer font-sans font-semibold"
+              className="text-violet-400 hover:text-violet-300 transition cursor-pointer font-sans font-semibold p-1"
             >
-              Back to Top &uarr;
+              Top &uarr;
             </button>
           </div>
         </div>

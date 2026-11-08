@@ -209,7 +209,7 @@ export const LandingWorkspace: React.FC = () => {
     : UTILITIES.filter(u => u.category === selectedFilter);
 
   return (
-    <div className="w-full flex-1 overflow-y-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col items-center">
+    <div className="w-full flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-10 flex flex-col items-center">
       {/* Hidden File Inputs */}
       <input
         ref={fileInputRef}
@@ -229,25 +229,30 @@ export const LandingWorkspace: React.FC = () => {
       />
 
       {/* Main Container */}
-      <div className="w-full max-w-5xl flex flex-col items-center space-y-10 relative">
+      <div className="w-full max-w-5xl flex flex-col items-center space-y-8 sm:space-y-10 relative">
         {/* Active Ambient Fluid Aurora Blooms */}
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-violet-600/35 via-indigo-500/30 to-cyan-400/35 blur-[100px] pointer-events-none rounded-full animate-aura-1"></div>
         <div className="absolute top-1/3 -right-28 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/25 via-blue-500/20 to-violet-600/25 blur-[110px] pointer-events-none rounded-full animate-aura-2"></div>
         <div className="absolute top-2/3 -left-28 w-[480px] h-[480px] bg-gradient-to-tr from-violet-600/30 to-fuchsia-600/20 blur-[100px] pointer-events-none rounded-full animate-aura-3"></div>
 
         {/* Hero Banner Header */}
-        <div className="text-center space-y-5 max-w-3xl relative z-10 flex flex-col items-center">
+        <div className="text-center space-y-4 sm:space-y-5 max-w-3xl relative z-10 flex flex-col items-center px-1">
           {/* Logo Brand Emblem with Subtle Glow */}
-          <div className="relative group cursor-pointer py-2" onClick={() => fileInputRef.current?.click()}>
+          <div className="relative group cursor-pointer py-1 sm:py-2" onClick={() => fileInputRef.current?.click()}>
             <div className="absolute -inset-4 bg-gradient-to-r from-fuchsia-600/20 via-purple-600/15 to-cyan-500/20 rounded-3xl blur-2xl group-hover:blur-3xl transition duration-500"></div>
-            <ZailoGraphLogo size="xl" showText={true} showTagline={true} className="relative drop-shadow-xl" />
+            <div className="hidden sm:block">
+              <ZailoGraphLogo size="xl" showText={true} showTagline={true} className="relative drop-shadow-xl" />
+            </div>
+            <div className="sm:hidden">
+              <ZailoGraphLogo size="lg" showText={true} showTagline={true} className="relative drop-shadow-lg" />
+            </div>
           </div>
 
           {/* Privacy Trust Pill & Mobile 25 Tools Navigation Shortcut */}
-          <div className="flex flex-col sm:flex-row items-center gap-2">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200/80 text-neutral-800 text-xs font-semibold shadow-2xs">
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200/80 text-neutral-800 text-[11px] sm:text-xs font-semibold shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 animate-pulse"></span>
-              <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
+              <ShieldCheck className="w-3.5 h-3.5 text-violet-600 shrink-0" />
               <span>100% Private • Built by Coralgenz &amp; Zorquelz</span>
             </div>
 
@@ -277,7 +282,7 @@ export const LandingWorkspace: React.FC = () => {
             </div>
           )}
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.08]">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.1]">
             Your images. Your workflow. <br className="hidden sm:inline" />
             <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">
               Your control.
@@ -287,13 +292,13 @@ export const LandingWorkspace: React.FC = () => {
           {/* Brand Tagline Accent */}
           <div className="flex items-center justify-center gap-3 w-full max-w-md pt-0.5">
             <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-violet-300"></div>
-            <span className="text-[10px] font-mono font-bold tracking-widest text-neutral-400 uppercase">
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-widest text-neutral-400 uppercase">
               THE BROWSER IMAGE STUDIO
             </span>
             <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-cyan-300"></div>
           </div>
 
-          <p className="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed">
             Compress, vectorize, crop, sharpen, and convert images with WebAssembly and Web Workers. 
             All 25 tools run strictly in your browser — zero cloud latency, zero subscriptions, zero ads.
           </p>
@@ -340,39 +345,39 @@ export const LandingWorkspace: React.FC = () => {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`relative w-full rounded-3xl border-2 border-dashed p-6 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white/85 backdrop-blur-xl shadow-lg ${
+          className={`relative w-full rounded-2xl sm:rounded-3xl border-2 border-dashed p-4 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white/85 backdrop-blur-xl shadow-lg ${
             isDragOver
               ? 'border-violet-600 bg-violet-50/50 scale-[1.01] shadow-2xl shadow-violet-500/15'
               : 'border-violet-300/80 hover:border-violet-500 hover:shadow-xl hover:shadow-violet-500/10'
           }`}
         >
           {/* Subtle Ambient Radial Highlight */}
-          <div className="absolute inset-0 bg-radial from-violet-50/40 via-transparent to-transparent opacity-70 pointer-events-none rounded-3xl"></div>
+          <div className="absolute inset-0 bg-radial from-violet-50/40 via-transparent to-transparent opacity-70 pointer-events-none rounded-2xl sm:rounded-3xl"></div>
 
           {/* Central Cloud Icon with Logo Tint */}
-          <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-gradient-to-br from-neutral-100 to-neutral-50 text-neutral-800 flex items-center justify-center mb-4 sm:mb-5 group-hover:from-violet-600 group-hover:to-cyan-600 group-hover:text-white transition duration-300 shadow-xs border border-neutral-200/60 group-hover:border-transparent">
-            <UploadCloud className="w-7 sm:w-8 h-7 sm:h-8" />
+          <div className="w-12 sm:w-16 h-12 sm:h-16 rounded-2xl bg-gradient-to-br from-neutral-100 to-neutral-50 text-neutral-800 flex items-center justify-center mb-3 sm:mb-5 group-hover:from-violet-600 group-hover:to-cyan-600 group-hover:text-white transition duration-300 shadow-xs border border-neutral-200/60 group-hover:border-transparent">
+            <UploadCloud className="w-6 sm:w-8 h-6 sm:h-8" />
           </div>
 
-          <h2 className="text-lg sm:text-2xl font-bold text-neutral-900 mb-2">
-            Drop your images here, paste with <kbd className="px-1.5 py-0.5 rounded-md bg-neutral-100 border border-neutral-300 font-mono text-xs text-neutral-700">Ctrl + V</kbd>, or <span className="underline decoration-violet-300 underline-offset-4 group-hover:decoration-violet-600 transition">browse files</span>
+          <h2 className="text-base sm:text-2xl font-bold text-neutral-900 mb-2 leading-snug">
+            Drop images here, paste with <kbd className="hidden sm:inline px-1.5 py-0.5 rounded-md bg-neutral-100 border border-neutral-300 font-mono text-xs text-neutral-700">Ctrl + V</kbd><span className="sm:hidden">clipboard</span>, or <span className="underline decoration-violet-300 underline-offset-4 group-hover:decoration-violet-600 transition">browse</span>
           </h2>
-          <p className="text-xs text-neutral-500 max-w-md mb-5 leading-relaxed">
-            Drag single files or an entire batch. Supports high-res AVIF, JPEG, PNG, WebP, SVG, Apple HEIC, and Camera RAW (Canon CR2/CR3, Nikon NEF, Sony ARW, Adobe DNG).
+          <p className="text-xs text-neutral-500 max-w-md mb-4 sm:mb-5 leading-relaxed">
+            Drag single files or an entire batch. Supports high-res AVIF, JPEG, PNG, WebP, SVG, Apple HEIC, and Camera RAW.
           </p>
 
           {/* Mobile Direct Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-6" onClick={(e) => e.stopPropagation()}>
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-4 sm:mb-6 w-full sm:w-auto" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white font-bold text-xs shadow-md shadow-violet-600/25 flex items-center gap-2 cursor-pointer transition min-h-[44px]"
+              className="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white font-bold text-xs shadow-md shadow-violet-600/25 flex items-center justify-center gap-2 cursor-pointer transition min-h-[44px]"
             >
               <UploadCloud className="w-4 h-4" />
               <span>Choose Images</span>
             </button>
             <button
               onClick={() => cameraInputRef.current?.click()}
-              className="px-4 py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 font-semibold text-xs border border-neutral-300/80 flex items-center gap-2 cursor-pointer transition min-h-[44px]"
+              className="flex-1 sm:flex-none px-3.5 sm:px-4 py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 font-semibold text-xs border border-neutral-300/80 flex items-center justify-center gap-2 cursor-pointer transition min-h-[44px]"
             >
               <Camera className="w-4 h-4 text-violet-600" />
               <span>Take Photo</span>
@@ -380,15 +385,11 @@ export const LandingWorkspace: React.FC = () => {
           </div>
 
           {/* Supported Format Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-1 max-w-lg mb-6 sm:mb-8">
-            {['NEXT-GEN AVIF', 'WEBP', 'JPEG / JPG', 'PNG', 'SVG', 'APPLE HEIC', 'CANON CR2/CR3', 'NIKON NEF', 'SONY ARW', 'ADOBE DNG'].map((fmt) => (
+          <div className="flex flex-wrap items-center justify-center gap-1 max-w-lg mb-4 sm:mb-8">
+            {['AVIF', 'WEBP', 'JPG', 'PNG', 'SVG', 'HEIC', 'CR2/CR3', 'NEF', 'ARW', 'DNG'].map((fmt) => (
               <span
                 key={fmt}
-                className={`px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-medium border ${
-                  fmt === 'NEXT-GEN AVIF' 
-                    ? 'bg-gradient-to-r from-violet-50 to-cyan-50 text-violet-700 border-violet-200/80 font-bold' 
-                    : 'bg-neutral-100 text-neutral-600 border-neutral-200/60'
-                }`}
+                className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-medium border bg-neutral-100 text-neutral-600 border-neutral-200/60"
               >
                 {fmt}
               </span>
@@ -397,32 +398,32 @@ export const LandingWorkspace: React.FC = () => {
 
           {/* Instant 1-Click Test Drive Row */}
           <div 
-            className="w-full pt-5 sm:pt-6 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
+            className="w-full pt-4 sm:pt-6 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500">
               <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
               <span>No image on hand? Try instant sample:</span>
             </div>
 
-            <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 no-scrollbar">
+            <div className="flex items-center justify-center sm:justify-start gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 no-scrollbar">
               <button
                 onClick={() => loadDemoSample('photo')}
-                className="px-3 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shrink-0 min-h-[40px]"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1 shrink-0 min-h-[38px]"
                 title="4K Landscape photo for MozJPEG compression and sharpening"
               >
                 <span>🏔️ Landscape</span>
               </button>
               <button
                 onClick={() => loadDemoSample('portrait')}
-                className="px-3 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shrink-0 min-h-[40px]"
-                title="Portrait shot for AI background removal & passport studio"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1 shrink-0 min-h-[38px]"
+                title="Portrait shot for passport photo studio"
               >
                 <span>👤 Portrait</span>
               </button>
               <button
                 onClick={() => loadDemoSample('vector')}
-                className="px-3 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shrink-0 min-h-[40px]"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1 shrink-0 min-h-[38px]"
                 title="Graphic design for SVG vectorization and palette extraction"
               >
                 <span>🎨 Logo Art</span>

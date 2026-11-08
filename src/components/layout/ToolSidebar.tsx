@@ -290,7 +290,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
               <Layers className="w-4 h-4 text-violet-600" />
               <span className="text-sm font-bold text-neutral-900">Choose Utility</span>
               <span className="text-[10px] font-mono text-neutral-500 bg-white px-2 py-0.5 rounded-full border border-neutral-200 font-semibold">
-                26 Available
+                25 Tools
               </span>
             </div>
             <button

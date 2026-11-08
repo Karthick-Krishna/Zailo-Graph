@@ -249,21 +249,21 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
       <div className="z-20 w-full max-w-7xl px-2 mb-2 shrink-0 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
         
         {/* Island 1: File Telemetry & Quick Undo/Redo */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200/90 shadow-2xs text-xs shrink-0">
-          <div className="flex items-center gap-1.5 font-medium text-neutral-800">
-            <span className="font-semibold truncate max-w-[110px] sm:max-w-[160px] tracking-tight">{imageName}</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200/90 shadow-2xs text-xs shrink-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 font-medium text-neutral-800">
+            <span className="font-semibold truncate max-w-[75px] min-[360px]:max-w-[100px] sm:max-w-[160px] tracking-tight">{imageName}</span>
             <span className="text-neutral-300">|</span>
-            <span className="font-mono text-neutral-500 text-[11px]">{formatBytes(originalSize)}</span>
+            <span className="font-mono text-neutral-500 text-[10px] sm:text-[11px]">{formatBytes(originalSize)}</span>
           </div>
 
           {processedSize && (
-            <div className="flex items-center gap-1.5 pl-1.5 border-l border-neutral-200">
-              <span className="text-neutral-400 font-bold">&rarr;</span>
-              <span className="font-mono text-neutral-900 font-semibold text-[11px]">
+            <div className="flex items-center gap-1 sm:gap-1.5 pl-1 sm:pl-1.5 border-l border-neutral-200">
+              <span className="text-neutral-400 font-bold text-[10px] sm:text-xs">&rarr;</span>
+              <span className="font-mono text-neutral-900 font-semibold text-[10px] sm:text-[11px]">
                 {formatBytes(processedSize)}
               </span>
               {savings && (
-                <span className={`font-mono text-[10px] px-1.5 py-0.2 rounded-md font-semibold ${
+                <span className={`font-mono text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 rounded-md font-semibold ${
                   savings.isSaved 
                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' 
                     : 'bg-neutral-100 text-neutral-700'
@@ -274,8 +274,8 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
             </div>
           )}
 
-          {/* Inline Undo / Redo */}
-          <div className="flex items-center gap-0.5 pl-1.5 border-l border-neutral-200">
+          {/* Inline Undo / Redo (Hidden on mobile as it is already in Header) */}
+          <div className="hidden sm:flex items-center gap-0.5 pl-1.5 border-l border-neutral-200">
             <button
               onClick={undo}
               disabled={!canUndo}

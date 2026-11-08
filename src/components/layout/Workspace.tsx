@@ -44,13 +44,13 @@ export const Workspace: React.FC = () => {
         />
 
         {/* Center Canvas Viewport */}
-        <main className={`flex-1 flex flex-col items-center justify-center overflow-hidden bg-transparent relative p-2 sm:p-4 ${
-          images.length > 0 ? 'pb-24 sm:pb-4' : ''
+        <main className={`flex-1 flex flex-col items-center justify-center overflow-hidden bg-transparent relative p-1.5 sm:p-4 ${
+          images.length > 0 ? 'pb-20 sm:pb-4' : ''
         }`}>
           {images.length === 0 ? (
             <LandingWorkspace />
           ) : !isUnlocked ? (
-            <div className="flex-1 flex items-center justify-center p-6 w-full">
+            <div className="flex-1 flex items-center justify-center p-4 sm:p-6 w-full">
               <GatedFeatureCard utility={activeUtility} />
             </div>
           ) : (
@@ -75,37 +75,37 @@ export const Workspace: React.FC = () => {
         {images.length > 0 && isUnlocked && <ControlRack />}
       </div>
 
-      {/* Mobile Floating Command Dock */}
+      {/* Mobile Floating Command Dock (Optimized for all screen sizes down to 320px) */}
       {images.length > 0 && isUnlocked && (
-        <div className="md:hidden fixed bottom-3 left-3 right-3 z-40 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-2xl rounded-2xl p-1.5 flex items-center justify-between gap-1.5 pointer-events-auto">
+        <div className="md:hidden fixed bottom-2 sm:bottom-3 left-2 right-2 sm:left-3 sm:right-3 z-40 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-2xl rounded-2xl p-1.5 flex items-center justify-between gap-1 sm:gap-1.5 pointer-events-auto">
           {/* Active Tool Picker Button */}
           <button
             onClick={() => setIsMobileToolsOpen(true)}
-            className="flex-1 py-2 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 flex items-center justify-center gap-1.5 transition text-xs font-semibold cursor-pointer min-h-[44px]"
+            className="flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 flex items-center justify-center gap-1 sm:gap-1.5 transition text-xs font-semibold cursor-pointer min-h-[42px] sm:min-h-[44px]"
             title="Switch Tool"
           >
-            <Sparkles className="w-4 h-4 text-violet-600 shrink-0" />
-            <span className="truncate max-w-[100px]">{activeUtility.name}</span>
+            <Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-violet-600 shrink-0" />
+            <span className="truncate max-w-[75px] sm:max-w-[110px] text-[11px] sm:text-xs">{activeUtility.name}</span>
           </button>
 
           {/* Parameters Sheet Button */}
           <button
             onClick={() => setShowMobileControls(true)}
-            className="flex-1 py-2 px-3 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white flex items-center justify-center gap-1.5 transition text-xs font-bold shadow-sm shadow-violet-600/25 cursor-pointer min-h-[44px]"
+            className="flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white flex items-center justify-center gap-1 sm:gap-1.5 transition text-xs font-bold shadow-sm shadow-violet-600/25 cursor-pointer min-h-[42px] sm:min-h-[44px]"
             title="Adjust Settings"
           >
-            <Sliders className="w-4 h-4 shrink-0" />
-            <span>Settings</span>
+            <Sliders className="w-3.5 sm:w-4 h-3.5 sm:h-4 shrink-0" />
+            <span className="text-[11px] sm:text-xs">Settings</span>
           </button>
 
           {/* Quick Download Button (When Result Exists) */}
           {activeImage?.processedBlob && (
             <button
               onClick={() => downloadImage(activeImage.id)}
-              className="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white flex items-center justify-center gap-1 transition text-xs font-bold shadow-sm shadow-emerald-600/20 cursor-pointer min-h-[44px]"
+              className="py-2 px-2.5 sm:px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white flex items-center justify-center gap-1 transition text-xs font-bold shadow-sm shadow-emerald-600/20 cursor-pointer min-h-[42px] sm:min-h-[44px] shrink-0"
               title="Download Processed Result"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
             </button>
           )}
 
@@ -113,10 +113,10 @@ export const Workspace: React.FC = () => {
           {images.length > 1 && (
             <button
               onClick={() => setShowMobileBatch(true)}
-              className="py-2 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 flex items-center justify-center gap-1 text-xs font-semibold cursor-pointer min-h-[44px]"
+              className="py-2 px-2 sm:px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 flex items-center justify-center gap-1 text-xs font-semibold cursor-pointer min-h-[42px] sm:min-h-[44px] shrink-0"
               title="View Image Queue"
             >
-              <Layers className="w-4 h-4 text-neutral-500" />
+              <Layers className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-neutral-500" />
               <span className="text-[10px] font-mono font-bold bg-neutral-200 px-1.5 py-0.2 rounded-full">
                 {images.length}
               </span>

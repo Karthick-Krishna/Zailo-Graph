@@ -275,7 +275,9 @@ export const ControlRack: React.FC<ControlRackProps> = ({
       </div>
 
       {/* Bottom Action Rack & "Send To..." Workflow Bus - 100% Solid Pure White */}
-      <div className="p-4 sm:p-5 pb-8 sm:pb-5 border-t border-neutral-200 bg-white space-y-2.5 relative z-10 shrink-0">
+      <div className={`p-4 sm:p-5 pb-8 sm:pb-5 border-t border-neutral-200 bg-white space-y-2.5 relative z-10 shrink-0 ${
+        isMobileDrawer ? 'sticky bottom-0 bg-white/95 backdrop-blur-md shadow-lg' : ''
+      }`}>
         {!isUnlocked ? (
           <button
             onClick={() => openAuthModal('pro_feature', activeUtilityId)}

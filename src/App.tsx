@@ -90,7 +90,7 @@ const AppContent: React.FC = () => {
       if (!e.metaKey && !e.ctrlKey && !e.altKey) {
         if (e.key === '1') setActiveUtilityId('compression');
         else if (e.key === '2') setActiveUtilityId('batch-resize');
-        else if (e.key === '3') setActiveUtilityId('ai-bg-removal');
+        else if (e.key === '3') setActiveUtilityId('heic-converter');
         else if (e.key === '4') setActiveUtilityId('avatar-crop');
         else if (e.key === '5') setActiveUtilityId('exif-viewer');
         else if (e.key === '6') setActiveUtilityId('camera-raw');
