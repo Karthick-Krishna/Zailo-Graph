@@ -115,3 +115,4 @@ export const ImageSplitterControls: React.FC = () => {
     </div>
   );
 };
+

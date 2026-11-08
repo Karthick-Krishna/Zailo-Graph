@@ -701,13 +701,13 @@ ${faqSchema}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-neutral-800">
         <div class="flex items-center gap-2">
-          <span class="font-extrabold text-lg text-white">ZailoGraph</span>
-          <span class="text-xs text-neutral-400">by Zorquelz</span>
+          <span class="font-extrabold text-lg text-white">Zailo Graph</span>
+          <span class="text-xs text-neutral-400">by Coralgenz &amp; Zorquelz</span>
         </div>
         <p class="text-xs text-neutral-400">100% Client-Side Image Workspace. No Cloud Transmission.</p>
       </div>
       <div class="text-center text-xs text-neutral-500">
-        <p>&copy; 2026 ZailoGraph. All 25 browser utilities are 100% free forever.</p>
+        <p>&copy; 2026 Zailo Graph by Coralgenz &amp; Zorquelz. A Collaborative Product by Coralgenz &amp; Zorquelz. All 25 browser utilities are 100% free forever.</p>
       </div>
     </div>
   </footer>
@@ -758,3 +758,4 @@ function run() {
 }
 
 run();
+

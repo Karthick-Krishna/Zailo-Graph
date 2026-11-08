@@ -174,7 +174,7 @@ export const LandingWorkspace: React.FC = () => {
 
       ctx.fillStyle = '#0F172A';
       ctx.font = 'bold 72px sans-serif';
-      ctx.fillText('ZORQUELZ VECTOR STUDIO', 400, 820);
+      ctx.fillText('ZAILO GRAPH VECTOR STUDIO', 400, 820);
       ctx.font = '32px monospace';
       ctx.fillStyle = '#64748B';
       ctx.fillText('Sharp SVG Vectorization & Color Quantization Test', 400, 890);
@@ -243,12 +243,12 @@ export const LandingWorkspace: React.FC = () => {
             <ZailoGraphLogo size="xl" showText={true} showTagline={true} className="relative drop-shadow-xl" />
           </div>
 
-          {/* Privacy Trust Pill & Mobile 26 Tools Navigation Shortcut */}
+          {/* Privacy Trust Pill & Mobile 25 Tools Navigation Shortcut */}
           <div className="flex flex-col sm:flex-row items-center gap-2">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200/80 text-neutral-800 text-xs font-semibold shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 animate-pulse"></span>
               <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
-              <span>100% Private • High-Speed Processing • Built by Zorquelz</span>
+              <span>100% Private • Built by Coralgenz &amp; Zorquelz</span>
             </div>
 
             {/* Mobile Direct Navigation Button */}
@@ -257,7 +257,7 @@ export const LandingWorkspace: React.FC = () => {
               className="md:hidden inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white text-xs font-bold shadow-md shadow-violet-600/20 transition cursor-pointer active:scale-95"
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Browse 26 Tools</span>
+              <span>Browse 25 Tools</span>
               <ArrowRight className="w-3 h-3" />
             </button>
           </div>
@@ -294,8 +294,8 @@ export const LandingWorkspace: React.FC = () => {
           </div>
 
           <p className="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed">
-            Compress, vectorize, crop, colorize, and enhance images with WebAssembly and WebGPU. 
-            All 26 tools run strictly in your browser — zero cloud latency, zero subscriptions, zero ads.
+            Compress, vectorize, crop, sharpen, and convert images with WebAssembly and Web Workers. 
+            All 25 tools run strictly in your browser — zero cloud latency, zero subscriptions, zero ads.
           </p>
         </div>
 
@@ -447,9 +447,9 @@ export const LandingWorkspace: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200/60 text-violet-700 flex items-center justify-center group-hover:scale-105 transition-transform">
               <Cpu className="w-5 h-5 text-violet-600" />
             </div>
-            <h3 className="text-sm font-bold text-neutral-900">WebGPU Neural AI</h3>
+            <h3 className="text-sm font-bold text-neutral-900">Multi-Thread Web Workers</h3>
             <p className="text-xs text-neutral-500 leading-relaxed">
-              Tiled on-device neural background removal, 4× super-resolution, inpainting, and colorization.
+              Parallel background threads with OffscreenCanvas for instant 60fps image processing without UI lockup.
             </p>
           </div>
 
@@ -474,98 +474,9 @@ export const LandingWorkspace: React.FC = () => {
           </div>
         </div>
 
-        {/* 25 Browser Utilities Directory */}
-        <div className="w-full space-y-6 pt-6 border-t border-neutral-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-neutral-900 tracking-tight">The 25 Browser Utilities</h2>
-              <p className="text-xs text-neutral-500 mt-0.5">
-                Select any utility below to launch its dedicated workspace with custom parameters.
-              </p>
-            </div>
-
-            {/* Category Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-              {[
-                { id: 'all', label: 'All 25' },
-                { id: 'optimize', label: 'Optimize' },
-                { id: 'convert', label: 'Convert' },
-                { id: 'edit', label: 'Edit & Crop' },
-                { id: 'social', label: 'Social & Share' },
-                { id: 'metadata', label: 'Metadata' },
-              ].map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedFilter(cat.id as any)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer shrink-0 ${
-                    selectedFilter === cat.id
-                      ? 'bg-neutral-900 text-white shadow-xs'
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80 hover:text-neutral-900'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Utility Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3.5">
-            {filteredUtilities.map((u) => {
-              const isLocked = !isUtilityUnlocked(u.id);
-              return (
-                <div
-                  key={u.id}
-                  onClick={() => {
-                    setActiveUtilityId(u.id);
-                    if (isLocked) {
-                      openAuthModal('pro_feature', u.id);
-                    } else if (u.id === 'base64-to-image') {
-                      setShowBase64Modal(true);
-                    } else {
-                      fileInputRef.current?.click();
-                    }
-                  }}
-                  className="p-4 rounded-2xl bg-white hover:bg-neutral-50/90 border border-neutral-200/80 hover:border-violet-300 hover:shadow-md hover:shadow-violet-500/5 transition cursor-pointer flex flex-col justify-between group shadow-2xs"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
-                        {u.category}
-                      </span>
-                      {isLocked ? (
-                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                          <Lock className="w-2.5 h-2.5" />
-                          <span>Free Pro</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200/60">
-                          <CheckCircle2 className="w-2.5 h-2.5" />
-                          <span>Local</span>
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-xs font-bold text-neutral-900 group-hover:text-violet-950 transition-colors">
-                      {u.name}
-                    </h3>
-                    <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
-                      {u.description}
-                    </p>
-                  </div>
-
-                  <div className="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between text-[10px] text-neutral-400">
-                    <span className="font-mono">{u.supportsBatch ? 'Batch Capable' : 'Single Studio'}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-violet-600 group-hover:translate-x-1 transition duration-150" />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Footer Trust Bar */}
+        {/* Collaborative Product Trust Bar */}
         <div className="w-full pt-8 pb-4 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400 font-mono">
-          <div>ZAILO GRAPH • ZORQUELZ OPEN PRODUCT ECOSYSTEM</div>
+          <div>ZAILO GRAPH • A COLLABORATIVE PRODUCT BY CORALGENZ &amp; ZORQUELZ</div>
           <div className="flex items-center gap-4">
             <span>ZERO CLOUD TRANSMISSION</span>
             <span>•</span>

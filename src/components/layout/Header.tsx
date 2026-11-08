@@ -20,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <ZailoGraphLogo size="sm" showText={true} />
           <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-400 pl-2 border-l border-neutral-200">
-            by Zorquelz
+            by Coralgenz &amp; Zorquelz
           </span>
           <button
             onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
