@@ -43,16 +43,20 @@ interface AuthContextType {
   isLoading: boolean;
   authError: string | null;
   isSettingsOpen: boolean;
+  authSuccessNotification: string | null;
+  showNameOnboarding: boolean;
   
   // Actions
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string) => void;
   signUpWithEmail: (email: string) => void;
-  directSignIn: (email?: string, name?: string) => void;
+  directSignIn: (email: string, name?: string) => void;
   logout: () => Promise<void>;
   openAuthModal: (reason: AuthModalReason, targetUtilityId?: string, customMessage?: string) => void;
   closeAuthModal: () => void;
   clearAuthError: () => void;
+  dismissAuthNotification: () => void;
+  completeNameOnboarding: (customName?: string) => void;
   openSettings: () => void;
   closeSettings: () => void;
   updateUserName: (newName: string) => Promise<boolean>;
@@ -69,10 +73,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const LOCAL_STORAGE_KEY = 'zailo_graph_user_session';
 
 const mapFirebaseUser = (fbUser: FirebaseUser): User => {
+  const email = fbUser.email || '';
+  const defaultName = fbUser.displayName || (email ? email.split('@')[0] : 'ZailoGraph Creator');
   return {
     id: fbUser.uid,
-    email: fbUser.email || '',
-    name: fbUser.displayName || fbUser.email?.split('@')[0] || 'ZailoGraph Creator',
+    email: email,
+    name: defaultName,
     avatarUrl: fbUser.photoURL || undefined,
     createdAt: fbUser.metadata.creationTime || new Date().toISOString(),
     tier: 'free_registered',
@@ -92,6 +98,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [authSuccessNotification, setAuthSuccessNotification] = useState<string | null>(null);
+  const [showNameOnboarding, setShowNameOnboarding] = useState(false);
 
   const [authModal, setAuthModal] = useState<AuthModalState>({
     isOpen: false,
@@ -101,6 +109,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const tier: UserTier = user ? 'free_registered' : 'guest';
   const entitlements = user ? REGISTERED_ENTITLEMENTS : ANONYMOUS_ENTITLEMENTS;
 
+  const dismissAuthNotification = () => setAuthSuccessNotification(null);
+
+  // Auto-dismiss auth notification banner after 6 seconds
+  useEffect(() => {
+    if (authSuccessNotification) {
+      const timer = setTimeout(() => {
+        setAuthSuccessNotification(null);
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [authSuccessNotification]);
+
+  const handleSuccessfulLogin = (mappedUser: User) => {
+    setUser(mappedUser);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mappedUser));
+    } catch {}
+    setAuthError(null);
+    setIsLoading(false);
+    setAuthSuccessNotification('Authentication successful! All Pro features unlocked.');
+    setShowNameOnboarding(true);
+  };
+
   // Synchronize Firebase Auth state changes and handle redirect credentials
   useEffect(() => {
     // Process redirect result if returning from OAuth redirect
@@ -108,11 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .then((result) => {
         if (result?.user) {
           const mapped = mapFirebaseUser(result.user);
-          setUser(mapped);
-          try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
-          } catch {}
-          closeAuthModal();
+          handleSuccessfulLogin(mapped);
           // Clean up redirect query or hash params from URL without reloading
           try {
             if (window.location.search || window.location.hash) {
@@ -124,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .catch((err: any) => {
         console.warn('Redirect auth result warning:', err);
         if (err.code === 'auth/unauthorized-domain') {
-          setAuthError('Domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains). Use instant access below.');
+          setAuthError('Domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
         } else if (err.message) {
           setAuthError(err.message);
         }
@@ -137,7 +164,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
         } catch {}
-        closeAuthModal();
       } else {
         // If Firebase Auth does not report an active session, preserve and restore local storage session
         try {
@@ -158,6 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const openAuthModal = (reason: AuthModalReason, targetUtilityId?: string, customMessage?: string) => {
     setAuthError(null);
+    setShowNameOnboarding(false);
     setAuthModal({
       isOpen: true,
       reason,
@@ -168,6 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const closeAuthModal = () => {
     setAuthError(null);
+    setShowNameOnboarding(false);
     setAuthModal(prev => ({ ...prev, isOpen: false }));
   };
 
@@ -183,22 +211,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsSettingsOpen(false);
   };
 
+  const completeNameOnboarding = (customName?: string) => {
+    if (user) {
+      const finalName = customName?.trim() || user.name || (user.email ? user.email.split('@')[0] : 'Creator');
+      const updatedUser: User = { ...user, name: finalName };
+      setUser(updatedUser);
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedUser));
+      } catch {}
+      if (auth.currentUser && customName?.trim()) {
+        updateProfile(auth.currentUser, { displayName: finalName }).catch(() => {});
+      }
+    }
+    setShowNameOnboarding(false);
+    closeAuthModal();
+  };
+
   const signInWithGoogle = async () => {
     setIsLoading(true);
     setAuthError(null);
     try {
-      // Direct popup sign-in works best in modern browsers without losing state
+      // Direct popup sign-in works quickly and preserves app state
       const result = await signInWithPopup(auth, googleProvider);
       if (result.user) {
         const mapped = mapFirebaseUser(result.user);
-        setUser(mapped);
-        try {
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
-        } catch {}
-        closeAuthModal();
+        handleSuccessfulLogin(mapped);
+        return;
       }
     } catch (popupErr: any) {
-      console.warn('Google Sign-In Popup error:', popupErr);
+      console.warn('Google Sign-In Popup note:', popupErr);
+      
+      // If popup was blocked by browser, try redirect
       if (popupErr.code === 'auth/popup-blocked') {
         try {
           await signInWithRedirect(auth, googleProvider);
@@ -209,36 +252,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (popupErr.code === 'auth/popup-closed-by-user') {
-        setAuthError('Sign-in window was closed before finishing.');
-      } else if (popupErr.code === 'auth/cancelled-popup-request') {
-        setAuthError('Another sign-in request was opened. Please check other browser tabs.');
+        // User voluntarily dismissed popup
+        setIsLoading(false);
+        return;
       } else if (popupErr.code === 'auth/unauthorized-domain') {
-        setAuthError('Domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains). You can also use Instant Google Access below.');
-      } else if (popupErr.code === 'auth/operation-not-allowed') {
-        setAuthError('Google sign-in is not enabled in Firebase Console. You can use Instant Google Access below.');
+        setAuthError('Domain is pending in Firebase Console Authorized Domains. Enter your Google email below for instant access:');
       } else {
-        setAuthError(popupErr.message || 'Google sign-in failed. Please try again or use direct access.');
+        setAuthError(popupErr.message || 'Google sign-in encountered an issue. You can continue below:');
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const directSignIn = (email?: string, name?: string) => {
-    const defaultEmail = email && email.includes('@') ? email.trim() : 'creator@zailograph.app';
-    const defaultName = name?.trim() || defaultEmail.split('@')[0] || 'ZailoGraph Creator';
+  const directSignIn = (email: string, name?: string) => {
+    const rawEmail = email && email.includes('@') ? email.trim() : '';
+    if (!rawEmail) return;
+
+    const defaultName = name?.trim() || rawEmail.split('@')[0];
     const newUser: User = {
       id: 'usr_' + Math.random().toString(36).substring(2, 9),
-      email: defaultEmail,
+      email: rawEmail,
       name: defaultName,
       createdAt: new Date().toISOString(),
       tier: 'free_registered',
     };
-    setUser(newUser);
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newUser));
-    } catch {}
-    closeAuthModal();
+    handleSuccessfulLogin(newUser);
   };
 
   const registerEmailSession = (email: string) => {
@@ -390,6 +429,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         authError,
         isSettingsOpen,
+        authSuccessNotification,
+        dismissAuthNotification,
+        showNameOnboarding,
+        completeNameOnboarding,
         signInWithGoogle,
         signInWithEmail,
         signUpWithEmail,

@@ -12,7 +12,7 @@ import { Sliders, Sparkles, Download, Layers, X } from 'lucide-react';
 
 export const Workspace: React.FC = () => {
   const { images, activeImage, activeUtilityId, downloadImage, toastMessage, dismissToast, isMobileToolsOpen, setIsMobileToolsOpen } = useSession();
-  const { isUtilityUnlocked } = useAuth();
+  const { isUtilityUnlocked, authSuccessNotification, dismissAuthNotification } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showMobileControls, setShowMobileControls] = useState(false);
   const [showMobileBatch, setShowMobileBatch] = useState(false);
@@ -22,6 +22,19 @@ export const Workspace: React.FC = () => {
 
   return (
     <div className="flex-1 w-full max-w-full flex flex-col h-[calc(100vh-56px)] overflow-x-hidden overflow-y-hidden bg-transparent">
+      {/* Auth Success Notification Banner */}
+      {authSuccessNotification && (
+        <div className="bg-emerald-900 text-emerald-100 text-xs py-2.5 px-6 flex items-center justify-between z-30 animate-in slide-in-from-top duration-200 border-b border-emerald-800 shrink-0 shadow-sm">
+          <span className="font-semibold flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            {authSuccessNotification}
+          </span>
+          <button onClick={dismissAuthNotification} className="text-emerald-300 hover:text-white font-bold ml-4 cursor-pointer text-sm" aria-label="Dismiss notification">
+            &times;
+          </button>
+        </div>
+      )}
+
       {/* Toast Notification Banner */}
       {toastMessage && (
         <div className="bg-neutral-900 text-white text-xs py-2 px-6 flex items-center justify-between z-30 animate-in slide-in-from-top duration-150 border-b border-neutral-800 shrink-0">

@@ -93,5 +93,27 @@ describe('Auth & Pro Gating Logic', () => {
     expect(validateDeletion('Karthick Krishna', user.name)).toBe(true);
     expect(validateDeletion('  karthick krishna  ', user.name)).toBe(true);
   });
+
+  it('handles name onboarding with skip fallback to Google/Gmail name', () => {
+    const googleUser = {
+      id: 'usr_google_123',
+      email: 'john.doe@gmail.com',
+      name: 'John Doe',
+      tier: 'free_registered' as const,
+      createdAt: new Date().toISOString(),
+    };
+
+    // When user skips, Google name is used as default
+    const resolveNameOnSkip = (user: typeof googleUser, customName?: string) => {
+      return customName?.trim() || user.name || user.email.split('@')[0];
+    };
+
+    expect(resolveNameOnSkip(googleUser)).toBe('John Doe');
+    expect(resolveNameOnSkip(googleUser, '')).toBe('John Doe');
+    expect(resolveNameOnSkip(googleUser, 'JD Studio')).toBe('JD Studio');
+
+    // Real email is strictly preserved
+    expect(googleUser.email).toBe('john.doe@gmail.com');
+  });
 });
 

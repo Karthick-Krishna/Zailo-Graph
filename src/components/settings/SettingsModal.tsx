@@ -169,9 +169,9 @@ export const SettingsModal: React.FC = () => {
                 <h4 className="text-sm sm:text-base font-bold text-neutral-900 flex items-center gap-2">
                   <span>{currentDisplayName}</span>
                 </h4>
-                <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-0.5">
-                  <Mail className="w-3.5 h-3.5 text-neutral-400" />
-                  <span className="truncate max-w-[200px]">{user.email}</span>
+                <div className="flex items-center gap-1.5 text-xs text-neutral-600 mt-1">
+                  <Mail className="w-3.5 h-3.5 text-violet-600 shrink-0" />
+                  <span className="font-medium select-all">{user.email}</span>
                 </div>
               </div>
             </div>
