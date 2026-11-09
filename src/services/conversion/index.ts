@@ -37,11 +37,6 @@ import {
   convertMultipleImagesToPdf,
   convertPdfToImages,
 } from './imageDocumentConverter';
-import {
-  extractZipArchive,
-  extractTarArchive,
-  extractTarGzArchive,
-} from './archiveConverter';
 
 type ProgressCallback = (state: ConversionProgressState) => void;
 
@@ -134,14 +129,6 @@ export async function executeDocumentConversion(
         return await convertPdfToImages(file, 'jpg', onProgress);
       case 'pdf-to-png':
         return await convertPdfToImages(file, 'png', onProgress);
-
-      // E. Archive Conversions
-      case 'zip-extract':
-        return await extractZipArchive(file, onProgress);
-      case 'tar-extract':
-        return await extractTarArchive(file, onProgress);
-      case 'targz-extract':
-        return await extractTarGzArchive(file, onProgress);
 
       default:
         throw new Error(`Conversion handler for "${conversionId}" is not implemented.`);

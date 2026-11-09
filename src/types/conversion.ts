@@ -3,8 +3,7 @@ export type ConversionCategoryId =
   | 'presentations'
   | 'spreadsheets'
   | 'images_to_pdf'
-  | 'pdf_to_images'
-  | 'archives';
+  | 'pdf_to_images';
 
 export interface ConversionCategory {
   id: ConversionCategoryId;

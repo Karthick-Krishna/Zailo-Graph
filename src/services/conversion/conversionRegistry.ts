@@ -36,13 +36,6 @@ export const CONVERSION_CATEGORIES: ConversionCategory[] = [
     icon: 'Images',
     badge: '2 Formats',
   },
-  {
-    id: 'archives',
-    title: 'Archive Extraction',
-    description: 'Extract and inspect ZIP, TAR, and TAR.GZ archives safely without cloud upload',
-    icon: 'Archive',
-    badge: '3 Formats',
-  },
 ];
 
 export const CONVERSIONS: ConversionDefinition[] = [
@@ -455,47 +448,6 @@ export const CONVERSIONS: ConversionDefinition[] = [
     outputExtension: 'zip',
     outputMimeType: 'application/zip',
     description: 'Render PDF pages to lossless crisp PNG images with batch ZIP archive.',
-    supportsBatchOutput: true,
-  },
-
-  // E. Archive Conversions
-  {
-    id: 'zip-extract',
-    name: 'ZIP to Extracted Files',
-    category: 'archives',
-    sourceFormat: 'ZIP',
-    targetFormat: 'Extracted Files',
-    acceptsExtensions: ['.zip'],
-    acceptsMimeTypes: ['application/zip', 'application/x-zip-compressed'],
-    outputExtension: 'zip',
-    outputMimeType: 'application/zip',
-    description: 'Safely unpack and inspect ZIP archives with path traversal protection.',
-    supportsBatchOutput: true,
-  },
-  {
-    id: 'tar-extract',
-    name: 'TAR to Extracted Files',
-    category: 'archives',
-    sourceFormat: 'TAR',
-    targetFormat: 'Extracted Files',
-    acceptsExtensions: ['.tar'],
-    acceptsMimeTypes: ['application/x-tar'],
-    outputExtension: 'zip',
-    outputMimeType: 'application/zip',
-    description: 'Safely extract POSIX/GNU TAR archives directly inside your browser.',
-    supportsBatchOutput: true,
-  },
-  {
-    id: 'targz-extract',
-    name: 'TAR.GZ to Extracted Files',
-    category: 'archives',
-    sourceFormat: 'TAR.GZ / TGZ',
-    targetFormat: 'Extracted Files',
-    acceptsExtensions: ['.tar.gz', '.tgz', '.gz'],
-    acceptsMimeTypes: ['application/gzip', 'application/x-gzip', 'application/x-tar'],
-    outputExtension: 'zip',
-    outputMimeType: 'application/zip',
-    description: 'Decompress gzip and unpack tar files using native browser Web Streams.',
     supportsBatchOutput: true,
   },
 ];

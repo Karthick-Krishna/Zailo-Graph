@@ -16,25 +16,19 @@ import {
   convertCsvToXlsx,
   convertXlsxToCsv,
 } from '../services/conversion/spreadsheetConverter';
-import {
-  extractZipArchive,
-  sanitizeArchiveFilename,
-} from '../services/conversion/archiveConverter';
-import JSZip from 'jszip';
 
 describe('Document Conversion System - Registry & Validation', () => {
-  it('defines all 6 mandatory conversion categories', () => {
+  it('defines all 5 mandatory conversion categories', () => {
     const categoryIds = CONVERSION_CATEGORIES.map(c => c.id);
     expect(categoryIds).toContain('documents');
     expect(categoryIds).toContain('presentations');
     expect(categoryIds).toContain('spreadsheets');
     expect(categoryIds).toContain('images_to_pdf');
     expect(categoryIds).toContain('pdf_to_images');
-    expect(categoryIds).toContain('archives');
   });
 
-  it('contains all 36 specified conversion operations', () => {
-    expect(CONVERSIONS.length).toBe(36);
+  it('contains all 33 specified conversion operations', () => {
+    expect(CONVERSIONS.length).toBe(33);
 
     // Verify key operations exist
     expect(getConversionById('word-to-pdf')).toBeDefined();
@@ -50,9 +44,6 @@ describe('Document Conversion System - Registry & Validation', () => {
     expect(getConversionById('csv-to-xlsx')).toBeDefined();
     expect(getConversionById('images-to-pdf')).toBeDefined();
     expect(getConversionById('pdf-to-png')).toBeDefined();
-    expect(getConversionById('zip-extract')).toBeDefined();
-    expect(getConversionById('tar-extract')).toBeDefined();
-    expect(getConversionById('targz-extract')).toBeDefined();
   });
 
   it('categorizes operations accurately', () => {
@@ -70,9 +61,6 @@ describe('Document Conversion System - Registry & Validation', () => {
 
     const pdfToImages = getConversionsByCategory('pdf_to_images');
     expect(pdfToImages.length).toBe(2);
-
-    const archives = getConversionsByCategory('archives');
-    expect(archives.length).toBe(3);
   });
 
   it('validates file extensions and limits properly', () => {
@@ -130,28 +118,5 @@ describe('Spreadsheet Conversions Engine', () => {
     const csvResult = await convertXlsxToCsv(xlsxFile);
     const roundtripText = await csvResult.primaryBlob.text();
     expect(roundtripText.trim()).toBe(originalCsv.trim());
-  });
-});
-
-describe('Archive Extraction Engine', () => {
-  it('extracts ZIP archive files safely and blocks path traversal', async () => {
-    const zip = new JSZip();
-    zip.file('document.txt', 'Clean contents from Zailo Graph archive test.');
-    zip.file('subfolder/data.json', JSON.stringify({ version: '1.0' }));
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
-    const zipFile = new File([zipBlob], 'package.zip', { type: 'application/zip' });
-
-    const result = await extractZipArchive(zipFile);
-    expect(result.items).toBeDefined();
-    expect(result.items!.length).toBe(2);
-    expect(result.items!.some(i => i.name === 'document.txt')).toBe(true);
-    expect(result.primaryFilename).toBe('package_extracted.zip');
-  });
-
-  it('rejects filenames containing malicious path traversal ../', () => {
-    expect(() => sanitizeArchiveFilename('../../etc/passwd')).toThrow(/Security Violation/);
-    expect(() => sanitizeArchiveFilename('/root/.ssh/id_rsa')).toThrow(/Security Violation/);
-    expect(() => sanitizeArchiveFilename('C:\\Windows\\System32')).toThrow(/Security Violation/);
-    expect(sanitizeArchiveFilename('clean/path/document.txt')).toBe('clean/path/document.txt');
   });
 });

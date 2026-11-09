@@ -58,19 +58,19 @@ export const UTILITIES: UtilityDefinition[] = [
     outputFormats: ['image/jpeg', 'image/png', 'image/webp'],
     supportsBatch: true,
   },
-  // 3. Document and File Converter System (Word, PDF, Excel, PowerPoint, Text, RTF, Images, Archives)
+  // 3. Document and File Converter System (Word, PDF, Excel, PowerPoint, Text, RTF, Images)
   {
     id: 'document-converter',
     name: 'Document & File Converter',
-    description: 'Convert Word, PDF, Excel, PowerPoint, Text, RTF, Images, and Archives with 100% privacy.',
+    description: 'Convert Word, PDF, Excel, PowerPoint, Text, RTF, and Images with 100% privacy.',
     category: 'convert',
     isCompetitorPaid: false,
     icon: 'FileCode2',
-    badge: '36 Tools',
+    badge: '33 Tools',
     inputFormats: [
       '.docx', '.doc', '.pdf', '.pptx', '.ppt', '.xlsx', '.xls', '.csv',
       '.odt', '.rtf', '.txt', '.jpg', '.jpeg', '.png', '.webp', '.bmp',
-      '.tiff', '.tif', '.zip', '.tar', '.gz'
+      '.tiff', '.tif'
     ],
     outputFormats: [
       '.pdf', '.docx', '.doc', '.txt', '.rtf', '.pptx', '.ppt', '.xlsx',

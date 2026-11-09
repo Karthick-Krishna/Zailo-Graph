@@ -182,7 +182,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
               <span>{u.name}</span>
               {isDocConverter ? (
                 <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-blue-600 text-white uppercase font-bold">
-                  36 in 1
+                  33 in 1
                 </span>
               ) : u.badge ? (
                 <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-neutral-800 text-cyan-300 uppercase">
@@ -224,11 +224,11 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
                   <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full uppercase font-bold ${
                     isSelected ? 'bg-white/20 text-white' : 'bg-blue-600 text-white'
                   }`}>
-                    36 in 1
+                    33 in 1
                   </span>
                 </div>
                 <p className={`text-[11px] truncate mt-0.5 ${isSelected ? 'text-blue-100' : 'text-blue-700'}`}>
-                  Convert Word, PDF, PPT, Excel, Images &amp; Archives
+                  Convert Word, PDF, PPT, Excel &amp; Images
                 </p>
               </div>
             </div>
@@ -313,7 +313,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
                 </span>
               </div>
               <p className={`text-[10px] truncate ${isSelected ? 'text-blue-100 font-normal' : 'text-blue-700/80 font-medium'}`}>
-                36 in 1 Universal Engine
+                33 in 1 Universal Engine
               </p>
             </div>
           </div>
@@ -324,7 +324,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
                 ? 'bg-white/25 text-white ring-1 ring-white/40'
                 : 'bg-blue-600 text-white shadow-xs'
             }`}>
-              36 in 1
+              33 in 1
             </span>
           </div>
         </button>

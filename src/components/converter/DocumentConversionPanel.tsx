@@ -21,7 +21,6 @@ import {
   Table, 
   Image as ImageIcon, 
   Images, 
-  Archive, 
   UploadCloud, 
   Check, 
   AlertCircle, 
@@ -45,7 +44,6 @@ const CATEGORY_ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   Table,
   Image: ImageIcon,
   Images,
-  Archive,
 };
 
 interface DocumentConversionPanelProps {
@@ -67,7 +65,6 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
     spreadsheets: false,
     images_to_pdf: false,
     pdf_to_images: false,
-    archives: false,
   });
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -236,7 +233,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
                 Document &amp; File Converter
               </span>
               <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 uppercase">
-                36 in 1 Suite
+                33 in 1 Suite
               </span>
             </div>
           </div>
@@ -569,7 +566,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
                         onClick={() => handleDownloadFile(conversionResult.zipBlob!, conversionResult.zipFilename || 'all_items.zip')}
                         className="text-emerald-700 hover:underline flex items-center gap-1 cursor-pointer"
                       >
-                        <Archive className="w-3.5 h-3.5" />
+                        <Download className="w-3.5 h-3.5" />
                         <span>Download All (ZIP)</span>
                       </button>
                     )}
