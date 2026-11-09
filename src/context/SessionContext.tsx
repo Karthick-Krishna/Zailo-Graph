@@ -257,14 +257,32 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
 
   useEffect(() => {
-    const handleHash = () => {
+    const handleUrlChange = () => {
+      const pathMatch = window.location.pathname.match(/\/tools\/([a-z0-9-]+)(?:\.html)?/i);
+      if (pathMatch && pathMatch[1]) {
+        const id = pathMatch[1];
+        if (UTILITIES.some(u => u.id === id) || id === 'heic-converter' || id === 'webp-to-raster' || id === 'raster-to-webp') {
+          setActiveUtilityId(id);
+          return;
+        }
+        setActiveUtilityId('document-converter');
+        return;
+      }
       const match = window.location.hash.match(/tool=([a-z0-9-]+)/i);
       if (match && match[1]) {
         setActiveUtilityId(match[1]);
+        return;
+      }
+      if (window.location.pathname === '/') {
+        setActiveUtilityId('workflow-recipes');
       }
     };
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
   }, []);
   const [currentParams, setCurrentParams] = useState<any>({});
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -896,6 +914,17 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const selectUtility = useCallback((newUtilityId: string) => {
     setActiveUtilityId(newUtilityId);
+
+    // Update browser URL so address bar reflects current tool page
+    if (typeof window !== 'undefined') {
+      const targetUrl = newUtilityId === 'workflow-recipes' && window.location.pathname === '/'
+        ? '/'
+        : `/tools/${newUtilityId}.html`;
+      if (window.location.pathname !== targetUrl) {
+        window.history.pushState({ tool: newUtilityId }, '', targetUrl);
+      }
+    }
+
     // Invalidate prior job sequences
     currentJobSeqRef.current++;
 

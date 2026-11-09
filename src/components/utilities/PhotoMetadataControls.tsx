@@ -307,3 +307,4 @@ export const PhotoMetadataControls: React.FC = () => {
     </div>
   );
 };
+

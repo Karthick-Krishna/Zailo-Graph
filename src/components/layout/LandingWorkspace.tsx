@@ -13,7 +13,6 @@ import {
   Camera, 
   X
 } from 'lucide-react';
-import { Base64Controls } from '../utilities/Base64Controls';
 import { DocumentConversionPanel } from '../converter/DocumentConversionPanel';
 import { GatedFeatureCard } from '../auth/GatedFeatureCard';
 import { ICON_MAP } from './ToolSidebar';
@@ -23,7 +22,6 @@ export const LandingWorkspace: React.FC = () => {
   const { addImages, activeUtilityId, setActiveUtilityId, savedSessionCount, restoreSavedSession, clearSavedSession, setIsMobileToolsOpen } = useSession();
   const { isUtilityUnlocked } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
-  const [showBase64Modal, setShowBase64Modal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -495,54 +493,6 @@ export const LandingWorkspace: React.FC = () => {
 
       {/* Clean Collaborative Footer */}
       <Footer />
-
-      {/* Base64 to Image Decoder Modal */}
-      {(showBase64Modal || activeUtilityId === 'base64-to-image') && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
-          onClick={() => {
-            setShowBase64Modal(false);
-            if (activeUtilityId === 'base64-to-image') {
-              setActiveUtilityId('compression');
-            }
-          }}
-        >
-          <div
-            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-neutral-200 p-6 space-y-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    setShowBase64Modal(false);
-                    if (activeUtilityId === 'base64-to-image') {
-                      setActiveUtilityId('compression');
-                    }
-                  }}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-xs font-semibold text-neutral-700 transition cursor-pointer"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Back</span>
-                </button>
-                <h3 className="text-sm font-bold text-neutral-900">Base64 to Image Decoder</h3>
-              </div>
-              <button
-                onClick={() => {
-                  setShowBase64Modal(false);
-                  if (activeUtilityId === 'base64-to-image') {
-                    setActiveUtilityId('compression');
-                  }
-                }}
-                className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-xl transition cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <Base64Controls />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

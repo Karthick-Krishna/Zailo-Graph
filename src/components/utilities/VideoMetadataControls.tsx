@@ -240,3 +240,4 @@ export const VideoMetadataControls: React.FC = () => {
     </div>
   );
 };
+

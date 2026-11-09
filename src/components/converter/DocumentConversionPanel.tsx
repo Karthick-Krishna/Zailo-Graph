@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { 
   CONVERSION_CATEGORIES, 
@@ -121,6 +121,13 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
     } else {
       setSelectedFiles([]);
     }
+
+    if (typeof window !== 'undefined') {
+      const targetUrl = `/tools/${conversionId}.html`;
+      if (window.location.pathname !== targetUrl) {
+        window.history.pushState({ conversion: conversionId }, '', targetUrl);
+      }
+    }
   };
 
   const handleBackToOverview = () => {
@@ -131,7 +138,29 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
     setValidationError(null);
     setProgressState({ status: 'idle', phase: '', percent: 0 });
     setConversionResult(null);
+
+    if (typeof window !== 'undefined') {
+      const targetUrl = `/tools/document-converter.html`;
+      if (window.location.pathname !== targetUrl) {
+        window.history.pushState({ tool: 'document-converter' }, '', targetUrl);
+      }
+    }
   };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window !== 'undefined') {
+        const match = window.location.pathname.match(/\/tools\/([a-z0-9-]+)(?:\.html)?/i);
+        if (match && match[1] && getConversionById(match[1])) {
+          setSelectedConversionId(match[1]);
+        } else if (match && match[1] === 'document-converter') {
+          setSelectedConversionId(null);
+        }
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Drag & drop handlers
   const handleDragOver = (e: React.DragEvent) => {

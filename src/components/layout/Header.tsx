@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
   const { user, logout, openAuthModal, openSettings } = useAuth();
-  const { images, clearWorkspace, undo, redo, canUndo, canRedo, activeHistory, activeHistoryIndex, isMobileToolsOpen, setIsMobileToolsOpen } = useSession();
+  const { images, clearWorkspace, undo, redo, canUndo, canRedo, activeHistory, activeHistoryIndex, isMobileToolsOpen, setIsMobileToolsOpen, setActiveUtilityId } = useSession();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -40,9 +40,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
   return (
     <header className="sticky top-0 z-30 w-full max-w-full bg-white border-b border-neutral-200 select-none overflow-visible">
       <div className="max-w-7xl mx-auto px-2 min-[360px]:px-3 sm:px-6 h-14 flex items-center justify-between gap-1 sm:gap-4">
-        {/* Brand with Official Vector Logo & Mobile Tools (25) Launcher */}
+        {/* Brand with Official Vector Logo & Mobile Tools Launcher */}
         <div className="flex items-center gap-1 min-[360px]:gap-2 sm:gap-3 shrink-0">
-          <ZailoGraphLogo size="sm" showText={true} hideTextOnMobile={true} />
+          <a
+            href="/"
+            onClick={(e) => {
+              if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+                e.preventDefault();
+                setActiveUtilityId('workflow-recipes');
+                window.history.pushState({}, '', '/');
+              }
+            }}
+            className="flex items-center gap-1 min-[360px]:gap-2 sm:gap-3 shrink-0 hover:opacity-90 transition cursor-pointer"
+            title="Zailo Graph Home Hub"
+          >
+            <ZailoGraphLogo size="sm" showText={true} hideTextOnMobile={true} />
+          </a>
           <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-400 pl-2 border-l border-neutral-200">
             by Coralgenz &amp; Zorquelz
           </span>
@@ -54,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
           >
             <Layers className="w-3.5 h-3.5 text-blue-600 shrink-0" />
             <span className="hidden min-[380px]:inline text-[11px]">Tools </span>
-            <span className="font-mono text-[10px] min-[360px]:text-[11px]">(26)</span>
+            <span className="font-mono text-[10px] min-[360px]:text-[11px]">(20)</span>
           </button>
         </div>
 
