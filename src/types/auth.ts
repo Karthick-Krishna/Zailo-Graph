@@ -1,6 +1,7 @@
 export type UserTier = 'guest' | 'free_registered';
 
 export const PRO_GATED_UTILITIES: string[] = [
+  'document-converter',
   'workflow-recipes',
   'svg-to-png',
   'png-to-svg',

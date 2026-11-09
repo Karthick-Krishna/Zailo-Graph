@@ -31,6 +31,11 @@ import {
   convertCsvToPdf,
   convertXlsxToOds,
   convertOdsToXlsx,
+  convertXlsToXlsx,
+  convertXlsxToXls,
+  convertCsvToXls,
+  convertXlsToOds,
+  convertOdsToXls,
 } from './spreadsheetConverter';
 import {
   convertImageToPdf,
@@ -115,6 +120,16 @@ export async function executeDocumentConversion(
         return await convertXlsxToOds(file, onProgress);
       case 'ods-to-xlsx':
         return await convertOdsToXlsx(file, onProgress);
+      case 'xls-to-xlsx':
+        return await convertXlsToXlsx(file, onProgress);
+      case 'xlsx-to-xls':
+        return await convertXlsxToXls(file, onProgress);
+      case 'csv-to-xls':
+        return await convertCsvToXls(file, onProgress);
+      case 'xls-to-ods':
+        return await convertXlsToOds(file, onProgress);
+      case 'ods-to-xls':
+        return await convertOdsToXls(file, onProgress);
 
       // D. Image and Document Conversions
       case 'jpg-to-pdf':

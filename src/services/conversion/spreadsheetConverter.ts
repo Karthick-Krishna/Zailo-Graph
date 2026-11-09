@@ -345,8 +345,11 @@ function renderSpreadsheetToPdf(
     doc.text(`${title} • Sheet: ${sheetName}`, margin, cursorY);
     cursorY += 24;
 
-    // 1. Top Header / Logo Images (anchored to row <= 1)
-    const topImages = sheetImages.filter(img => img.fromRow !== undefined && img.fromRow <= 1);
+    // 1. Top Header / Logo Images (anchored to row <= 1, or first unassociated banner image on sheet 0)
+    const topImages = sheetImages.filter(img => 
+      (img.fromRow !== undefined && img.fromRow <= 1) || 
+      (img.fromRow === undefined && sheetIdx === 0 && img.id === 'raw_img_1' && img.aspectRatio > 1.2)
+    );
     for (const img of topImages) {
       const maxH = 90;
       const targetH = Math.min(img.height || 60, maxH);
@@ -747,5 +750,145 @@ export async function convertOdsToXlsx(
     primaryMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     primarySize: xlsxBlob.size,
     summary: `Converted OpenDocument Spreadsheet into Microsoft Excel XLSX (${(xlsxBlob.size / 1024).toFixed(1)} KB).`,
+  };
+}
+
+/**
+ * 9. Excel XLS to XLSX (.xls -> .xlsx)
+ */
+export async function convertXlsToXlsx(
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<ConversionResult> {
+  onProgress?.({ status: 'validating', phase: 'Reading Excel 97-2003 workbook...', percent: 25 });
+  const arrayBuffer = await file.arrayBuffer();
+
+  onProgress?.({ status: 'processing', phase: 'Extracting worksheets and formulas...', percent: 60 });
+  const wb = XLSX.read(arrayBuffer, { type: 'array' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+
+  onProgress?.({ status: 'generating', phase: 'Packaging modern OpenXML XLSX...', percent: 85 });
+  const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const xlsxBlob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+  onProgress?.({ status: 'done', phase: 'XLS to XLSX complete!', percent: 100 });
+  return {
+    primaryBlob: xlsxBlob,
+    primaryFilename: `${baseName}.xlsx`,
+    primaryMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    primarySize: xlsxBlob.size,
+    summary: `Converted legacy Excel XLS into modern Microsoft Excel XLSX with ${wb.SheetNames.length} sheet(s) (${(xlsxBlob.size / 1024).toFixed(1)} KB).`,
+  };
+}
+
+/**
+ * 10. Excel XLSX to XLS (.xlsx -> .xls)
+ */
+export async function convertXlsxToXls(
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<ConversionResult> {
+  onProgress?.({ status: 'validating', phase: 'Reading Excel XLSX workbook...', percent: 25 });
+  const arrayBuffer = await file.arrayBuffer();
+
+  onProgress?.({ status: 'processing', phase: 'Converting workbook structures...', percent: 60 });
+  const wb = XLSX.read(arrayBuffer, { type: 'array' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+
+  onProgress?.({ status: 'generating', phase: 'Encoding binary BIFF8 XLS...', percent: 85 });
+  const buffer = XLSX.write(wb, { bookType: 'biff8', type: 'array' });
+  const xlsBlob = new Blob([buffer], { type: 'application/vnd.ms-excel' });
+
+  onProgress?.({ status: 'done', phase: 'XLSX to XLS complete!', percent: 100 });
+  return {
+    primaryBlob: xlsBlob,
+    primaryFilename: `${baseName}.xls`,
+    primaryMimeType: 'application/vnd.ms-excel',
+    primarySize: xlsBlob.size,
+    summary: `Converted Microsoft Excel XLSX into legacy Excel 97-2003 XLS with ${wb.SheetNames.length} sheet(s) (${(xlsBlob.size / 1024).toFixed(1)} KB).`,
+  };
+}
+
+/**
+ * 11. CSV to XLS (.csv -> .xls)
+ */
+export async function convertCsvToXls(
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<ConversionResult> {
+  onProgress?.({ status: 'validating', phase: 'Parsing CSV dataset...', percent: 25 });
+  const text = await file.text();
+
+  onProgress?.({ status: 'processing', phase: 'Building spreadsheet records...', percent: 60 });
+  const wb = XLSX.read(text, { type: 'string' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+
+  onProgress?.({ status: 'generating', phase: 'Encoding binary BIFF8 XLS...', percent: 85 });
+  const buffer = XLSX.write(wb, { bookType: 'biff8', type: 'array' });
+  const xlsBlob = new Blob([buffer], { type: 'application/vnd.ms-excel' });
+
+  onProgress?.({ status: 'done', phase: 'CSV to XLS complete!', percent: 100 });
+  return {
+    primaryBlob: xlsBlob,
+    primaryFilename: `${baseName}.xls`,
+    primaryMimeType: 'application/vnd.ms-excel',
+    primarySize: xlsBlob.size,
+    summary: `Converted CSV into legacy Excel 97-2003 XLS workbook (${(xlsBlob.size / 1024).toFixed(1)} KB).`,
+  };
+}
+
+/**
+ * 12. XLS to ODS (.xls -> .ods)
+ */
+export async function convertXlsToOds(
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<ConversionResult> {
+  onProgress?.({ status: 'validating', phase: 'Reading Excel XLS workbook...', percent: 25 });
+  const arrayBuffer = await file.arrayBuffer();
+
+  onProgress?.({ status: 'processing', phase: 'Translating spreadsheet sheets...', percent: 60 });
+  const wb = XLSX.read(arrayBuffer, { type: 'array' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+
+  onProgress?.({ status: 'generating', phase: 'Packaging OpenDocument Spreadsheet...', percent: 85 });
+  const buffer = XLSX.write(wb, { bookType: 'ods', type: 'array' });
+  const odsBlob = new Blob([buffer], { type: 'application/vnd.oasis.opendocument.spreadsheet' });
+
+  onProgress?.({ status: 'done', phase: 'XLS to ODS complete!', percent: 100 });
+  return {
+    primaryBlob: odsBlob,
+    primaryFilename: `${baseName}.ods`,
+    primaryMimeType: 'application/vnd.oasis.opendocument.spreadsheet',
+    primarySize: odsBlob.size,
+    summary: `Converted Excel XLS into OpenDocument Spreadsheet .ods (${(odsBlob.size / 1024).toFixed(1)} KB).`,
+  };
+}
+
+/**
+ * 13. ODS to XLS (.ods -> .xls)
+ */
+export async function convertOdsToXls(
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<ConversionResult> {
+  onProgress?.({ status: 'validating', phase: 'Reading OpenDocument Spreadsheet...', percent: 25 });
+  const arrayBuffer = await file.arrayBuffer();
+
+  onProgress?.({ status: 'processing', phase: 'Converting to Microsoft Excel...', percent: 60 });
+  const wb = XLSX.read(arrayBuffer, { type: 'array' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+
+  onProgress?.({ status: 'generating', phase: 'Encoding binary BIFF8 XLS...', percent: 85 });
+  const buffer = XLSX.write(wb, { bookType: 'biff8', type: 'array' });
+  const xlsBlob = new Blob([buffer], { type: 'application/vnd.ms-excel' });
+
+  onProgress?.({ status: 'done', phase: 'ODS to XLS complete!', percent: 100 });
+  return {
+    primaryBlob: xlsBlob,
+    primaryFilename: `${baseName}.xls`,
+    primaryMimeType: 'application/vnd.ms-excel',
+    primarySize: xlsBlob.size,
+    summary: `Converted OpenDocument Spreadsheet into Excel XLS (${(xlsBlob.size / 1024).toFixed(1)} KB).`,
   };
 }

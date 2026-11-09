@@ -51,7 +51,11 @@ export const Workspace: React.FC = () => {
           {activeUtilityId === 'document-converter' ? (
             <div className="w-full h-full flex-1 overflow-y-auto py-3 sm:py-6 px-2 sm:px-6 flex flex-col items-center justify-start animate-in fade-in duration-150">
               <div className="w-full max-w-5xl">
-                <DocumentConversionPanel />
+                {!isUnlocked ? (
+                  <GatedFeatureCard utility={activeUtility} />
+                ) : (
+                  <DocumentConversionPanel />
+                )}
               </div>
             </div>
           ) : images.length === 0 || !activeImage ? (
@@ -61,19 +65,43 @@ export const Workspace: React.FC = () => {
               <GatedFeatureCard utility={activeUtility} />
             </div>
           ) : (
-            <div className="flex-1 w-full h-full flex items-center justify-center min-h-0">
-              <ComparisonSlider
-                originalUrl={activeImage.url}
-                processedUrl={activeImage.processedUrl}
-                originalSize={activeImage.size}
-                processedSize={activeImage.processedSize}
-                originalWidth={activeImage.width}
-                originalHeight={activeImage.height}
-                processedWidth={activeImage.processedWidth}
-                processedHeight={activeImage.processedHeight}
-                imageName={activeImage.name}
-                activeUtilityId={activeUtilityId}
-              />
+            <div className="flex-1 w-full h-full flex flex-col items-center justify-center min-h-0">
+              {/* Highlighted Active Feature Indicator on Main Screen */}
+              <div className="w-full max-w-4xl px-2 mb-2 flex items-center justify-between shrink-0 animate-in fade-in">
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-blue-400 shadow-md shadow-blue-500/10">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse shrink-0"></span>
+                  <span className="text-[11px] font-mono text-neutral-500 font-bold uppercase tracking-wider">Active Feature:</span>
+                  <span className="text-xs sm:text-sm font-black text-neutral-900 tracking-tight font-display">{activeUtility.name}</span>
+                  {activeUtility.badge && (
+                    <span className="text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                      {activeUtility.badge}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setIsMobileToolsOpen(true)}
+                  className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-neutral-100 border border-neutral-300 text-xs font-semibold text-neutral-700 shadow-2xs transition active:scale-95 cursor-pointer"
+                >
+                  <Layers className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Switch Feature</span>
+                </button>
+              </div>
+
+              <div className="flex-1 w-full h-full flex items-center justify-center min-h-0">
+                <ComparisonSlider
+                  originalUrl={activeImage.url}
+                  processedUrl={activeImage.processedUrl}
+                  originalSize={activeImage.size}
+                  processedSize={activeImage.processedSize}
+                  originalWidth={activeImage.width}
+                  originalHeight={activeImage.height}
+                  processedWidth={activeImage.processedWidth}
+                  processedHeight={activeImage.processedHeight}
+                  imageName={activeImage.name}
+                  activeUtilityId={activeUtilityId}
+                />
+              </div>
             </div>
           )}
         </main>

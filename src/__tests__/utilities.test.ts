@@ -27,11 +27,12 @@ describe('UTILITIES catalog', () => {
     const proUtilities = UTILITIES.filter(u => u.isCompetitorPaid);
     const freeUtilities = UTILITIES.filter(u => !u.isCompetitorPaid);
 
-    expect(proUtilities.length).toBe(10);
-    expect(freeUtilities.length).toBe(16);
+    expect(proUtilities.length).toBe(11);
+    expect(freeUtilities.length).toBe(15);
 
     // Verify key Pro features
     const proIds = proUtilities.map(u => u.id);
+    expect(proIds).toContain('document-converter');
     expect(proIds).toContain('workflow-recipes');
     expect(proIds).toContain('watermark');
     expect(proIds).toContain('collage-maker');

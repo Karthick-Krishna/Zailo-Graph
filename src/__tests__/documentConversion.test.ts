@@ -16,6 +16,10 @@ import {
   convertCsvToXlsx,
   convertXlsxToCsv,
   convertXlsxToPdf,
+  convertXlsToXlsx,
+  convertXlsxToXls,
+  convertCsvToXls,
+  convertXlsToPdf,
 } from '../services/conversion/spreadsheetConverter';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
@@ -30,8 +34,8 @@ describe('Document Conversion System - Registry & Validation', () => {
     expect(categoryIds).toContain('pdf_to_images');
   });
 
-  it('contains all 33 specified conversion operations', () => {
-    expect(CONVERSIONS.length).toBe(33);
+  it('contains all 38 specified conversion operations', () => {
+    expect(CONVERSIONS.length).toBe(38);
 
     // Verify key operations exist
     expect(getConversionById('word-to-pdf')).toBeDefined();
@@ -43,8 +47,15 @@ describe('Document Conversion System - Registry & Validation', () => {
     expect(getConversionById('pptx-to-pdf')).toBeDefined();
     expect(getConversionById('pptx-to-images')).toBeDefined();
     expect(getConversionById('xlsx-to-pdf')).toBeDefined();
+    expect(getConversionById('xls-to-pdf')).toBeDefined();
     expect(getConversionById('xlsx-to-csv')).toBeDefined();
+    expect(getConversionById('xls-to-csv')).toBeDefined();
     expect(getConversionById('csv-to-xlsx')).toBeDefined();
+    expect(getConversionById('xls-to-xlsx')).toBeDefined();
+    expect(getConversionById('xlsx-to-xls')).toBeDefined();
+    expect(getConversionById('csv-to-xls')).toBeDefined();
+    expect(getConversionById('xls-to-ods')).toBeDefined();
+    expect(getConversionById('ods-to-xls')).toBeDefined();
     expect(getConversionById('images-to-pdf')).toBeDefined();
     expect(getConversionById('pdf-to-png')).toBeDefined();
   });
@@ -57,7 +68,7 @@ describe('Document Conversion System - Registry & Validation', () => {
     expect(presentations.length).toBe(6);
 
     const spreadsheets = getConversionsByCategory('spreadsheets');
-    expect(spreadsheets.length).toBe(8);
+    expect(spreadsheets.length).toBe(13);
 
     const imagesToPdf = getConversionsByCategory('images_to_pdf');
     expect(imagesToPdf.length).toBe(6);
@@ -154,5 +165,48 @@ describe('Spreadsheet Conversions Engine', () => {
     expect(result.primaryMimeType).toBe('application/pdf');
     expect(result.primaryFilename).toBe('report_with_logo_sheets.pdf');
     expect(result.summary).toContain('embedded image');
+  });
+
+  it('supports full bidirectional XLS conversions (XLS <-> XLSX, CSV -> XLS, XLS -> PDF)', async () => {
+    // 1. Create a binary BIFF8 XLS workbook
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([
+      ['Product', 'Q1 Sales', 'Q2 Sales'],
+      ['Zailo Studio', 12000, 18500],
+      ['Coralgenz Pro', 8500, 14200],
+    ]);
+    XLSX.utils.book_append_sheet(wb, ws, 'Quarterly');
+    const xlsBuffer = XLSX.write(wb, { bookType: 'biff8', type: 'array' });
+    const xlsFile = new File([xlsBuffer], 'quarterly_report.xls', {
+      type: 'application/vnd.ms-excel',
+    });
+
+    // 2. Convert XLS -> XLSX
+    const xlsxResult = await convertXlsToXlsx(xlsFile);
+    expect(xlsxResult.primaryBlob).toBeDefined();
+    expect(xlsxResult.primaryFilename).toBe('quarterly_report.xlsx');
+    expect(xlsxResult.primaryMimeType).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+    // 3. Convert XLSX -> XLS
+    const convertedXlsxFile = new File([xlsxResult.primaryBlob], 'quarterly_report.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const xlsResult = await convertXlsxToXls(convertedXlsxFile);
+    expect(xlsResult.primaryBlob).toBeDefined();
+    expect(xlsResult.primaryFilename).toBe('quarterly_report.xls');
+    expect(xlsResult.primaryMimeType).toBe('application/vnd.ms-excel');
+
+    // 4. Convert CSV -> XLS
+    const csvFile = new File(['Col1,Col2\nVal1,Val2'], 'data.csv', { type: 'text/csv' });
+    const csvToXlsResult = await convertCsvToXls(csvFile);
+    expect(csvToXlsResult.primaryBlob).toBeDefined();
+    expect(csvToXlsResult.primaryFilename).toBe('data.xls');
+    expect(csvToXlsResult.primaryMimeType).toBe('application/vnd.ms-excel');
+
+    // 5. Convert XLS -> PDF
+    const pdfResult = await convertXlsToPdf(xlsFile);
+    expect(pdfResult.primaryBlob).toBeDefined();
+    expect(pdfResult.primaryMimeType).toBe('application/pdf');
+    expect(pdfResult.primaryFilename).toBe('quarterly_report_sheets.pdf');
   });
 });

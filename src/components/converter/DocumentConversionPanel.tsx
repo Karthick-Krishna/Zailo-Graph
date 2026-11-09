@@ -272,7 +272,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
             <span>100% Client-Side Privacy</span>
           </span>
           <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 uppercase tracking-wide">
-            33 in 1 Suite
+            {CONVERSIONS.length} in 1 Suite
           </span>
         </div>
       </div>
@@ -416,7 +416,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>All (33)</span>
+                  <span>All ({CONVERSIONS.length})</span>
                 </button>
 
                 {CONVERSION_CATEGORIES.map(cat => {
@@ -453,7 +453,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter 33 tools... (Word, Excel, PDF)"
+                  placeholder={`Filter ${CONVERSIONS.length} tools... (Word, Excel, PDF)`}
                   className="w-full pl-8.5 pr-7 py-2 rounded-xl bg-neutral-100/90 border border-neutral-200 text-xs text-neutral-900 placeholder-neutral-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
                 />
                 {searchQuery && (
@@ -543,7 +543,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
               <button
                 onClick={handleBackToOverview}
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-950 transition cursor-pointer px-2.5 py-1.5 rounded-xl hover:bg-neutral-100 active:scale-95 shadow-2xs"
-                title="Return to all 33 conversions"
+                title={`Return to all ${CONVERSIONS.length} conversions`}
               >
                 <ArrowLeft className="w-3.5 h-3.5 text-neutral-500" />
                 <span>All Conversions</span>

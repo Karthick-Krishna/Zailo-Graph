@@ -141,8 +141,9 @@ describe('Zailo Graph Google Authentication, Profile Architecture & Settings', (
   });
 
   describe('Pro Utility Gating', () => {
-    it('correctly locks the 10 Pro utilities for guests and unlocks all 25 for authenticated users', () => {
-      expect(PRO_GATED_UTILITIES).toHaveLength(10);
+    it('correctly locks the 11 Pro utilities for guests and unlocks all 26 for authenticated users', () => {
+      expect(PRO_GATED_UTILITIES).toHaveLength(11);
+      expect(PRO_GATED_UTILITIES).toContain('document-converter');
       expect(PRO_GATED_UTILITIES).toContain('workflow-recipes');
       expect(PRO_GATED_UTILITIES).toContain('svg-to-png');
       expect(PRO_GATED_UTILITIES).toContain('png-to-svg');
@@ -162,6 +163,7 @@ describe('Zailo Graph Google Authentication, Profile Architecture & Settings', (
       };
 
       expect(isUtilityUnlocked('compression', null)).toBe(true);
+      expect(isUtilityUnlocked('document-converter', null)).toBe(false);
       expect(isUtilityUnlocked('camera-raw', null)).toBe(false);
       expect(isUtilityUnlocked('watermark', null)).toBe(false);
 

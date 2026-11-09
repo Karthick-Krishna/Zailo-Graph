@@ -40,7 +40,7 @@ import {
   Grid
 } from 'lucide-react';
 
-const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
+export const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   Sparkles,
   Maximize2,
   FileDown,
@@ -166,10 +166,10 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
             aria-label={u.name}
           >
             <IconComponent className="w-4 h-4 shrink-0" />
-            {isDocConverter && (
+            {isDocConverter && !isLocked && (
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-blue-600 ring-2 ring-white animate-pulse" />
             )}
-            {isLocked && !isDocConverter && (
+            {isLocked && (
               <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center border border-amber-200">
                 <Lock className="w-2 h-2" />
               </span>
@@ -182,7 +182,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
               <span>{u.name}</span>
               {isDocConverter ? (
                 <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-blue-600 text-white uppercase font-bold">
-                  33 in 1
+                  PRO • 38 in 1
                 </span>
               ) : u.badge ? (
                 <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-neutral-800 text-cyan-300 uppercase">
@@ -222,18 +222,22 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
                     {u.name}
                   </span>
                   <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full uppercase font-bold ${
-                    isSelected ? 'bg-white/20 text-white' : 'bg-blue-600 text-white'
+                    isSelected ? 'bg-white/20 text-white' : isLocked ? 'bg-amber-500 text-white' : 'bg-blue-600 text-white'
                   }`}>
-                    33 in 1
+                    PRO • 38 in 1
                   </span>
                 </div>
                 <p className={`text-[11px] truncate mt-0.5 ${isSelected ? 'text-blue-100' : 'text-blue-700'}`}>
-                  Convert Word, PDF, PPT, Excel &amp; Images
+                  Convert Word, PDF, PPT, Excel XLS/XLSX &amp; Images
                 </p>
               </div>
             </div>
             <div className="pl-2 shrink-0">
-              <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-blue-600'}`}>&rarr;</span>
+              {isLocked ? (
+                <Lock className={`w-4 h-4 ${isSelected ? 'text-amber-300' : 'text-amber-500'}`} />
+              ) : (
+                <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-blue-600'}`}>&rarr;</span>
+              )}
             </div>
           </button>
         );
@@ -313,18 +317,23 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
                 </span>
               </div>
               <p className={`text-[10px] truncate ${isSelected ? 'text-blue-100 font-normal' : 'text-blue-700/80 font-medium'}`}>
-                33 in 1 Universal Engine
+                38 in 1 Universal Engine
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1 shrink-0 ml-1">
+          <div className="flex items-center gap-1.5 shrink-0 ml-1">
+            {isLocked && (
+              <Lock className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-300' : 'text-amber-500'}`} />
+            )}
             <span className={`text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
               isSelected
                 ? 'bg-white/25 text-white ring-1 ring-white/40'
+                : isLocked
+                ? 'bg-amber-500 text-white shadow-xs'
                 : 'bg-blue-600 text-white shadow-xs'
             }`}>
-              33 in 1
+              {isLocked ? 'PRO' : '38 in 1'}
             </span>
           </div>
         </button>
