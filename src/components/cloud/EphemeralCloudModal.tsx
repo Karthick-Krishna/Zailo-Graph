@@ -51,7 +51,7 @@ export const EphemeralCloudModal: React.FC<EphemeralCloudModalProps> = ({
         {/* Content Body */}
         <div className="p-6 space-y-4">
           <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
-            Your hardware does not have an active WebGPU backend, or this task requires heavy neural execution. You can opt to dispatch this single job through the <strong>Coralgenz &amp; Zorquelz Zero-Retention Cloud Engine</strong>.
+            Your hardware does not have an active WebGPU backend, or this task requires heavy neural execution. You can opt to dispatch this single job through the <strong>Coralgenz Global &amp; Zorquelz Technologies Zero-Retention Cloud Engine</strong>.
           </p>
 
           {/* Privacy & Security Guarantees */}
@@ -125,7 +125,7 @@ export const EphemeralCloudModal: React.FC<EphemeralCloudModalProps> = ({
         {/* Footer */}
         <div className="p-4 bg-neutral-50 border-t border-neutral-100 flex items-center justify-center gap-2 text-xs text-neutral-500 font-medium">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>Coralgenz &amp; Zorquelz Zero-Knowledge Verified • No Accounts or Credit Cards</span>
+          <span>Coralgenz Global &amp; Zorquelz Technologies Zero-Knowledge Verified • No Accounts or Credit Cards</span>
         </div>
       </div>
     </div>

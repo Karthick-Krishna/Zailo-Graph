@@ -1123,7 +1123,7 @@ function generateHtmlPage(tool) {
     },
     'author': {
       '@type': 'Organization',
-      'name': 'Coralgenz & Zorquelz'
+      'name': 'Coralgenz Global & Zorquelz Technologies'
     }
   };
 
@@ -1336,12 +1336,12 @@ function generateHtmlPage(tool) {
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-neutral-200">
         <div class="flex items-center gap-2">
           <span class="font-extrabold text-base text-neutral-900">Zailo Graph</span>
-          <span class="text-xs text-neutral-500 font-medium">by Coralgenz &amp; Zorquelz</span>
+          <span class="text-xs text-neutral-500 font-medium">by Coralgenz Global &amp; Zorquelz Technologies</span>
         </div>
         <p class="text-xs text-neutral-500">100% Client-Side Image Workspace. No Cloud Transmission.</p>
       </div>
       <div class="text-center text-xs text-neutral-500">
-        <p>&copy; 2026 Zailo Graph by Coralgenz &amp; Zorquelz. All 60 browser utilities are 100% free forever.</p>
+        <p>&copy; 2026 Zailo Graph by Coralgenz Global &amp; Zorquelz Technologies. All 60 browser utilities are 100% free forever.</p>
       </div>
     </div>
   </footer>

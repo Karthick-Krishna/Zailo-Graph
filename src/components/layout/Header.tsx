@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
             <ZailoGraphLogo size="sm" showText={true} hideTextOnMobile={true} />
           </a>
           <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-400 pl-2 border-l border-neutral-200">
-            by Coralgenz &amp; Zorquelz
+            by Coralgenz Global &amp; Zorquelz Technologies
           </span>
           <button
             onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}

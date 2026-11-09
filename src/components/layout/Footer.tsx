@@ -23,10 +23,10 @@ export const Footer: React.FC = () => {
             
             <div className="space-y-0.5">
               <h3 className="text-sm font-bold text-neutral-900 tracking-wide font-display">
-                Zailo Graph by Coralgenz &amp; Zorquelz
+                Zailo Graph by Coralgenz Global &amp; Zorquelz Technologies
               </h3>
               <p className="text-xs font-semibold text-blue-600">
-                A Collaborative Product by Coralgenz &amp; Zorquelz
+                A Collaborative Product by Coralgenz Global &amp; Zorquelz Technologies
               </p>
             </div>
 
@@ -69,7 +69,7 @@ export const Footer: React.FC = () => {
         {/* Copyright & Legal Attribution */}
         <div className="pt-6 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-xs text-neutral-500 text-center sm:text-left">
           <p>
-            &copy; 2026 Zailo Graph by Coralgenz &amp; Zorquelz. A Collaborative Product by Coralgenz &amp; Zorquelz. All 25 browser utilities are 100% free forever.
+            &copy; 2026 Zailo Graph by Coralgenz Global &amp; Zorquelz Technologies. A Collaborative Product by Coralgenz Global &amp; Zorquelz Technologies. All 20 browser utilities are 100% free forever.
           </p>
 
           <div className="flex items-center justify-center gap-3 text-neutral-500 font-mono text-[11px]">

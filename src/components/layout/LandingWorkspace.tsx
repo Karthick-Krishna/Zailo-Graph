@@ -236,7 +236,7 @@ export const LandingWorkspace: React.FC = () => {
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200/80 text-neutral-800 text-[11px] sm:text-xs font-semibold shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 animate-pulse"></span>
               <ShieldCheck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-              <span>100% Private • Built by Coralgenz &amp; Zorquelz</span>
+              <span>100% Private • Built by Coralgenz Global &amp; Zorquelz Technologies</span>
             </div>
 
             {/* Mobile Direct Navigation Button */}
