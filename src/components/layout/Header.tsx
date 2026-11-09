@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSession } from '../../context/SessionContext';
 import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
@@ -12,9 +12,33 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
   const { user, logout, openAuthModal, openSettings } = useAuth();
   const { images, clearWorkspace, undo, redo, canUndo, canRedo, activeHistory, activeHistoryIndex, isMobileToolsOpen, setIsMobileToolsOpen } = useSession();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close user dropdown on click outside or Escape key
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [showUserMenu]);
 
   return (
-    <header className="sticky top-0 z-30 w-full max-w-full bg-white border-b border-neutral-200 select-none overflow-hidden">
+    <header className="sticky top-0 z-30 w-full max-w-full bg-white border-b border-neutral-200 select-none overflow-visible">
       <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-14 flex items-center justify-between gap-1.5 sm:gap-4">
         {/* Brand with Official Vector Logo & Mobile Tools (25) Launcher */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
@@ -141,10 +165,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
                 <span className="hidden md:inline">Settings</span>
               </button>
 
-              <div className="relative">
+              <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="p-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 text-neutral-800 text-xs font-medium transition flex items-center gap-1.5 cursor-pointer shadow-2xs min-h-[34px]"
+                  aria-expanded={showUserMenu}
+                  aria-haspopup="true"
+                  className="p-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-white border border-neutral-200 hover:border-neutral-300 active:bg-neutral-50 text-neutral-800 text-xs font-medium transition flex items-center gap-1.5 cursor-pointer shadow-2xs min-h-[34px]"
                   aria-label="User account menu"
                 >
                   {user.avatarUrl ? (
@@ -159,37 +185,90 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
                       {(user.email?.[0] || 'Z').toUpperCase()}
                     </div>
                   )}
-                  <span className="hidden sm:inline max-w-[120px] truncate text-neutral-700">{user?.name || user?.email}</span>
-                  <span className="px-1.5 py-0.2 rounded bg-gradient-to-r from-blue-50 to-sky-50 text-blue-700 border border-blue-200/60 font-mono text-[9px] font-bold">PRO</span>
-                  <ChevronDown className="w-3 h-3 text-neutral-400" />
+                  <span className="hidden sm:inline max-w-[120px] truncate text-neutral-700 font-medium">
+                    {user?.name || user?.email}
+                  </span>
+                  <span className="px-1.5 py-0.2 rounded bg-gradient-to-r from-blue-50 to-sky-50 text-blue-700 border border-blue-200/60 font-mono text-[9px] font-bold">
+                    PRO
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-neutral-200 py-1 z-50 animate-in fade-in duration-100">
-                    <div className="px-3 py-2 border-b border-neutral-100">
-                      <p className="text-[10px] text-neutral-400 uppercase font-mono">Account</p>
-                      <p className="text-xs font-medium text-neutral-800 truncate">{user?.email}</p>
+                  <div 
+                    className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-neutral-200/90 py-2 z-[100] animate-in fade-in zoom-in-95 duration-150 origin-top-right overflow-hidden"
+                    role="menu"
+                    aria-orientation="vertical"
+                  >
+                    {/* Account Info Header */}
+                    <div className="px-4 py-3 border-b border-neutral-100 bg-neutral-50/70">
+                      <div className="flex items-center gap-2.5 mb-1.5">
+                        {user.avatarUrl ? (
+                          <img 
+                            src={user.avatarUrl} 
+                            alt={user.name || user.email}
+                            referrerPolicy="no-referrer"
+                            className="w-8 h-8 rounded-full object-cover border border-neutral-200 shadow-2xs" 
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-sky-400 text-white flex items-center justify-center text-xs font-bold shadow-2xs">
+                            {(user.email?.[0] || 'Z').toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-neutral-900 truncate">
+                            {user.name || 'Zailo Graph Creator'}
+                          </p>
+                          <p className="text-[11px] font-mono text-neutral-500 truncate">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-1 text-[10px]">
+                        <span className="text-neutral-500 font-medium">Account Tier</span>
+                        <span className="px-2 py-0.5 rounded-full bg-blue-100/80 text-blue-800 font-bold font-mono">
+                          PRO UNLOCKED
+                        </span>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        openSettings();
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full px-3 py-2 text-left text-xs text-neutral-700 hover:bg-neutral-50 flex items-center gap-2 transition cursor-pointer"
-                    >
-                      <Settings className="w-3.5 h-3.5 text-neutral-500" />
-                      <span>Settings</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        logout();
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full px-3 py-2 text-left text-xs text-red-600 hover:bg-neutral-50 flex items-center gap-2 transition cursor-pointer border-t border-neutral-100"
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                      <span>Sign Out</span>
-                    </button>
+
+                    {/* Menu Actions */}
+                    <div className="p-1.5 space-y-0.5">
+                      <button
+                        onClick={() => {
+                          openSettings();
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100/80 rounded-xl flex items-center gap-2.5 transition cursor-pointer font-medium"
+                      >
+                        <Settings className="w-4 h-4 text-neutral-500" />
+                        <span>Account Settings</span>
+                      </button>
+
+                      {onOpenShortcuts && (
+                        <button
+                          onClick={() => {
+                            onOpenShortcuts();
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full px-3 py-2 text-left text-xs text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100/80 rounded-xl flex items-center gap-2.5 transition cursor-pointer font-medium sm:hidden"
+                        >
+                          <Keyboard className="w-4 h-4 text-neutral-500" />
+                          <span>Keyboard Shortcuts</span>
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          logout();
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs text-red-600 hover:text-red-700 hover:bg-red-50/80 rounded-xl flex items-center gap-2.5 transition cursor-pointer font-medium border-t border-neutral-100 mt-1 pt-2"
+                      >
+                        <LogOut className="w-4 h-4 text-red-500" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
