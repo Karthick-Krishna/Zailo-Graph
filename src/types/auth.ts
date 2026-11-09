@@ -23,12 +23,12 @@ export interface User {
 }
 
 export interface Entitlements {
-  maxFileSize: number; // in bytes (e.g. 10 * 1024 * 1024 for guest, 50 * 1024 * 1024 for registered)
-  maxBatchQueue: number; // 3 for guest, 50 for registered
+  maxFileSize: number; // in bytes (e.g. 100 * 1024 * 1024)
+  maxBatchQueue: number; // 50 concurrent items
   maxExportResolution: {
     width: number;
     height: number;
-  } | null; // null = uncapped; { 1920, 1080 } for guest
+  } | null; // null = uncapped
   gatedUtilities: string[];
   hasCloudAccess: boolean;
   hasPersistentSessions: boolean;
@@ -47,4 +47,5 @@ export interface AuthModalState {
   targetUtilityId?: string;
   customMessage?: string;
 }
+
 

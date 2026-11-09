@@ -4,6 +4,7 @@ import { SessionProvider, useSession } from './context/SessionContext';
 import { Header } from './components/layout/Header';
 import { Workspace } from './components/layout/Workspace';
 import { AuthModal } from './components/auth/AuthModal';
+import { SettingsModal } from './components/settings/SettingsModal';
 import { ShortcutsModal } from './components/common/ShortcutsModal';
 import { ActiveAuroraBackground } from './components/common/ActiveAuroraBackground';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
@@ -109,6 +110,7 @@ const AppContent: React.FC = () => {
       <Header onOpenShortcuts={() => setIsShortcutsOpen(true)} />
       <Workspace />
       <AuthModal />
+      <SettingsModal />
       <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
     </div>
   );

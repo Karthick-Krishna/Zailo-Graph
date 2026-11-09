@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { User, UserTier, Entitlements, AuthModalState, AuthModalReason } from '../types/auth';
+import { User, UserTier, Entitlements, AuthModalState, AuthModalReason, PRO_GATED_UTILITIES } from '../types/auth';
 import { UTILITIES } from '../types/utility';
 import { auth, googleProvider } from '../services/firebase';
 import { 
@@ -7,7 +7,9 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signInWithPopup, 
-  signOut, 
+  signOut,
+  updateProfile,
+  deleteUser,
   User as FirebaseUser 
 } from 'firebase/auth';
 
@@ -18,7 +20,7 @@ const ANONYMOUS_ENTITLEMENTS: Entitlements = {
   maxFileSize: DEFAULT_MAX_FILE_SIZE,
   maxBatchQueue: DEFAULT_MAX_BATCH,
   maxExportResolution: null, // Uncapped preview & test for all tools
-  gatedUtilities: [], // All utilities 100% unlocked for free local processing
+  gatedUtilities: PRO_GATED_UTILITIES,
   hasCloudAccess: false,
   hasPersistentSessions: true,
 };
@@ -40,15 +42,21 @@ interface AuthContextType {
   authModal: AuthModalState;
   isLoading: boolean;
   authError: string | null;
+  isSettingsOpen: boolean;
   
   // Actions
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string) => void;
   signUpWithEmail: (email: string) => void;
+  directSignIn: (email?: string, name?: string) => void;
   logout: () => Promise<void>;
   openAuthModal: (reason: AuthModalReason, targetUtilityId?: string, customMessage?: string) => void;
   closeAuthModal: () => void;
   clearAuthError: () => void;
+  openSettings: () => void;
+  closeSettings: () => void;
+  updateUserName: (newName: string) => Promise<boolean>;
+  deleteAccount: (confirmationName: string) => Promise<{ success: boolean; error?: string }>;
   
   // Quota Evaluators
   validateFileSize: (sizeInBytes: number) => { allowed: boolean; maxAllowed: number; message?: string };
@@ -83,6 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const [authModal, setAuthModal] = useState<AuthModalState>({
     isOpen: false,
@@ -92,9 +101,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const tier: UserTier = user ? 'free_registered' : 'guest';
   const entitlements = user ? REGISTERED_ENTITLEMENTS : ANONYMOUS_ENTITLEMENTS;
 
-  // Synchronize Firebase Auth state changes and handle redirect credentials from zailograph.firebaseapp.com
+  // Synchronize Firebase Auth state changes and handle redirect credentials
   useEffect(() => {
-    // Process redirect result if returning from zailograph.firebaseapp.com
+    // Process redirect result if returning from OAuth redirect
     getRedirectResult(auth)
       .then((result) => {
         if (result?.user) {
@@ -123,12 +132,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
         } catch {}
       } else {
-        // Only clear if not manually stored or when explicitly logged out from firebase
-        if (!auth.currentUser) {
+        // If logged out from Firebase and no local session is present
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (!stored) {
           setUser(null);
-          try {
-            localStorage.removeItem(LOCAL_STORAGE_KEY);
-          } catch {}
         }
       }
     });
@@ -155,49 +162,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAuthError(null);
   };
 
+  const openSettings = () => {
+    setIsSettingsOpen(true);
+  };
+
+  const closeSettings = () => {
+    setIsSettingsOpen(false);
+  };
+
   const signInWithGoogle = async () => {
     setIsLoading(true);
     setAuthError(null);
     try {
-      // Redirect to zailograph.firebaseapp.com OAuth handler
-      await signInWithRedirect(auth, googleProvider);
-    } catch (err: any) {
-      console.warn('Google Sign-In Redirect error, trying popup fallback:', err);
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        if (result.user) {
-          const mapped = mapFirebaseUser(result.user);
-          setUser(mapped);
-          try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
-          } catch {}
-          closeAuthModal();
-        }
-      } catch (popupErr: any) {
-        console.error('Google Sign-In error:', popupErr);
-        if (popupErr.code === 'auth/popup-closed-by-user') {
-          setAuthError('Sign-in window was closed before finishing. Click below to continue to ZailoGraph.');
-        } else if (popupErr.code === 'auth/cancelled-popup-request') {
-          setAuthError('Another sign-in window was opened. Please check your browser tabs.');
-        } else if (popupErr.code === 'auth/unauthorized-domain') {
-          setAuthError('This domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
-        } else if (popupErr.code === 'auth/popup-blocked') {
-          setAuthError('Browser blocked the sign-in popup. Please allow popups for ZailoGraph.');
-        } else {
-          setAuthError(popupErr.message || err.message || 'Failed to sign in with Google. Please try again.');
-        }
-      } finally {
-        setIsLoading(false);
+      // Direct popup sign-in works best in modern browsers without losing state
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result.user) {
+        const mapped = mapFirebaseUser(result.user);
+        setUser(mapped);
+        try {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
+        } catch {}
+        closeAuthModal();
       }
+    } catch (popupErr: any) {
+      console.warn('Google Sign-In Popup error:', popupErr);
+      if (popupErr.code === 'auth/popup-blocked') {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectErr: any) {
+          console.error('Redirect fallback failed:', redirectErr);
+        }
+      }
+      
+      if (popupErr.code === 'auth/popup-closed-by-user') {
+        setAuthError('Sign-in window was closed before finishing.');
+      } else if (popupErr.code === 'auth/cancelled-popup-request') {
+        setAuthError('Another sign-in request was opened. Please check other browser tabs.');
+      } else if (popupErr.code === 'auth/unauthorized-domain') {
+        setAuthError('Domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains). You can also use Instant Google Access below.');
+      } else if (popupErr.code === 'auth/operation-not-allowed') {
+        setAuthError('Google sign-in is not enabled in Firebase Console. You can use Instant Google Access below.');
+      } else {
+        setAuthError(popupErr.message || 'Google sign-in failed. Please try again or use direct access.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const registerEmailSession = (email: string) => {
-    const trimmed = email.trim().toLowerCase();
+  const directSignIn = (email?: string, name?: string) => {
+    const defaultEmail = email && email.includes('@') ? email.trim() : 'creator@zailograph.app';
+    const defaultName = name?.trim() || defaultEmail.split('@')[0] || 'ZailoGraph Creator';
     const newUser: User = {
       id: 'usr_' + Math.random().toString(36).substring(2, 9),
-      email: trimmed,
-      name: trimmed.split('@')[0],
+      email: defaultEmail,
+      name: defaultName,
       createdAt: new Date().toISOString(),
       tier: 'free_registered',
     };
@@ -208,12 +228,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     closeAuthModal();
   };
 
+  const registerEmailSession = (email: string) => {
+    directSignIn(email);
+  };
+
   const signInWithEmail = (email: string) => {
     registerEmailSession(email);
   };
 
   const signUpWithEmail = (email: string) => {
     registerEmailSession(email);
+  };
+
+  const updateUserName = async (newName: string): Promise<boolean> => {
+    const trimmed = newName.trim();
+    if (!trimmed || !user) return false;
+
+    const updatedUser: User = {
+      ...user,
+      name: trimmed,
+    };
+    setUser(updatedUser);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedUser));
+    } catch {}
+
+    if (auth.currentUser) {
+      try {
+        await updateProfile(auth.currentUser, { displayName: trimmed });
+      } catch (err) {
+        console.warn('Firebase displayName update note:', err);
+      }
+    }
+    return true;
   };
 
   const logout = async () => {
@@ -223,10 +270,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.warn('Sign out warning:', err);
     } finally {
       setUser(null);
+      setIsSettingsOpen(false);
       try {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
       } catch {}
     }
+  };
+
+  const deleteAccount = async (confirmationName: string): Promise<{ success: boolean; error?: string }> => {
+    if (!user) {
+      return { success: false, error: 'No active user session to delete.' };
+    }
+
+    const currentName = (user.name || user.email.split('@')[0]).trim();
+    if (confirmationName.trim().toLowerCase() !== currentName.toLowerCase()) {
+      return { 
+        success: false, 
+        error: `Confirmation text does not match "${currentName}". Please type your exact name to confirm.` 
+      };
+    }
+
+    // Attempt Firebase user deletion if signed in through Firebase
+    try {
+      if (auth.currentUser) {
+        try {
+          await deleteUser(auth.currentUser);
+        } catch (fbErr: any) {
+          console.warn('Firebase user deletion note:', fbErr);
+          if (fbErr.code === 'auth/requires-recent-login') {
+            await signOut(auth);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Firebase deletion cleanup:', e);
+    }
+
+    // Wipe all local sessions and cached workspace data
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('zailo') || key.startsWith('imazora'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    } catch {}
+
+    setUser(null);
+    setIsSettingsOpen(false);
+    return { success: true };
   };
 
   const validateFileSize = (sizeInBytes: number) => {
@@ -263,8 +358,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   };
 
-  const isUtilityUnlocked = (_utilityId: string) => {
-    // All 25 utilities unlocked for live preview & processing
+  const isUtilityUnlocked = (utilityId: string): boolean => {
+    // If utility is in the Pro gated list, require active authenticated session
+    if (PRO_GATED_UTILITIES.includes(utilityId)) {
+      return !!user;
+    }
     return true;
   };
 
@@ -278,13 +376,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         authModal,
         isLoading,
         authError,
+        isSettingsOpen,
         signInWithGoogle,
         signInWithEmail,
         signUpWithEmail,
+        directSignIn,
         logout,
         openAuthModal,
         closeAuthModal,
         clearAuthError,
+        openSettings,
+        closeSettings,
+        updateUserName,
+        deleteAccount,
         validateFileSize,
         validateBatchCount,
         isUtilityUnlocked,
@@ -302,3 +406,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

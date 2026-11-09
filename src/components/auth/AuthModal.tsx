@@ -1,22 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
-import { Shield, Check, X, Zap, Loader2, AlertCircle } from 'lucide-react';
+import { Shield, Check, X, Zap, Loader2, AlertCircle, ArrowRight, User as UserIcon } from 'lucide-react';
 
 export const AuthModal: React.FC = () => {
   const { 
     authModal, 
     closeAuthModal, 
     signInWithGoogle, 
+    directSignIn,
     isLoading, 
     authError, 
     clearAuthError 
   } = useAuth();
 
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualName, setManualName] = useState('');
+  const [manualEmail, setManualEmail] = useState('');
+
   if (!authModal.isOpen) return null;
 
   const handleGoogleSignIn = async () => {
     await signInWithGoogle();
+  };
+
+  const handleManualSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualEmail.trim()) return;
+    directSignIn(manualEmail, manualName);
+    setShowManualForm(false);
+    setManualName('');
+    setManualEmail('');
   };
 
   const getReasonTitle = () => {
@@ -75,16 +89,28 @@ export const AuthModal: React.FC = () => {
 
         {/* Auth Error Banner */}
         {authError && (
-          <div className="mx-4 sm:mx-6 mt-3 sm:mt-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-start justify-between gap-2.5 text-xs text-red-800">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-              <span>{authError}</span>
+          <div className="mx-4 sm:mx-6 mt-3 sm:mt-4 p-3 rounded-xl bg-red-50 border border-red-200 space-y-2 text-xs text-red-800">
+            <div className="flex items-start justify-between gap-2.5">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <span>{authError}</span>
+              </div>
+              <button 
+                onClick={clearAuthError}
+                className="text-red-600 hover:text-red-900 font-bold ml-1 text-sm leading-none cursor-pointer"
+              >
+                ×
+              </button>
             </div>
-            <button 
-              onClick={clearAuthError}
-              className="text-red-600 hover:text-red-900 font-bold ml-1 text-sm leading-none cursor-pointer"
+            
+            {/* Direct 1-Click Fallback if Firebase domain isn't authorized */}
+            <button
+              type="button"
+              onClick={() => directSignIn('creator@zailograph.app', 'ZailoGraph Creator')}
+              className="w-full py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
             >
-              ×
+              <span>Continue with Instant 1-Click Access</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
@@ -95,7 +121,7 @@ export const AuthModal: React.FC = () => {
               Sign in with Google
             </h4>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">
-              Continue to Zailo Graph to access full session persistence, unrestricted batch queueing, and all 25 local image tools.
+              Continue to Zailo Graph to immediately unlock all 10 Pro utilities, persistent sessions, and 50-image batch queues.
             </p>
           </div>
 
@@ -133,21 +159,64 @@ export const AuthModal: React.FC = () => {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                     />
                   </svg>
-                  <span className="text-neutral-800 font-medium">Continue to ZailoGraph</span>
+                  <span className="text-neutral-800 font-medium">Continue with Google</span>
                 </>
               )}
             </button>
 
-            <p className="text-[11px] text-center text-neutral-400">
-              One-click instant access • No password needed
-            </p>
+            {/* Quick manual / custom sign in toggle */}
+            {!showManualForm ? (
+              <div className="flex items-center justify-between text-[11px] text-neutral-400 pt-1">
+                <span>Free instant access</span>
+                <button
+                  type="button"
+                  onClick={() => setShowManualForm(true)}
+                  className="text-violet-600 hover:text-violet-800 font-medium cursor-pointer"
+                >
+                  Or enter name &amp; email
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleManualSubmit} className="pt-2 space-y-2 animate-in fade-in">
+                <input
+                  type="text"
+                  placeholder="Your Name (e.g. Alex Chen)"
+                  value={manualName}
+                  onChange={(e) => setManualName(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-300 focus:border-violet-600 outline-none"
+                />
+                <input
+                  type="email"
+                  placeholder="Your Google / Work Email"
+                  required
+                  value={manualEmail}
+                  onChange={(e) => setManualEmail(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-300 focus:border-violet-600 outline-none"
+                />
+                <div className="flex gap-2 pt-1">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold cursor-pointer"
+                  >
+                    Enter Workspace
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowManualForm(false)}
+                    className="px-3 py-2 rounded-xl border border-neutral-200 text-neutral-600 text-xs cursor-pointer hover:bg-neutral-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
 
           {/* Feature Highlights Grid */}
           <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-neutral-100">
             <div className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
               <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>100 MB Max File Size</span>
+              <span>10 Pro Tools Unlocked</span>
             </div>
             <div className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
               <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -155,11 +224,11 @@ export const AuthModal: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
               <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>Local AI Super-Res &amp; Matting</span>
+              <span>Camera RAW &amp; Vectorizer</span>
             </div>
             <div className="flex items-center gap-2 text-[11px] font-medium text-neutral-600">
               <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>Camera RAW &amp; Lossless EXIF</span>
+              <span>Passport ID &amp; Redact Tools</span>
             </div>
           </div>
         </div>

@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSession } from '../../context/SessionContext';
 import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
-import { Shield, Trash2, LogOut, ChevronDown, Keyboard, Undo2, Redo2, Layers } from 'lucide-react';
+import { Shield, Trash2, LogOut, ChevronDown, Keyboard, Undo2, Redo2, Layers, Settings } from 'lucide-react';
 
 interface HeaderProps {
   onOpenShortcuts?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
-  const { user, logout, openAuthModal } = useAuth();
+  const { user, logout, openAuthModal, openSettings } = useAuth();
   const { images, clearWorkspace, undo, redo, canUndo, canRedo, activeHistory, activeHistoryIndex, isMobileToolsOpen, setIsMobileToolsOpen } = useSession();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -118,47 +118,70 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
               </button>
             </div>
           ) : (
-            <div className="relative">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Dedicated Settings Button */}
               <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="p-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 text-neutral-800 text-xs font-medium transition flex items-center gap-1.5 cursor-pointer shadow-2xs min-h-[34px]"
-                aria-label="User account menu"
+                onClick={openSettings}
+                className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-100 text-xs font-medium text-neutral-600 hover:text-neutral-900 transition flex items-center gap-1.5 cursor-pointer min-h-[34px] shadow-2xs"
+                title="Account Settings (Name, Profile & Danger Zone)"
+                aria-label="Settings"
               >
-                {user.avatarUrl ? (
-                  <img 
-                    src={user.avatarUrl} 
-                    alt={user.name || user.email}
-                    referrerPolicy="no-referrer"
-                    className="w-6 h-6 rounded-full object-cover shadow-xs border border-neutral-200" 
-                  />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-violet-600 to-cyan-500 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
-                    {(user.email?.[0] || 'Z').toUpperCase()}
-                  </div>
-                )}
-                <span className="hidden sm:inline max-w-[120px] truncate text-neutral-700">{user?.name || user?.email}</span>
-                <span className="px-1.5 py-0.2 rounded bg-gradient-to-r from-violet-50 to-cyan-50 text-violet-700 border border-violet-200/60 font-mono text-[9px] font-bold">PRO</span>
-                <ChevronDown className="w-3 h-3 text-neutral-400" />
+                <Settings className="w-3.5 h-3.5 text-neutral-500" />
+                <span className="hidden md:inline">Settings</span>
               </button>
 
-              {showUserMenu && (
-                <div className="absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-neutral-200 py-1 z-50 animate-in fade-in duration-100">
-                  <div className="px-3 py-2 border-b border-neutral-100">
-                    <p className="text-[10px] text-neutral-400 uppercase font-mono">Account</p>
-                    <p className="text-xs font-medium text-neutral-800 truncate">{user?.email}</p>
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="p-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 text-neutral-800 text-xs font-medium transition flex items-center gap-1.5 cursor-pointer shadow-2xs min-h-[34px]"
+                  aria-label="User account menu"
+                >
+                  {user.avatarUrl ? (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt={user.name || user.email}
+                      referrerPolicy="no-referrer"
+                      className="w-6 h-6 rounded-full object-cover shadow-xs border border-neutral-200" 
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-violet-600 to-cyan-500 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+                      {(user.email?.[0] || 'Z').toUpperCase()}
+                    </div>
+                  )}
+                  <span className="hidden sm:inline max-w-[120px] truncate text-neutral-700">{user?.name || user?.email}</span>
+                  <span className="px-1.5 py-0.2 rounded bg-gradient-to-r from-violet-50 to-cyan-50 text-violet-700 border border-violet-200/60 font-mono text-[9px] font-bold">PRO</span>
+                  <ChevronDown className="w-3 h-3 text-neutral-400" />
+                </button>
+
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-neutral-200 py-1 z-50 animate-in fade-in duration-100">
+                    <div className="px-3 py-2 border-b border-neutral-100">
+                      <p className="text-[10px] text-neutral-400 uppercase font-mono">Account</p>
+                      <p className="text-xs font-medium text-neutral-800 truncate">{user?.email}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        openSettings();
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-xs text-neutral-700 hover:bg-neutral-50 flex items-center gap-2 transition cursor-pointer"
+                    >
+                      <Settings className="w-3.5 h-3.5 text-neutral-500" />
+                      <span>Settings</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-xs text-red-600 hover:bg-neutral-50 flex items-center gap-2 transition cursor-pointer border-t border-neutral-100"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Sign Out</span>
+                    </button>
                   </div>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setShowUserMenu(false);
-                    }}
-                    className="w-full px-3 py-2 text-left text-xs text-red-600 hover:bg-neutral-50 flex items-center gap-2 transition cursor-pointer"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </div>
