@@ -13,25 +13,25 @@ export const GatedFeatureCard: React.FC<GatedFeatureCardProps> = ({ utility }) =
   const { setActiveUtilityId } = useSession();
 
   return (
-    <div className="w-full max-w-lg mx-auto my-6 sm:my-8 p-6 bg-white rounded-2xl border border-neutral-200 shadow-xs flex flex-col items-center text-center animate-in fade-in duration-150">
+    <div className="w-full max-w-xl mx-auto my-6 sm:my-10 p-6 sm:p-8 bg-white rounded-3xl border border-neutral-200 shadow-xl shadow-neutral-100/80 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-200">
       {/* Back Button */}
       <div className="w-full flex items-center justify-start mb-4">
         <button
           onClick={() => setActiveUtilityId('compression')}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-medium transition cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-950 text-xs font-semibold transition cursor-pointer active:scale-95"
         >
-          <ArrowLeft className="w-3.5 h-3.5 text-neutral-500" />
-          <span>Back to free tools</span>
+          <ArrowLeft className="w-3.5 h-3.5 text-neutral-600" />
+          <span>Back to Free Tools</span>
         </button>
       </div>
       {/* Badge */}
-      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-700 text-xs font-medium mb-4">
-        <Lock className="w-3.5 h-3.5 text-neutral-500" />
-        <span>Pro feature • Free sign in required</span>
+      <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold mb-5 shadow-2xs">
+        <Lock className="w-3.5 h-3.5 text-amber-600" />
+        <span>Pro Feature • Sign in with Google to Unlock</span>
       </div>
 
       {/* Title & Description */}
-      <h2 className="text-xl sm:text-2xl font-semibold text-neutral-900 tracking-tight mb-1.5">
+      <h2 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight mb-2 font-display">
         {utility.name}
       </h2>
       <p className="text-xs sm:text-sm text-neutral-500 max-w-md mb-6 leading-relaxed">
@@ -39,27 +39,27 @@ export const GatedFeatureCard: React.FC<GatedFeatureCardProps> = ({ utility }) =
       </p>
 
       {/* Visual Showcase Box */}
-      <div className="w-full p-4 rounded-xl bg-neutral-50 border border-neutral-200 mb-6 text-left">
-        <h4 className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 mb-2.5">
-          Included with your account:
+      <div className="w-full p-5 rounded-2xl bg-neutral-50 border border-neutral-200/70 mb-6 text-left">
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-3 font-display">
+          Unlocked with your Free Zailo Graph Account:
         </h4>
-        <div className="space-y-2">
-          <div className="flex items-start gap-2.5">
+        <div className="space-y-2.5">
+          <div className="flex items-start gap-3">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <p className="text-xs text-neutral-700">
-              <strong className="text-neutral-900 font-medium">Pro Tools:</strong> Document & File Converter, 1-Click Recipes, Watermarking, RAW Studio, Biometric Passports, and Vector Tracing.
+              <strong className="text-neutral-900">All 14 Pro Studio Tools:</strong> AI Super-Res, BG Removal, 1-Click Recipes, Watermarking, RAW Studio, Biometric Passports, and more.
             </p>
           </div>
-          <div className="flex items-start gap-2.5">
+          <div className="flex items-start gap-3">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <p className="text-xs text-neutral-700">
-              <strong className="text-neutral-900 font-medium">Unconstrained Batch Processing:</strong> Process multi-image queues with high-fidelity WebAssembly codecs.
+              <strong className="text-neutral-900">Unconstrained 100 MB Limit:</strong> Process massive high-resolution photo batches with 50-image queues.
             </p>
           </div>
-          <div className="flex items-start gap-2.5">
+          <div className="flex items-start gap-3">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <p className="text-xs text-neutral-700">
-              <strong className="text-neutral-900 font-medium">100% Private:</strong> All processing stays entirely in browser memory on your device.
+              <strong className="text-neutral-900">100% Privacy-First:</strong> All image pixels remain on your device in browser memory.
             </p>
           </div>
         </div>
@@ -68,9 +68,9 @@ export const GatedFeatureCard: React.FC<GatedFeatureCardProps> = ({ utility }) =
       {/* CTA Button with Google Branding */}
       <button
         onClick={() => openAuthModal('pro_feature', utility.id)}
-        className="w-full py-2.5 px-4 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition cursor-pointer flex items-center justify-center gap-2.5"
+        className="w-full max-w-md py-3.5 px-6 rounded-2xl bg-white hover:bg-neutral-50 active:bg-neutral-100 text-neutral-800 font-bold text-sm transition-all border border-neutral-300 shadow-sm hover:shadow-md flex items-center justify-center gap-3 cursor-pointer group"
       >
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+        <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
           <path
             fill="#4285F4"
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

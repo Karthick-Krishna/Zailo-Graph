@@ -48,22 +48,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
           </span>
           <button
             onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
-            className="md:hidden flex items-center gap-1 px-2 py-1 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-200 text-xs font-medium transition cursor-pointer min-h-[32px] shrink-0"
+            className="md:hidden flex items-center gap-1 px-1.5 min-[360px]:px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-900 border border-blue-200 text-xs font-bold transition cursor-pointer shadow-2xs min-h-[32px] shrink-0"
             title="Browse all Studio Tools"
             aria-label="Open Studio Tools Navigation"
           >
-            <Layers className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
-            <span className="hidden min-[380px]:inline text-[11px]">Tools</span>
-            <span className="font-mono text-[10px] min-[360px]:text-[11px] text-neutral-500">(24)</span>
+            <Layers className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <span className="hidden min-[380px]:inline text-[11px]">Tools </span>
+            <span className="font-mono text-[10px] min-[360px]:text-[11px]">(26)</span>
           </button>
         </div>
 
         {/* Center: Quiet Status Indicators */}
         <div className="hidden md:flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-2 text-neutral-600">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <Shield className="w-3.5 h-3.5 text-neutral-500" />
-            <span className="text-neutral-700">100% private • Client WebAssembly</span>
+          <div className="flex items-center gap-1.5 text-neutral-600">
+            <span className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 animate-pulse"></span>
+            <Shield className="w-3.5 h-3.5 text-blue-600" />
+            <span className="font-medium text-neutral-700">100% Private • Zero Cloud Uploads</span>
           </div>
 
           {images.length > 0 && (
@@ -138,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
               <button
                 type="button"
                 onClick={() => openAuthModal('manual', undefined, undefined, 'sign_in')}
-                className="px-3 py-1.5 rounded-lg border border-neutral-300 hover:border-neutral-400 bg-white hover:bg-neutral-50 active:bg-neutral-100 text-neutral-700 text-xs font-medium transition cursor-pointer min-h-[32px] whitespace-nowrap shrink-0"
+                className="px-2 min-[360px]:px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-neutral-300 hover:border-neutral-400 bg-white hover:bg-neutral-50 active:bg-neutral-100 text-neutral-800 text-[11px] min-[360px]:text-xs font-semibold transition cursor-pointer min-h-[32px] sm:min-h-[36px] whitespace-nowrap shadow-2xs shrink-0"
               >
                 Sign In
               </button>
@@ -147,7 +147,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
               <button
                 type="button"
                 onClick={() => openAuthModal('manual', undefined, undefined, 'sign_up')}
-                className="px-3.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 active:bg-black text-white text-xs font-medium transition cursor-pointer flex items-center gap-1.5 border border-neutral-900 min-h-[32px] whitespace-nowrap shrink-0"
+                className="px-2.5 min-[360px]:px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-neutral-900 via-blue-950 to-neutral-900 hover:from-blue-900 hover:to-blue-950 text-white text-[11px] min-[360px]:text-xs font-semibold transition-all shadow-xs hover:shadow-md hover:shadow-blue-500/15 cursor-pointer flex items-center gap-1 sm:gap-1.5 border border-neutral-800 min-h-[32px] sm:min-h-[36px] whitespace-nowrap shrink-0"
               >
                 <span>Sign Up</span>
               </button>

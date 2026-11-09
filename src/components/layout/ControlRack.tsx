@@ -217,8 +217,8 @@ export const ControlRack: React.FC<ControlRackProps> = ({
             <div className="w-12 h-1.5 rounded-full bg-neutral-300 mb-2"></div>
             <div className="w-full flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-neutral-600" />
-                <span className="text-xs font-semibold text-neutral-900">Adjust Settings</span>
+                <Sliders className="w-4 h-4 text-violet-600" />
+                <span className="text-xs font-bold text-neutral-900">Adjust Settings</span>
               </div>
               <button
                 onClick={onCloseMobile}
@@ -242,10 +242,10 @@ export const ControlRack: React.FC<ControlRackProps> = ({
                 setActiveUtilityId('compression');
               }
             }}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-950 text-xs font-medium transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-700 hover:text-neutral-950 text-xs font-semibold transition cursor-pointer active:scale-95 shadow-2xs"
             title="Back to All Tools"
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-neutral-500" />
+            <ArrowLeft className="w-3.5 h-3.5 text-neutral-600" />
             <span>Back to Tools</span>
           </button>
 
@@ -256,8 +256,8 @@ export const ControlRack: React.FC<ControlRackProps> = ({
 
         {/* Studio Active Tool Header */}
         <div className="flex items-start gap-3 pb-4 border-b border-neutral-100">
-          <div className="w-10 h-10 rounded-lg bg-neutral-900 text-white flex items-center justify-center shrink-0">
-            {React.createElement(ICON_MAP[activeUtility.icon] || Sparkles, { className: "w-5 h-5 text-white" })}
+          <div className="w-10 h-10 rounded-2xl bg-neutral-900 text-white flex items-center justify-center shrink-0 shadow-sm border border-neutral-800">
+            {React.createElement(ICON_MAP[activeUtility.icon] || Sparkles, { className: "w-5 h-5 text-cyan-400" })}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 mb-1">
@@ -309,20 +309,21 @@ export const ControlRack: React.FC<ControlRackProps> = ({
 
       {/* Bottom Action Rack & "Send To..." Workflow Bus - 100% Solid Pure White */}
       <div 
-        className={`p-4 sm:p-5 border-t border-neutral-200 bg-white space-y-2 relative z-10 shrink-0 ${
-          isMobileDrawer ? 'sticky bottom-0 bg-white' : ''
+        className={`p-4 sm:p-5 border-t border-neutral-200 bg-white space-y-2.5 relative z-10 shrink-0 ${
+          isMobileDrawer ? 'sticky bottom-0 bg-white/95 backdrop-blur-md shadow-lg' : ''
         }`}
         style={isMobileDrawer ? { paddingBottom: 'max(1.75rem, env(safe-area-inset-bottom, 1.75rem))' } : undefined}
       >
         {!isUnlocked ? (
           <button
             onClick={() => openAuthModal('pro_feature', activeUtilityId)}
-            className="w-full py-2.5 px-4 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs flex items-center justify-center gap-2 cursor-pointer transition"
+            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-[0.99] text-white font-bold text-xs tracking-wide transition-all shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 cursor-pointer group"
           >
-            <Lock className="w-4 h-4 text-neutral-400" />
+            <Lock className="w-4 h-4 text-white" />
             <span>Unlock {activeUtility.name} (Pro)</span>
           </button>
         ) : (
+          /* Process Button - Vibrant, punchy, active primary CTA */
           <button
             onClick={() => {
               executeActiveUtility();
@@ -331,17 +332,17 @@ export const ControlRack: React.FC<ControlRackProps> = ({
               }
             }}
             disabled={isProcessing}
-            className="w-full py-2.5 px-4 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs flex items-center justify-center gap-2 cursor-pointer transition disabled:opacity-50"
+            className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs tracking-wide transition-all shadow-md shadow-blue-600/25 hover:shadow-lg hover:shadow-blue-600/35 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
           >
             {isProcessing ? (
-              <span className="flex items-center gap-2 text-white font-medium">
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                <span>Processing...</span>
+              <span className="flex items-center gap-2 text-white font-semibold">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-300 animate-ping"></span>
+                <span>Processing with WebAssembly...</span>
               </span>
             ) : (
               <>
-                <Play className="w-3.5 h-3.5 fill-white text-white" />
-                <span>Apply Transformation</span>
+                <Play className="w-3.5 h-3.5 fill-white text-white group-hover:scale-110 transition-transform" />
+                <span className="text-white font-bold">Apply Transformation</span>
               </>
             )}
           </button>
@@ -351,7 +352,7 @@ export const ControlRack: React.FC<ControlRackProps> = ({
         {activeImage?.processedBlob && (
           <button
             onClick={() => downloadImage(activeImage.id)}
-            className="w-full py-2 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs flex items-center justify-center gap-2 cursor-pointer transition"
+            className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs transition shadow-sm hover:shadow-md hover:shadow-emerald-600/20 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Download Result ({formatBytes(activeImage.processedSize || 0)})</span>

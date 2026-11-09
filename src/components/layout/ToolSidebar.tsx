@@ -156,30 +156,41 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
         <div key={u.id} className="relative group mb-1.5">
           <button
             onClick={() => setActiveUtilityId(u.id)}
-            className={`w-10 h-10 rounded-lg flex items-center justify-center transition cursor-pointer ${
-              isSelected
-                ? 'bg-neutral-900 text-white shadow-xs'
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+              isDocConverter
+                ? isSelected
+                  ? 'bg-gradient-to-br from-blue-600 via-blue-700 to-sky-500 text-white shadow-lg shadow-blue-500/30 ring-2 ring-blue-400'
+                  : 'bg-gradient-to-br from-blue-50 to-sky-100 text-blue-700 border-2 border-blue-400/90 shadow-2xs hover:border-blue-600 hover:scale-105'
+                : isSelected
+                ? 'bg-neutral-900 text-cyan-300 shadow-sm ring-1 ring-neutral-800'
                 : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100'
             }`}
             aria-label={u.name}
           >
             <IconComponent className="w-4 h-4 shrink-0" />
+            {isDocConverter && !isLocked && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-blue-600 ring-2 ring-white animate-pulse" />
+            )}
             {isLocked && (
-              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-neutral-100 text-neutral-600 flex items-center justify-center border border-neutral-200">
+              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center border border-amber-200">
                 <Lock className="w-2 h-2" />
               </span>
             )}
           </button>
 
-          {/* Floating Tooltip Popover */}
+          {/* Instant Floating Tooltip Popover (Senior Dev Desktop Tooling) */}
           <div className="absolute left-full ml-2.5 top-1/2 -translate-y-1/2 z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center">
-            <div className="px-2.5 py-1 rounded-md bg-neutral-900 text-white text-xs font-medium shadow-md whitespace-nowrap flex items-center gap-1.5">
+            <div className="px-2.5 py-1 rounded-lg bg-neutral-900 text-white text-xs font-medium tracking-tight shadow-xl border border-neutral-700/60 whitespace-nowrap flex items-center gap-1.5">
               <span>{u.name}</span>
-              {u.badge && (
-                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-neutral-800 text-neutral-300 uppercase">
+              {isDocConverter ? (
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-blue-600 text-white uppercase font-bold">
+                  PRO • 38 in 1
+                </span>
+              ) : u.badge ? (
+                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-neutral-800 text-cyan-300 uppercase">
                   {u.badge}
                 </span>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
@@ -187,6 +198,53 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
     }
 
     if (isMobileDrawer) {
+      if (isDocConverter) {
+        return (
+          <button
+            key={u.id}
+            onClick={() => {
+              setActiveUtilityId(u.id);
+              if (onCloseMobile) onCloseMobile();
+            }}
+            className={`w-full p-3 rounded-2xl text-left transition-all cursor-pointer flex items-center justify-between group mb-2.5 border-2 ${
+              isSelected
+                ? 'bg-gradient-to-r from-blue-600 to-sky-600 border-blue-400 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-300/40'
+                : 'bg-gradient-to-r from-blue-50 via-white to-sky-50 border-blue-400 text-blue-950 shadow-xs hover:border-blue-500'
+            }`}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition ${
+                isSelected ? 'bg-white/20 text-white' : 'bg-blue-600 text-white shadow-xs'
+              }`}>
+                <IconComponent className="w-4.5 h-4.5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-blue-950'}`}>
+                    {u.name}
+                  </span>
+                  <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full uppercase font-bold ${
+                    isSelected ? 'bg-white/20 text-white' : isLocked ? 'bg-amber-500 text-white' : 'bg-blue-600 text-white'
+                  }`}>
+                    PRO • 38 in 1
+                  </span>
+                </div>
+                <p className={`text-[11px] truncate mt-0.5 ${isSelected ? 'text-blue-100' : 'text-blue-700'}`}>
+                  Convert Word, PDF, PPT, Excel XLS/XLSX &amp; Images
+                </p>
+              </div>
+            </div>
+            <div className="pl-2 shrink-0">
+              {isLocked ? (
+                <Lock className={`w-4 h-4 ${isSelected ? 'text-amber-300' : 'text-amber-500'}`} />
+              ) : (
+                <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-blue-600'}`}>&rarr;</span>
+              )}
+            </div>
+          </button>
+        );
+      }
+
       return (
         <button
           key={u.id}
@@ -194,32 +252,30 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
             setActiveUtilityId(u.id);
             if (onCloseMobile) onCloseMobile();
           }}
-          className={`w-full p-2.5 rounded-lg text-left transition cursor-pointer flex items-center justify-between group mb-1 border ${
+          className={`w-full p-3 rounded-2xl text-left transition-all cursor-pointer flex items-center justify-between group mb-2 border ${
             isSelected
-              ? 'bg-neutral-900 text-white border-neutral-900 shadow-xs'
-              : 'bg-white text-neutral-800 border-neutral-200 hover:bg-neutral-50'
+              ? 'bg-neutral-900 border-neutral-900 text-white shadow-md'
+              : 'bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-800'
           }`}
         >
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
-              isSelected ? 'bg-neutral-800 text-white' : 'bg-neutral-100 text-neutral-700'
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+              isSelected ? 'bg-neutral-800 text-cyan-400' : 'bg-neutral-100 text-neutral-600'
             }`}>
               <IconComponent className="w-4 h-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-medium truncate">
-                  {u.name}
-                </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold truncate">{u.name}</span>
                 {u.badge && (
-                  <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded uppercase ${
-                    isSelected ? 'bg-neutral-800 text-neutral-300' : 'bg-neutral-100 text-neutral-600 border border-neutral-200'
+                  <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded border uppercase font-semibold ${
+                    isSelected ? 'bg-neutral-800 text-neutral-300 border-neutral-700' : 'bg-neutral-100 text-neutral-500 border-neutral-200'
                   }`}>
                     {u.badge}
                   </span>
                 )}
               </div>
-              <p className={`text-[11px] truncate mt-0.5 ${isSelected ? 'text-neutral-400' : 'text-neutral-500'}`}>
+              <p className={`text-[11px] truncate mt-0.5 ${isSelected ? 'text-neutral-300' : 'text-neutral-500'}`}>
                 {u.description}
               </p>
             </div>
@@ -227,10 +283,60 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
 
           <div className="pl-2 shrink-0">
             {isLocked ? (
-              <Lock className="w-3.5 h-3.5 text-neutral-400" />
+              <Lock className={`w-4 h-4 ${isSelected ? 'text-amber-400' : 'text-neutral-400'}`} />
             ) : (
-              <span className={`text-xs ${isSelected ? 'text-white' : 'text-neutral-400'}`}>&rarr;</span>
+              <span className={`text-xs ${isSelected ? 'text-cyan-400 font-bold' : 'text-neutral-400'}`}>&rarr;</span>
             )}
+          </div>
+        </button>
+      );
+    }
+
+    if (isDocConverter) {
+      return (
+        <button
+          key={u.id}
+          onClick={() => {
+            setActiveUtilityId(u.id);
+            if (isMobileDrawer && onCloseMobile) onCloseMobile();
+          }}
+          className={`w-full px-2.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer flex items-center justify-between group mb-2.5 border-2 relative overflow-hidden ${
+            isSelected
+              ? 'bg-gradient-to-r from-blue-600 via-blue-700 to-sky-600 text-white font-bold shadow-md shadow-blue-600/30 border-blue-400 ring-2 ring-blue-300/40'
+              : 'bg-gradient-to-r from-blue-50/95 via-sky-50/70 to-white hover:from-blue-100/90 hover:via-sky-100/80 hover:to-white text-blue-950 font-bold border-blue-400/90 hover:border-blue-600 shadow-2xs hover:shadow-sm'
+          }`}
+        >
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition ${
+              isSelected ? 'bg-white/20 text-white' : 'bg-blue-600 text-white shadow-2xs group-hover:scale-105'
+            }`}>
+              <IconComponent className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className={`text-xs font-bold truncate tracking-tight ${isSelected ? 'text-white' : 'text-blue-950'}`}>
+                  {u.name}
+                </span>
+              </div>
+              <p className={`text-[10px] truncate ${isSelected ? 'text-blue-100 font-normal' : 'text-blue-700/80 font-medium'}`}>
+                38 in 1 Universal Engine
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0 ml-1">
+            {isLocked && (
+              <Lock className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-300' : 'text-amber-500'}`} />
+            )}
+            <span className={`text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
+              isSelected
+                ? 'bg-white/25 text-white ring-1 ring-white/40'
+                : isLocked
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'bg-blue-600 text-white shadow-xs'
+            }`}>
+              {isLocked ? 'PRO' : '38 in 1'}
+            </span>
           </div>
         </button>
       );
@@ -245,32 +351,31 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
             onCloseMobile();
           }
         }}
-        className={`w-full px-2.5 py-2 rounded-lg text-left transition cursor-pointer flex items-center justify-between group mb-1 min-h-[38px] ${
+        className={`w-full px-2.5 py-2 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between group mb-1 min-h-[40px] ${
           isSelected
-            ? 'bg-neutral-900 text-white font-medium shadow-xs'
-            : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100 font-normal'
+            ? 'bg-neutral-900 text-white font-medium shadow-sm'
+            : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100/80 font-normal'
         }`}
       >
         <div className="flex items-center gap-2 min-w-0">
-          <span className={`w-1 h-3.5 rounded-full transition-opacity shrink-0 ${
-            isSelected ? 'bg-blue-500 opacity-100' : 'opacity-0'
+          {/* Left Active Glow Indicator Pip */}
+          <span className={`w-1 h-3.5 rounded-full transition-all shrink-0 ${
+            isSelected 
+              ? 'bg-gradient-to-b from-blue-500 to-sky-400 opacity-100' 
+              : 'opacity-0'
           }`} />
-          <IconComponent className={`w-4 h-4 shrink-0 ${
-            isSelected ? 'text-white' : 'text-neutral-500 group-hover:text-neutral-900'
-          }`} />
+          <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? 'text-sky-300' : 'text-neutral-500 group-hover:text-neutral-800'}`} />
           <span className="text-xs truncate tracking-tight">{u.name}</span>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0 ml-1">
-          {isLocked && (
-            <Lock className={`w-3 h-3 ${isSelected ? 'text-neutral-400' : 'text-neutral-400'}`} />
-          )}
-          {u.badge && (
-            <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded uppercase ${
-              isSelected ? 'bg-neutral-800 text-neutral-300' : 'bg-neutral-100 text-neutral-500 border border-neutral-200'
-            }`}>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {u.badge && !isSelected && (
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-500 border border-neutral-200/60 uppercase">
               {u.badge}
             </span>
+          )}
+          {isLocked && (
+            <Lock className={`w-3 h-3 ${isSelected ? 'text-amber-400' : 'text-neutral-400'}`} />
           )}
         </div>
       </button>
