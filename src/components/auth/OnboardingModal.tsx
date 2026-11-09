@@ -81,7 +81,7 @@ export const OnboardingModal: React.FC = () => {
                 />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 text-white flex items-center justify-center font-bold text-xl shadow-lg mx-auto ring-4 ring-violet-100">
-                  {(user.google_name?.[0] || user.email?.[0] || 'I').toUpperCase()}
+                  {(user.google_name?.[0] || user.email?.[0] || 'Z').toUpperCase()}
                 </div>
               )}
               <span className="absolute bottom-0 right-0 p-1 rounded-full bg-emerald-500 text-white ring-2 ring-white">
@@ -91,7 +91,7 @@ export const OnboardingModal: React.FC = () => {
 
             <div className="space-y-1">
               <h2 id="onboarding-title" className="text-2xl font-extrabold text-neutral-900 tracking-tight flex items-center justify-center gap-2">
-                <span>Welcome to Imazora!</span>
+                <span>Welcome to Zailo Graph!</span>
                 <Sparkles className="w-5 h-5 text-violet-600" />
               </h2>
               <p className="text-xs sm:text-sm text-neutral-500 max-w-xs mx-auto">

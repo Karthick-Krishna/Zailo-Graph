@@ -7,7 +7,8 @@ import { extractEmbeddedRawPreview } from '../utils/rawExtractor';
 import { convertHeicToRaster } from '../utils/heic';
 import { saveToOPFS, readFromOPFS, deleteFromOPFS, clearOPFSWorkspace } from '../utils/opfs';
 
-const OPFS_SESSION_MANIFEST_KEY = 'imazora_recent_session_manifest';
+const OPFS_SESSION_MANIFEST_KEY = 'zailograph_recent_session_manifest';
+const LEGACY_OPFS_MANIFEST_KEY = 'imazora_recent_session_manifest';
 
 interface SavedSessionItem {
   id: string;
@@ -131,7 +132,7 @@ export const getDefaultParamsForUtility = (utilityId: string, image: { width: nu
       return { presetWidth: 1080, presetHeight: 1080, fillMode: 'blur', fillColor: '#FAFAFA' };
     case 'watermark':
       return {
-        text: 'Imazora Studio',
+        text: 'Zailo Graph Studio',
         fontSize: Math.max(20, Math.round(minDim * 0.04)),
         opacity: 0.75,
         position: 'bottom-right',
@@ -282,7 +283,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const [savedSessionCount, setSavedSessionCount] = useState<number>(() => {
     try {
-      const stored = localStorage.getItem(OPFS_SESSION_MANIFEST_KEY);
+      const stored = localStorage.getItem(OPFS_SESSION_MANIFEST_KEY) || localStorage.getItem(LEGACY_OPFS_MANIFEST_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         return Array.isArray(parsed) ? parsed.length : 0;
@@ -325,6 +326,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const clearSavedSession = useCallback(() => {
     try {
       localStorage.removeItem(OPFS_SESSION_MANIFEST_KEY);
+      localStorage.removeItem(LEGACY_OPFS_MANIFEST_KEY);
       setSavedSessionCount(0);
       clearOPFSWorkspace();
     } catch {}
@@ -332,7 +334,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const restoreSavedSession = useCallback(async () => {
     try {
-      const raw = localStorage.getItem(OPFS_SESSION_MANIFEST_KEY);
+      const raw = localStorage.getItem(OPFS_SESSION_MANIFEST_KEY) || localStorage.getItem(LEGACY_OPFS_MANIFEST_KEY);
       if (!raw) return;
       const manifest: SavedSessionItem[] = JSON.parse(raw);
       if (!Array.isArray(manifest) || manifest.length === 0) return;
@@ -1170,7 +1172,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     const baseName = item.name.replace(/\.[^/.]+$/, '');
-    a.download = `${baseName}_imazora.${ext}`;
+    a.download = `${baseName}_zailograph.${ext}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

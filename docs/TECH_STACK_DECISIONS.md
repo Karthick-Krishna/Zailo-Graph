@@ -20,7 +20,7 @@
 
 ### Architectural Decision
 **Vite 6 + React 19 + TypeScript (Strict Mode)**.  
-The platform will be built and deployed as a **Pure Static Single-Page Application (SPA)** with zero server-side rendering dependencies. This allows Imazora to be served from any global edge CDN with zero server cost, infinite horizontal scalability, and inherent privacy guarantees.
+The platform will be built and deployed as a **Pure Static Single-Page Application (SPA)** with zero server-side rendering dependencies. This allows Zailo Graph to be served from any global edge CDN with zero server cost, infinite horizontal scalability, and inherent privacy guarantees.
 
 ---
 
@@ -98,7 +98,7 @@ This guarantees deterministic, platform-independent compression results regardle
 
 ### 5.4 EXIF Metadata Handling
 - **Selected Engine:** `exifr` for read operations; custom binary marker mutator for lossless stripping.
-- **Lossless Stripping Rationale:** Most web tools re-encode JPEGs to remove metadata, causing generational quality loss. Imazora uses a zero-copy binary parser that scans JPEG byte markers, locates `APP1` (`0xFFE1`), `APP2`, and `APP13` chunks, and slices them out of the byte array directly. The raw image DCT bitstream remains 100% untouched, executing in $< 5\text{ ms}$ with zero quality degradation.
+- **Lossless Stripping Rationale:** Most web tools re-encode JPEGs to remove metadata, causing generational quality loss. Zailo Graph uses a zero-copy binary parser that scans JPEG byte markers, locates `APP1` (`0xFFE1`), `APP2`, and `APP13` chunks, and slices them out of the byte array directly. The raw image DCT bitstream remains 100% untouched, executing in $< 5\text{ ms}$ with zero quality degradation.
 
 ---
 
@@ -155,7 +155,7 @@ Users can sign up in 5 seconds without credit cards, passwords, or intrusive dat
 1. File drops up to 50 MB (evaluated client-side before buffer allocation).
 2. Concurrency queues up to 50 batch images.
 3. Access to all 7 competitor-paid utilities (AI tools, vectorization, RAW studio, 16x SVG).
-4. Direct entitlement verification header (`Authorization: Bearer <token>`) passed to `api.Imazora.zorquelz.com` if using ephemeral cloud fallback.
+4. Direct entitlement verification header (`Authorization: Bearer <token>`) passed to `api.Zailo Graph.zorquelz.com` if using ephemeral cloud fallback.
 
 ---
 
@@ -164,7 +164,7 @@ Users can sign up in 5 seconds without credit cards, passwords, or intrusive dat
 ### Technology: Origin Private File System (OPFS) + Transferable Objects
 - **The Problem:** Storing 50 MB files and their transformed variants in standard JavaScript memory (`Blob` or `ArrayBuffer`) quickly causes the browser tab to crash.
 - **The Solution:**  
-  Imazora uses **OPFS** (Origin Private File System) via `navigator.storage.getDirectory()`. OPFS provides an isolated, sandboxed virtual filesystem on the user's local disk that operates with near-native I/O throughput.
+  Zailo Graph uses **OPFS** (Origin Private File System) via `navigator.storage.getDirectory()`. OPFS provides an isolated, sandboxed virtual filesystem on the user's local disk that operates with near-native I/O throughput.
   - Large incoming files and intermediate batch outputs are streamed directly to OPFS files.
   - Web Workers access OPFS handles using `createSyncAccessHandle()` in worker contexts, bypassing main-thread serialization completely.
   - Memory consumption on the JavaScript heap remains constant ($< 150\text{ MB}$) regardless of whether the user processes 1 or 50 images.
@@ -175,7 +175,7 @@ Users can sign up in 5 seconds without credit cards, passwords, or intrusive dat
 
 ### Key Security Implementations:
 1. **SVG Sanitization (DOMPurify & XML Depth Checks):**  
-   SVG files are vectors for Cross-Site Scripting (XSS) and XML Entity Expansion attacks. Imazora runs a dual-layer sanitization pipeline:
+   SVG files are vectors for Cross-Site Scripting (XSS) and XML Entity Expansion attacks. Zailo Graph runs a dual-layer sanitization pipeline:
    - Rejects any SVG containing entity definitions (`<!ENTITY>`) or external doctypes.
    - Strips all `<script>`, `<foreignObject>`, inline event handlers (`onload`, `onerror`), and external URL references before rendering.
 2. **Strict Content Security Policy (CSP):**
@@ -184,7 +184,7 @@ Users can sign up in 5 seconds without credit cards, passwords, or intrusive dat
    script-src 'self' 'wasm-unsafe-eval';
    style-src 'self' 'unsafe-inline';
    img-src 'self' blob: data: https://*.tile.openstreetmap.org;
-   connect-src 'self' https://api.Imazora.zorquelz.com;
+   connect-src 'self' https://api.Zailo Graph.zorquelz.com;
    worker-src 'self' blob:;
    object-src 'none';
    base-uri 'none';
@@ -204,7 +204,7 @@ Users can sign up in 5 seconds without credit cards, passwords, or intrusive dat
 
 ---
 
-## 12. Hosting & Deployment under `Imazora.zorquelz.com`
+## 12. Hosting & Deployment under `Zailo Graph.zorquelz.com`
 
 ### Deployment Topology
 - **Primary Static Host:** **Cloudflare Pages**.
@@ -212,8 +212,8 @@ Users can sign up in 5 seconds without credit cards, passwords, or intrusive dat
   - Zero-latency asset delivery for `.wasm` and `.onnx` model files.
   - Native support for custom HTTP headers via `_headers` configuration file (`COOP`, `COEP`, `Cache-Control`).
 - **Domain Configuration:**
-  - `Imazora.zorquelz.com` &rarr; CNAME to Cloudflare Pages deployment.
-  - `api.Imazora.zorquelz.com` &rarr; Route to Cloudflare Worker edge router (for optional ephemeral cloud fallback).
+  - `Zailo Graph.zorquelz.com` &rarr; CNAME to Cloudflare Pages deployment.
+  - `api.Zailo Graph.zorquelz.com` &rarr; Route to Cloudflare Worker edge router (for optional ephemeral cloud fallback).
 - **Caching Headers:**
   - HTML documents: `Cache-Control: public, max-age=0, must-revalidate`
   - JavaScript / CSS bundles (hashed): `Cache-Control: public, max-age=31536000, immutable`

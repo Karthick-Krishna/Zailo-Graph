@@ -9,7 +9,7 @@ import {
   getActiveSession 
 } from '../services/profile';
 
-describe('Imazora Google Authentication, Profile Architecture & Settings', () => {
+describe('Zailo Graph Google Authentication, Profile Architecture & Settings', () => {
   beforeEach(() => {
     localStorage.clear();
   });

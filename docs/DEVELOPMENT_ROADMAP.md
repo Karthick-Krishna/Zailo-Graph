@@ -9,11 +9,11 @@
 
 ## 1. Roadmap Overview & Phasing Strategy
 
-To ensure absolute software reliability and prevent architectural regressions, Imazora is structured into **seven sequential phases**. Each phase produces independently testable modules with concrete acceptance gates before proceeding to subsequent utilities.
+To ensure absolute software reliability and prevent architectural regressions, Zailo Graph is structured into **seven sequential phases**. Each phase produces independently testable modules with concrete acceptance gates before proceeding to subsequent utilities.
 
 ```mermaid
 gantt
-    title Imazora Engineering Delivery Pipeline
+    title Zailo Graph Engineering Delivery Pipeline
     dateFormat  YYYY-MM-DD
     section Architecture & Spikes
     Phase 0: Technical Spikes & Validation Gates       :active, p0, 2026-11-10, 14d
@@ -139,7 +139,7 @@ gantt
 
 - **Deliverables:**
   - Ephemeral Cloud Consent Dialog (explains exact reason for fallback, data transmission details, and guarantees).
-  - Cloudflare Edge Router (`api.Imazora.zorquelz.com`) enforcing IP rate limits, payload validation, and ephemeral JWT signatures.
+  - Cloudflare Edge Router (`api.Zailo Graph.zorquelz.com`) enforcing IP rate limits, payload validation, and ephemeral JWT signatures.
   - Stateless GPU Compute Worker (PyTorch / TensorRT in Docker) with read-only filesystem and volatile memory pipeline.
   - End-to-end stream piping with automatic client-side download/injection into the session DAG.
 - **Independent Testing Criteria:**
@@ -155,7 +155,7 @@ gantt
   - PWA configuration: Offline Service Worker caching all static assets and WASM binaries; manifest with OS file handler support.
   - Full automated visual regression suite running on Chromium, Firefox, and WebKit via Playwright.
   - Tab crash stress test: Continuous 50 MB batch processing for 30 minutes without memory leaks.
-  - Production deployment to Cloudflare Pages on `Imazora.zorquelz.com` with strict `COOP`, `COEP`, and `CSP` headers.
+  - Production deployment to Cloudflare Pages on `Zailo Graph.zorquelz.com` with strict `COOP`, `COEP`, and `CSP` headers.
 - **Independent Testing Criteria:**
   - Lighthouse score: $\ge 95$ across Performance, Accessibility, Best Practices, and SEO.
   - Zero memory growth over 10 consecutive image workflow cycles (verified via Chrome DevTools Protocol heap snapshots).

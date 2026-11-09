@@ -6,7 +6,7 @@ export const WatermarkControls: React.FC = () => {
   const { activeImage, executeActiveUtility, setCurrentParams } = useSession();
 
   const [watermarkType, setWatermarkType] = useState<'text' | 'image'>('text');
-  const [text, setText] = useState('© Imazora Studio');
+  const [text, setText] = useState('© Zailo Graph Studio');
   const [fontSize, setFontSize] = useState(28);
   const [opacity, setOpacity] = useState(0.75);
   const [color, setColor] = useState('#FFFFFF');

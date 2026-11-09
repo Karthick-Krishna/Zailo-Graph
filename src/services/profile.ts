@@ -1,8 +1,10 @@
 import { UserProfile, User } from '../types/auth';
 import { User as FirebaseUser } from 'firebase/auth';
 
-const PROFILE_PREFIX = 'imazora_profile_';
-const ACTIVE_SESSION_KEY = 'imazora_user_session';
+const PROFILE_PREFIX = 'zailograph_profile_';
+const LEGACY_PROFILE_PREFIX = 'imazora_profile_';
+const ACTIVE_SESSION_KEY = 'zailograph_user_session';
+const LEGACY_ACTIVE_SESSION_KEY = 'imazora_user_session';
 
 /**
  * Sanitizes and validates a display name string.
@@ -32,7 +34,7 @@ export const sanitizeDisplayName = (name: string): { isValid: boolean; sanitized
  */
 export const getUserProfile = (uid: string): UserProfile | null => {
   try {
-    const raw = localStorage.getItem(`${PROFILE_PREFIX}${uid}`);
+    const raw = localStorage.getItem(`${PROFILE_PREFIX}${uid}`) || localStorage.getItem(`${LEGACY_PROFILE_PREFIX}${uid}`);
     if (!raw) return null;
     return JSON.parse(raw) as UserProfile;
   } catch (err) {
@@ -141,7 +143,7 @@ export const completeOnboarding = (uid: string, customName?: string): UserProfil
   const profile = getUserProfile(uid);
   if (!profile) return null;
 
-  let effectiveName = profile.google_name || profile.email.split('@')[0] || 'Imazora Creator';
+  let effectiveName = profile.google_name || profile.email.split('@')[0] || 'Zailo Graph Creator';
   if (customName && customName.trim()) {
     const { isValid, sanitized } = sanitizeDisplayName(customName);
     if (isValid && sanitized) {
@@ -188,8 +190,9 @@ export const updateProfileDisplayName = (uid: string, newName: string): UserProf
 export const deleteStoredUserProfile = (uid: string): void => {
   try {
     localStorage.removeItem(`${PROFILE_PREFIX}${uid}`);
+    localStorage.removeItem(`${LEGACY_PROFILE_PREFIX}${uid}`);
     localStorage.removeItem(ACTIVE_SESSION_KEY);
-    // Legacy cleanup
+    localStorage.removeItem(LEGACY_ACTIVE_SESSION_KEY);
     localStorage.removeItem('zailo_graph_user_session');
   } catch (err) {
     console.warn('Failed to delete user profile from localStorage:', err);
@@ -201,7 +204,10 @@ export const deleteStoredUserProfile = (uid: string): void => {
  */
 export const getActiveSession = (): User | null => {
   try {
-    const raw = localStorage.getItem(ACTIVE_SESSION_KEY) || localStorage.getItem('zailo_graph_user_session');
+    const raw = 
+      localStorage.getItem(ACTIVE_SESSION_KEY) || 
+      localStorage.getItem(LEGACY_ACTIVE_SESSION_KEY) || 
+      localStorage.getItem('zailo_graph_user_session');
     if (!raw) return null;
     return JSON.parse(raw) as User;
   } catch {

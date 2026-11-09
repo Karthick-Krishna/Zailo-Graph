@@ -64,7 +64,7 @@ export const SettingsModal: React.FC = () => {
 
   // Real authenticated Google email from active session
   const realGoogleEmail = auth.currentUser?.email || user.email || 'No email associated';
-  const currentDisplayName = (user.name || user.google_name || realGoogleEmail.split('@')[0] || 'Imazora Creator').trim();
+  const currentDisplayName = (user.name || user.google_name || realGoogleEmail.split('@')[0] || 'Zailo Graph Creator').trim();
   const isDeleteConfirmed = deleteConfirmationInput.trim().toLowerCase() === currentDisplayName.toLowerCase();
 
   const handleSaveName = async (e: React.FormEvent) => {
@@ -168,7 +168,7 @@ export const SettingsModal: React.FC = () => {
                   />
                 ) : (
                   <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                    {(user.name?.[0] || realGoogleEmail?.[0] || 'I').toUpperCase()}
+                    {(user.name?.[0] || realGoogleEmail?.[0] || 'Z').toUpperCase()}
                   </div>
                 )}
                 <div className="space-y-0.5 min-w-0">

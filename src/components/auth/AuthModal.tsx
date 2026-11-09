@@ -47,7 +47,7 @@ export const AuthModal: React.FC = () => {
       case 'resolution_limit':
         return 'Unlock Unconstrained Master Exports';
       default:
-        return mode === 'sign_up' ? 'Join Imazora Free' : 'Welcome Back to Imazora';
+        return mode === 'sign_up' ? 'Join Zailo Graph Free' : 'Welcome Back to Zailo Graph';
     }
   };
 

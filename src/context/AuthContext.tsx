@@ -306,7 +306,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updatedUser = mapProfileToUser(updatedProfile);
     setUser(updatedUser);
     setIsOnboardingOpen(false);
-    showToast(`Welcome to Imazora, ${updatedUser.name}!`, 'success');
+    showToast(`Welcome to Zailo Graph, ${updatedUser.name}!`, 'success');
   };
 
   /**
