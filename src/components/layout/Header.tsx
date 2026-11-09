@@ -61,13 +61,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
           </span>
           <button
             onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
-            className="md:hidden flex items-center gap-1 px-1.5 min-[360px]:px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-900 border border-blue-200 text-xs font-bold transition cursor-pointer shadow-2xs min-h-[32px] shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-900 border border-blue-200 text-xs font-bold transition cursor-pointer shadow-2xs min-h-[32px] shrink-0"
             title="Browse all Studio Tools"
             aria-label="Open Studio Tools Navigation"
           >
             <Layers className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-            <span className="hidden min-[380px]:inline text-[11px]">Tools </span>
-            <span className="font-mono text-[10px] min-[360px]:text-[11px]">(20)</span>
+            <span className="hidden min-[380px]:inline text-[11px]">All Tools </span>
+            <span className="font-mono text-[10px] text-blue-700 bg-blue-100 px-1 py-0.2 rounded font-bold">(20)</span>
           </button>
         </div>
 

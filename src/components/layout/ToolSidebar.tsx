@@ -425,7 +425,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
               <Layers className="w-4 h-4 text-neutral-700" />
               <span className="text-xs font-bold text-neutral-900 tracking-tight">Toolbox</span>
               <span className="text-[10px] font-mono text-neutral-400 px-1.5 py-0.2 rounded bg-neutral-100 border border-neutral-200/60 font-semibold">
-                25
+                20
               </span>
             </div>
           )}
@@ -453,7 +453,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search 25 tools... (/)"
+              placeholder="Search 20 tools... (/)"
               className="w-full pl-8 pr-7 py-1.5 text-xs bg-neutral-50 hover:bg-neutral-100/80 focus:bg-white focus:ring-1 focus:ring-neutral-400 focus:outline-none rounded-xl border border-neutral-200 text-neutral-800 placeholder:text-neutral-400 transition"
             />
             {searchQuery && (

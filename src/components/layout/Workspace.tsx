@@ -20,7 +20,6 @@ export const Workspace: React.FC = () => {
 
   const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
   const isUnlocked = isUtilityUnlocked(activeUtilityId);
-  const isStandalone = typeof window !== 'undefined' && window.location.pathname.includes('/tools/');
 
   return (
     <div className="flex-1 w-full max-w-full flex flex-col h-[calc(100dvh-56px)] overflow-x-hidden overflow-y-hidden bg-transparent">
@@ -37,15 +36,13 @@ export const Workspace: React.FC = () => {
         </div>
       )}
 
-      {/* Main Studio Area: Left Vertical Navigation Sidebar (hidden in standalone mode) + Center Canvas Viewport + Right Control Rack */}
+      {/* Main Studio Area: Left Vertical Navigation Sidebar + Center Canvas Viewport + Right Control Rack */}
       <div className="flex-1 w-full max-w-full flex overflow-x-hidden overflow-y-hidden">
-        {/* Left Vertical Tool Navigation Sidebar (Only rendered on main studio hub) */}
-        {!isStandalone && (
-          <ToolSidebar
-            isCollapsed={isSidebarCollapsed}
-            onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
-          />
-        )}
+        {/* Left Vertical Tool Navigation Sidebar (Accessible on all pages to easily switch tools) */}
+        <ToolSidebar
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
+        />
 
         {/* Center Canvas Viewport */}
         <main className={`flex-1 w-full max-w-full flex flex-col items-center justify-center overflow-x-hidden bg-transparent relative p-1.5 sm:p-4 ${
@@ -166,13 +163,13 @@ export const Workspace: React.FC = () => {
         </div>
       )}
 
-      {/* Mobile Slide-Up Tool Picker Sheet (Accessible anytime) */}
+      {/* Global Slide-Up / Dialog Tools Drawer (Accessible anytime) */}
       {isMobileToolsOpen && (
         <div 
-          className="md:hidden fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex flex-col justify-end md:justify-center md:items-center p-0 md:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
           onClick={() => setIsMobileToolsOpen(false)}
         >
-          <div className="w-full max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full md:max-w-md max-h-[85vh] bg-white rounded-t-3xl md:rounded-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <ToolSidebar isMobileDrawer={true} onCloseMobile={() => setIsMobileToolsOpen(false)} />
           </div>
         </div>
