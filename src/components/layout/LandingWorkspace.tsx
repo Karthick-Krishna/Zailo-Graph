@@ -321,7 +321,7 @@ export const LandingWorkspace: React.FC = () => {
         )}
 
         {/* Active Tool Back Bar (When a specific feature is selected) */}
-        {activeUtilityId !== 'compression' && (
+        {activeUtilityId !== 'compression' && activeUtilityId !== 'document-converter' && (
           <div className="w-full max-w-2xl flex items-center justify-between pb-1 animate-in fade-in duration-150">
             <button
               onClick={() => setActiveUtilityId('compression')}
@@ -338,7 +338,7 @@ export const LandingWorkspace: React.FC = () => {
 
         {/* Hero Interactive Drag & Drop Box or Document Converter Studio */}
         {activeUtilityId === 'document-converter' ? (
-          <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xl border border-neutral-200/90 rounded-3xl p-5 sm:p-7 shadow-xl">
+          <div className="w-full max-w-5xl">
             <DocumentConversionPanel />
           </div>
         ) : (

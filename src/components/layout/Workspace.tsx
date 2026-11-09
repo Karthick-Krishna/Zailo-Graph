@@ -49,8 +49,8 @@ export const Workspace: React.FC = () => {
           images.length > 0 && activeUtilityId !== 'document-converter' ? 'pb-20 sm:pb-4' : ''
         }`}>
           {activeUtilityId === 'document-converter' ? (
-            <div className="w-full h-full flex-1 overflow-y-auto py-2 sm:py-6 px-2 sm:px-6 flex flex-col items-center justify-start animate-in fade-in duration-150">
-              <div className="w-full max-w-3xl">
+            <div className="w-full h-full flex-1 overflow-y-auto py-3 sm:py-6 px-2 sm:px-6 flex flex-col items-center justify-start animate-in fade-in duration-150">
+              <div className="w-full max-w-5xl">
                 <DocumentConversionPanel />
               </div>
             </div>
