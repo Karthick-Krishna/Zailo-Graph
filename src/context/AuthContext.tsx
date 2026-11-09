@@ -113,12 +113,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
           } catch {}
           closeAuthModal();
+          // Clean up redirect query or hash params from URL without reloading
+          try {
+            if (window.location.search || window.location.hash) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          } catch {}
         }
       })
       .catch((err: any) => {
         console.warn('Redirect auth result warning:', err);
         if (err.code === 'auth/unauthorized-domain') {
-          setAuthError('Domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
+          setAuthError('Domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains). Use instant access below.');
         } else if (err.message) {
           setAuthError(err.message);
         }
@@ -131,12 +137,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
         } catch {}
+        closeAuthModal();
       } else {
-        // If logged out from Firebase and no local session is present
-        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (!stored) {
-          setUser(null);
-        }
+        // If Firebase Auth does not report an active session, preserve and restore local storage session
+        try {
+          const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && (parsed.email || parsed.id)) {
+              setUser(parsed);
+              return;
+            }
+          }
+        } catch {}
       }
     });
 

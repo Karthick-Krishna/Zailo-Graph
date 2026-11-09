@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
 export const firebaseConfig = {
@@ -17,6 +17,13 @@ export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfi
 
 // Initialize Firebase Authentication
 export const auth = getAuth(app);
+
+// Explicitly guarantee persistence across sessions and reloads
+if (typeof window !== 'undefined') {
+  setPersistence(auth, browserLocalPersistence).catch((err) => {
+    console.warn('Firebase persistence initialization warning:', err);
+  });
+}
 
 // Configure Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
