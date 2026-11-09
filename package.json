@@ -4,11 +4,11 @@
   "description": "Your images. Your workflow. Your control. Privacy-first web-native image utility workspace.",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "node scripts/generateSeoPages.js && tsc -b && vite build",
+    "dev": "NODE_OPTIONS=--max-old-space-size=4096 vite --port 5001 --host",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/generateSeoPages.js && tsc -b && NODE_OPTIONS=--max-old-space-size=4096 vite build",
     "generate:seo": "node scripts/generateSeoPages.js",
-    "preview": "vite preview",
-    "test": "vitest run"
+    "preview": "NODE_OPTIONS=--max-old-space-size=4096 vite preview --port 5001 --host",
+    "test": "NODE_OPTIONS=--max-old-space-size=4096 vitest run"
   },
   "keywords": [
     "image-utility",

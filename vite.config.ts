@@ -18,6 +18,8 @@ export default defineConfig({
     format: 'es',
   },
   server: {
+    port: 5001,
+    host: true,
     watch: {
       usePolling: true,
       interval: 100,
@@ -27,6 +29,8 @@ export default defineConfig({
     },
   },
   preview: {
+    port: 5001,
+    host: true,
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
     },

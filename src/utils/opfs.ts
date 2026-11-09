@@ -46,13 +46,15 @@ export async function getWorkspaceDirectory(): Promise<FileSystemDirectoryHandle
 }
 
 /**
- * Saves a Blob stream into OPFS storage under an image ID.
+ * Saves a Blob stream into in-memory RAM cache and OPFS virtual disk storage.
  */
 export async function saveToOPFS(id: string, blob: Blob): Promise<boolean> {
+  // Always store in volatile RAM memory cache for instant, zero-latency access
+  memoryFallback.set(id, blob);
+
   try {
     const dir = await getWorkspaceDirectory();
     if (!dir) {
-      memoryFallback.set(id, blob);
       return true;
     }
 
@@ -62,9 +64,22 @@ export async function saveToOPFS(id: string, blob: Blob): Promise<boolean> {
     return true;
   } catch (err) {
     console.warn(`Failed to write image ${id} to OPFS, using memory fallback:`, err);
-    memoryFallback.set(id, blob);
     return false;
   }
+}
+
+/**
+ * Returns current in-memory RAM storage statistics
+ */
+export function getInMemoryStorageStats(): { count: number; totalBytes: number } {
+  let totalBytes = 0;
+  for (const blob of memoryFallback.values()) {
+    totalBytes += blob.size;
+  }
+  return {
+    count: memoryFallback.size,
+    totalBytes,
+  };
 }
 
 /**
