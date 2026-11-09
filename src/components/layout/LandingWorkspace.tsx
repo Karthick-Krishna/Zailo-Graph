@@ -215,7 +215,7 @@ export const LandingWorkspace: React.FC = () => {
         <div className="text-center space-y-4 sm:space-y-5 max-w-3xl relative z-10 flex flex-col items-center px-1">
           {/* Logo Brand Emblem with Subtle Glow */}
           <div className="relative group cursor-pointer py-1 sm:py-2" onClick={() => fileInputRef.current?.click()}>
-            <div className="absolute -inset-4 bg-gradient-to-r from-fuchsia-600/20 via-purple-600/15 to-cyan-500/20 rounded-3xl blur-2xl group-hover:blur-3xl transition duration-500"></div>
+            <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 via-sky-500/15 to-blue-400/20 rounded-3xl blur-2xl group-hover:blur-3xl transition duration-500"></div>
             <div className="hidden sm:block">
               <ZailoGraphLogo size="xl" showText={true} showTagline={true} className="relative drop-shadow-xl" />
             </div>
@@ -227,15 +227,15 @@ export const LandingWorkspace: React.FC = () => {
           {/* Privacy Trust Pill & Mobile 25 Tools Navigation Shortcut */}
           <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200/80 text-neutral-800 text-[11px] sm:text-xs font-semibold shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 animate-pulse"></span>
-              <ShieldCheck className="w-3.5 h-3.5 text-violet-600 shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 animate-pulse"></span>
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
               <span>100% Private • Built by Coralgenz &amp; Zorquelz</span>
             </div>
 
             {/* Mobile Direct Navigation Button */}
             <button
               onClick={() => setIsMobileToolsOpen(true)}
-              className="md:hidden inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white text-xs font-bold shadow-md shadow-violet-600/20 transition cursor-pointer active:scale-95"
+              className="md:hidden inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition cursor-pointer active:scale-95"
             >
               <Layers className="w-3.5 h-3.5" />
               <span>Browse 25 Tools</span>
@@ -245,12 +245,12 @@ export const LandingWorkspace: React.FC = () => {
 
           {/* Active Primed Tool Badge (if non-default) */}
           {activeUtilityId && activeUtilityId !== 'workflow-recipes' && (
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-50 border border-violet-200 text-violet-900 text-xs font-semibold animate-in fade-in">
-              <span className="w-2 h-2 rounded-full bg-violet-600 animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold animate-in fade-in">
+              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
               <span>Primed for: <strong>{activeUtility.name}</strong></span>
               <button 
                 onClick={() => setActiveUtilityId('workflow-recipes')}
-                className="text-violet-500 hover:text-violet-900 font-bold ml-1 text-sm cursor-pointer"
+                className="text-blue-500 hover:text-blue-900 font-bold ml-1 text-sm cursor-pointer"
                 title="Reset to default"
               >
                 &times;
@@ -258,20 +258,20 @@ export const LandingWorkspace: React.FC = () => {
             </div>
           )}
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.1]">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.1] font-display">
             Your images. Your workflow. <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 bg-clip-text text-transparent">
               Your control.
             </span>
           </h1>
 
           {/* Brand Tagline Accent */}
           <div className="flex items-center justify-center gap-3 w-full max-w-md pt-0.5">
-            <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-violet-300"></div>
+            <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-blue-300"></div>
             <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-widest text-neutral-400 uppercase">
               THE BROWSER IMAGE STUDIO
             </span>
-            <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-cyan-300"></div>
+            <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-sky-300"></div>
           </div>
 
           <p className="text-xs sm:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed">
@@ -282,15 +282,15 @@ export const LandingWorkspace: React.FC = () => {
 
         {/* Local Session Recovery Banner (Zero Data Loss) */}
         {savedSessionCount > 0 && (
-          <div className="w-full max-w-xl mx-auto p-4 rounded-2xl bg-neutral-900 border border-violet-500/40 text-white flex items-center justify-between shadow-xl shadow-violet-950/20 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="w-full max-w-xl mx-auto p-4 rounded-2xl bg-neutral-900 border border-blue-500/40 text-white flex items-center justify-between shadow-xl shadow-blue-950/20 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-violet-600/30 border border-violet-400/40 text-cyan-400">
+              <div className="p-2 rounded-xl bg-blue-600/30 border border-blue-400/40 text-sky-400">
                 <Layers className="w-4 h-4" />
               </div>
               <div>
                 <p className="text-xs font-bold text-white flex items-center gap-1.5">
                   <span>Previous Session Available</span>
-                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-violet-500/30 text-violet-200">
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-blue-500/30 text-blue-200">
                     {savedSessionCount} {savedSessionCount === 1 ? 'image' : 'images'}
                   </span>
                 </p>
@@ -307,7 +307,7 @@ export const LandingWorkspace: React.FC = () => {
               </button>
               <button
                 onClick={restoreSavedSession}
-                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 text-white text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition"
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 hover:opacity-90 text-white text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition"
               >
                 <span>Restore Files</span>
               </button>
@@ -323,20 +323,20 @@ export const LandingWorkspace: React.FC = () => {
           onClick={() => fileInputRef.current?.click()}
           className={`relative w-full rounded-2xl sm:rounded-3xl border-2 border-dashed p-4 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white/85 backdrop-blur-xl shadow-lg ${
             isDragOver
-              ? 'border-violet-600 bg-violet-50/50 scale-[1.01] shadow-2xl shadow-violet-500/15'
-              : 'border-violet-300/80 hover:border-violet-500 hover:shadow-xl hover:shadow-violet-500/10'
+              ? 'border-blue-600 bg-blue-50/50 scale-[1.01] shadow-2xl shadow-blue-500/15'
+              : 'border-blue-200/80 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10'
           }`}
         >
           {/* Subtle Ambient Radial Highlight */}
-          <div className="absolute inset-0 bg-radial from-violet-50/40 via-transparent to-transparent opacity-70 pointer-events-none rounded-2xl sm:rounded-3xl"></div>
+          <div className="absolute inset-0 bg-radial from-blue-50/40 via-transparent to-transparent opacity-70 pointer-events-none rounded-2xl sm:rounded-3xl"></div>
 
           {/* Central Cloud Icon with Logo Tint */}
-          <div className="w-12 sm:w-16 h-12 sm:h-16 rounded-2xl bg-gradient-to-br from-neutral-100 to-neutral-50 text-neutral-800 flex items-center justify-center mb-3 sm:mb-5 group-hover:from-violet-600 group-hover:to-cyan-600 group-hover:text-white transition duration-300 shadow-xs border border-neutral-200/60 group-hover:border-transparent">
+          <div className="w-12 sm:w-16 h-12 sm:h-16 rounded-2xl bg-gradient-to-br from-neutral-100 to-neutral-50 text-neutral-800 flex items-center justify-center mb-3 sm:mb-5 group-hover:from-blue-600 group-hover:to-sky-500 group-hover:text-white transition duration-300 shadow-xs border border-neutral-200/60 group-hover:border-transparent">
             <UploadCloud className="w-6 sm:w-8 h-6 sm:h-8" />
           </div>
 
           <h2 className="text-base sm:text-2xl font-bold text-neutral-900 mb-2 leading-snug">
-            Drop images here, paste with <kbd className="hidden sm:inline px-1.5 py-0.5 rounded-md bg-neutral-100 border border-neutral-300 font-mono text-xs text-neutral-700">Ctrl + V</kbd><span className="sm:hidden">clipboard</span>, or <span className="underline decoration-violet-300 underline-offset-4 group-hover:decoration-violet-600 transition">browse</span>
+            Drop images here, paste with <kbd className="hidden sm:inline px-1.5 py-0.5 rounded-md bg-neutral-100 border border-neutral-300 font-mono text-xs text-neutral-700">Ctrl + V</kbd><span className="sm:hidden">clipboard</span>, or <span className="underline decoration-blue-300 underline-offset-4 group-hover:decoration-blue-600 transition">browse</span>
           </h2>
           <p className="text-xs text-neutral-500 max-w-md mb-4 sm:mb-5 leading-relaxed">
             Drag single files or an entire batch. Supports high-res AVIF, JPEG, PNG, WebP, SVG, Apple HEIC, and Camera RAW.
@@ -346,7 +346,7 @@ export const LandingWorkspace: React.FC = () => {
           <div className="flex flex-wrap items-center justify-center gap-2 mb-4 sm:mb-6 w-full sm:w-auto" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white font-bold text-xs shadow-md shadow-violet-600/25 flex items-center justify-center gap-2 cursor-pointer transition min-h-[44px]"
+              className="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs shadow-md shadow-blue-600/25 flex items-center justify-center gap-2 cursor-pointer transition min-h-[44px]"
             >
               <UploadCloud className="w-4 h-4" />
               <span>Choose Images</span>
@@ -355,7 +355,7 @@ export const LandingWorkspace: React.FC = () => {
               onClick={() => cameraInputRef.current?.click()}
               className="flex-1 sm:flex-none px-3.5 sm:px-4 py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 font-semibold text-xs border border-neutral-300/80 flex items-center justify-center gap-2 cursor-pointer transition min-h-[44px]"
             >
-              <Camera className="w-4 h-4 text-violet-600" />
+              <Camera className="w-4 h-4 text-blue-600" />
               <span>Take Photo</span>
             </button>
           </div>

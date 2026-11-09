@@ -10,7 +10,7 @@ export const Footer: React.FC = () => {
   return (
     <footer className="w-full max-w-full bg-white/95 backdrop-blur-md text-neutral-700 pt-10 sm:pt-14 pb-8 sm:pb-12 mt-12 sm:mt-16 border-t border-neutral-200 relative overflow-hidden">
       {/* Subtle Ambient Light Gradients matching page theme */}
-      <div className="absolute top-0 left-1/4 w-80 h-80 bg-violet-100/50 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-0 left-1/4 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-6 right-1/4 w-80 h-80 bg-cyan-100/50 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 relative z-10">
@@ -22,10 +22,10 @@ export const Footer: React.FC = () => {
             </div>
             
             <div className="space-y-0.5">
-              <h3 className="text-sm font-bold text-neutral-900 tracking-wide">
+              <h3 className="text-sm font-bold text-neutral-900 tracking-wide font-display">
                 Zailo Graph by Coralgenz &amp; Zorquelz
               </h3>
-              <p className="text-xs font-semibold text-violet-600">
+              <p className="text-xs font-semibold text-blue-600">
                 A Collaborative Product by Coralgenz &amp; Zorquelz
               </p>
             </div>
@@ -79,7 +79,7 @@ export const Footer: React.FC = () => {
             <span>•</span>
             <button
               onClick={scrollToTop}
-              className="text-violet-600 hover:text-violet-700 transition cursor-pointer font-sans font-semibold p-1"
+              className="text-blue-600 hover:text-blue-700 transition cursor-pointer font-sans font-semibold p-1"
             >
               Back to Top &uarr;
             </button>

@@ -146,14 +146,14 @@ export const AuthModal: React.FC = () => {
                   : 'text-neutral-500 hover:text-neutral-800'
               }`}
             >
-              <Sparkles className={`w-3.5 h-3.5 ${mode === 'sign_up' ? 'text-violet-600' : 'text-neutral-400'}`} />
+              <Sparkles className={`w-3.5 h-3.5 ${mode === 'sign_up' ? 'text-blue-600' : 'text-neutral-400'}`} />
               <span>Sign Up</span>
             </button>
           </div>
 
           {/* Contextual Description */}
           <div className="text-center space-y-1">
-            <h4 className="text-base sm:text-lg font-bold text-neutral-900">
+            <h4 className="text-base sm:text-lg font-bold text-neutral-900 font-display">
               {mode === 'sign_up' ? 'Create Your Account' : 'Welcome Back'}
             </h4>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">
@@ -165,7 +165,7 @@ export const AuthModal: React.FC = () => {
 
           {/* Smart Notice for Existing Users on Sign Up */}
           {mode === 'sign_up' && (
-            <div className="p-2.5 rounded-xl bg-violet-50/80 border border-violet-100 text-[11px] text-violet-900 leading-relaxed text-center">
+            <div className="p-2.5 rounded-xl bg-blue-50/80 border border-blue-100 text-[11px] text-blue-900 leading-relaxed text-center">
               💡 <span className="font-semibold">Already have an account?</span> Signing up with your existing Google account will automatically log you directly into your workspace.
             </div>
           )}
@@ -180,7 +180,7 @@ export const AuthModal: React.FC = () => {
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-5 h-5 text-violet-600 animate-spin" />
+                  <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
                   <span>Connecting to Google...</span>
                 </>
               ) : (
@@ -222,7 +222,7 @@ export const AuthModal: React.FC = () => {
                       clearAuthError();
                       setAuthModalMode('sign_up');
                     }}
-                    className="font-semibold text-violet-600 hover:text-violet-700 underline underline-offset-2 cursor-pointer"
+                    className="font-semibold text-blue-600 hover:text-blue-700 underline underline-offset-2 cursor-pointer"
                   >
                     Sign Up
                   </button>
@@ -236,7 +236,7 @@ export const AuthModal: React.FC = () => {
                       clearAuthError();
                       setAuthModalMode('sign_in');
                     }}
-                    className="font-semibold text-violet-600 hover:text-violet-700 underline underline-offset-2 cursor-pointer"
+                    className="font-semibold text-blue-600 hover:text-blue-700 underline underline-offset-2 cursor-pointer"
                   >
                     Sign In
                   </button>

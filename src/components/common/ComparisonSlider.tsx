@@ -348,7 +348,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
               onClick={() => setShowCropHandles(prev => !prev)}
               className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 ml-1 border ${
                 showCropHandles
-                  ? 'bg-violet-600 border-violet-600 text-white shadow-xs'
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-xs'
                   : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200'
               }`}
               title="Toggle Interactive Draggable Crop Overlay on Canvas"
@@ -367,7 +367,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
               onClick={() => setIsLoupeActive(prev => !prev)}
               className={`px-2 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border ${
                 isLoupeActive
-                  ? 'bg-violet-600 border-violet-600 text-white shadow-xs'
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-xs'
                   : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200'
               }`}
               title="Toggle Pixel Inspection Loupe (Hotkey: Z)"
@@ -381,7 +381,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
                 <button
                   onClick={() => setLoupeZoom(2)}
                   className={`px-1.5 py-0.5 rounded font-bold transition cursor-pointer ${
-                    loupeZoom === 2 ? 'bg-white text-violet-700 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900'
+                    loupeZoom === 2 ? 'bg-white text-blue-700 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900'
                   }`}
                 >
                   2×
@@ -389,7 +389,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
                 <button
                   onClick={() => setLoupeZoom(4)}
                   className={`px-1.5 py-0.5 rounded font-bold transition cursor-pointer ${
-                    loupeZoom === 4 ? 'bg-white text-violet-700 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900'
+                    loupeZoom === 4 ? 'bg-white text-blue-700 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900'
                   }`}
                 >
                   4×
@@ -583,7 +583,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
                         setSliderPosition(100);
                       }
                     }}
-                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-neutral-900 border-2 border-white flex items-center justify-center text-white cursor-ew-resize transform transition-transform hover:scale-110 focus:scale-110 focus:ring-2 focus:ring-violet-500 focus:outline-none active:scale-95 shadow-md pointer-events-auto touch-none"
+                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-neutral-900 border-2 border-white flex items-center justify-center text-white cursor-ew-resize transform transition-transform hover:scale-110 focus:scale-110 focus:ring-2 focus:ring-blue-500 focus:outline-none active:scale-95 shadow-md pointer-events-auto touch-none"
                   >
                     <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2.5]" />
                   </div>
@@ -791,7 +791,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
         {/* Pixel Inspection Loupe (Floating 2× / 4× Lens) */}
         {isLoupeActive && isHoveringImage && imageScreenRect && (
           <div
-            className="fixed pointer-events-none z-50 rounded-full border-2 border-white shadow-2xl overflow-hidden ring-2 ring-violet-500/50 backdrop-blur-xs"
+            className="fixed pointer-events-none z-50 rounded-full border-2 border-white shadow-2xl overflow-hidden ring-2 ring-blue-500/50 backdrop-blur-xs"
             style={{
               width: 170,
               height: 170,

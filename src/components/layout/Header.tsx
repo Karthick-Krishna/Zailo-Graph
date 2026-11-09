@@ -24,11 +24,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
           </span>
           <button
             onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
-            className="md:hidden flex items-center gap-1 px-2 py-1 rounded-xl bg-violet-50 hover:bg-violet-100 active:bg-violet-200 text-violet-900 border border-violet-200 text-xs font-bold transition cursor-pointer shadow-2xs ml-0.5 min-h-[34px]"
+            className="md:hidden flex items-center gap-1 px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-900 border border-blue-200 text-xs font-bold transition cursor-pointer shadow-2xs ml-0.5 min-h-[34px]"
             title="Browse all 25 Studio Tools"
             aria-label="Open 25 Studio Tools Navigation"
           >
-            <Layers className="w-3.5 h-3.5 text-violet-600 shrink-0" />
+            <Layers className="w-3.5 h-3.5 text-blue-600 shrink-0" />
             <span className="hidden min-[360px]:inline">Tools </span>
             <span className="font-mono text-[11px]">(25)</span>
           </button>
@@ -37,8 +37,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
         {/* Center: Quiet Status Indicators */}
         <div className="hidden md:flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5 text-neutral-600">
-            <span className="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 animate-pulse"></span>
-            <Shield className="w-3.5 h-3.5 text-violet-600" />
+            <span className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 animate-pulse"></span>
+            <Shield className="w-3.5 h-3.5 text-blue-600" />
             <span className="font-medium text-neutral-700">100% Private • Zero Cloud Uploads</span>
           </div>
 
@@ -90,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
               title="Keyboard Shortcuts (?)"
               aria-label="Toggle keyboard shortcuts"
             >
-              <Keyboard className="w-3.5 h-3.5 text-violet-500" />
+              <Keyboard className="w-3.5 h-3.5 text-blue-600" />
               <span className="hidden lg:inline text-[11px] font-semibold">Shortcuts</span>
               <kbd className="hidden sm:inline px-1 py-0.2 rounded bg-neutral-100 border border-neutral-200 text-[10px] text-neutral-500">?</kbd>
             </button>
@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
               <button
                 type="button"
                 onClick={() => openAuthModal('manual', undefined, undefined, 'sign_up')}
-                className="px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 hover:from-violet-950 hover:to-indigo-950 text-white text-xs font-semibold transition-all shadow-xs hover:shadow-md hover:shadow-violet-500/10 cursor-pointer flex items-center gap-1.5 border border-neutral-800 min-h-[34px] sm:min-h-[36px] whitespace-nowrap"
+                className="px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-neutral-900 via-blue-950 to-neutral-900 hover:from-blue-900 hover:to-blue-950 text-white text-xs font-semibold transition-all shadow-xs hover:shadow-md hover:shadow-blue-500/15 cursor-pointer flex items-center gap-1.5 border border-neutral-800 min-h-[34px] sm:min-h-[36px] whitespace-nowrap"
               >
                 <span>Sign Up</span>
               </button>
@@ -155,12 +155,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
                       className="w-6 h-6 rounded-full object-cover shadow-xs border border-neutral-200" 
                     />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-violet-600 to-cyan-500 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-sky-400 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
                       {(user.email?.[0] || 'Z').toUpperCase()}
                     </div>
                   )}
                   <span className="hidden sm:inline max-w-[120px] truncate text-neutral-700">{user?.name || user?.email}</span>
-                  <span className="px-1.5 py-0.2 rounded bg-gradient-to-r from-violet-50 to-cyan-50 text-violet-700 border border-violet-200/60 font-mono text-[9px] font-bold">PRO</span>
+                  <span className="px-1.5 py-0.2 rounded bg-gradient-to-r from-blue-50 to-sky-50 text-blue-700 border border-blue-200/60 font-mono text-[9px] font-bold">PRO</span>
                   <ChevronDown className="w-3 h-3 text-neutral-400" />
                 </button>
 

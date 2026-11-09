@@ -73,9 +73,9 @@ export const ActiveAuroraBackground: React.FC = () => {
         className="md:hidden absolute inset-0 pointer-events-none opacity-80"
         style={{
           background: `
-            radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.16) 0%, transparent 45%),
-            radial-gradient(circle at 85% 25%, rgba(6, 182, 212, 0.14) 0%, transparent 50%),
-            radial-gradient(circle at 20% 75%, rgba(217, 70, 239, 0.12) 0%, transparent 50%)
+            radial-gradient(circle at 10% 10%, rgba(0, 82, 255, 0.14) 0%, transparent 45%),
+            radial-gradient(circle at 85% 25%, rgba(0, 210, 255, 0.12) 0%, transparent 50%),
+            radial-gradient(circle at 20% 75%, rgba(10, 102, 194, 0.10) 0%, transparent 50%)
           `
         }}
       />
@@ -85,41 +85,41 @@ export const ActiveAuroraBackground: React.FC = () => {
         ref={spotlightRef}
         className="hidden md:block absolute top-0 left-0 w-[600px] h-[600px] rounded-full blur-[80px] pointer-events-none transition-opacity duration-300 opacity-70 will-change-transform"
         style={{
-          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.45) 0%, rgba(6, 182, 212, 0.35) 40%, rgba(217, 70, 239, 0.15) 60%, transparent 75%)',
+          background: 'radial-gradient(circle, rgba(0, 82, 255, 0.35) 0%, rgba(0, 210, 255, 0.28) 40%, rgba(10, 30, 90, 0.15) 60%, transparent 75%)',
         }}
       />
 
       {/* DESKTOP LAYER 2: Floating Autonomous Parallax Aurora Orbs (Contained within desktop bounds) */}
       <div ref={parallaxRef} className="hidden md:block absolute inset-0 pointer-events-none overflow-hidden will-change-transform transition-transform duration-100 ease-out">
-        {/* Orb 1: Vibrant Electric Violet */}
+        {/* Orb 1: Vibrant Cobalt Blue */}
         <div 
           className="absolute -top-24 left-[15%] w-[800px] h-[520px] rounded-full blur-[90px] pointer-events-none animate-aura-1"
           style={{
-            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.48) 0%, rgba(99, 102, 241, 0.35) 45%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(0, 82, 255, 0.40) 0%, rgba(37, 99, 235, 0.28) 45%, transparent 70%)',
           }}
         />
 
-        {/* Orb 2: Radiant Cyan & Sky Blue */}
+        {/* Orb 2: Radiant Electric Azure & Cyan */}
         <div 
           className="absolute top-1/4 -right-16 w-[700px] h-[700px] rounded-full blur-[100px] pointer-events-none animate-aura-2"
           style={{
-            background: 'radial-gradient(circle, rgba(6, 182, 212, 0.44) 0%, rgba(59, 130, 246, 0.32) 45%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(0, 210, 255, 0.36) 0%, rgba(2, 132, 199, 0.25) 45%, transparent 70%)',
           }}
         />
 
-        {/* Orb 3: Fuchsia & Magenta Sunset */}
+        {/* Orb 3: Deep Tech Royal Blue */}
         <div 
           className="absolute -bottom-20 -left-16 w-[650px] h-[650px] rounded-full blur-[85px] pointer-events-none animate-aura-3"
           style={{
-            background: 'radial-gradient(circle, rgba(217, 70, 239, 0.40) 0%, rgba(244, 63, 94, 0.28) 45%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(14, 165, 233, 0.30) 0%, rgba(30, 58, 138, 0.24) 45%, transparent 70%)',
           }}
         />
 
-        {/* Orb 4: Pulsing Central Ethereal Core */}
+        {/* Orb 4: Pulsing Central Cobalt Core */}
         <div 
           className="absolute top-1/3 left-1/3 w-[550px] h-[550px] rounded-full blur-[90px] pointer-events-none animate-aura-glow"
           style={{
-            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.36) 0%, rgba(6, 182, 212, 0.28) 50%, transparent 75%)',
+            background: 'radial-gradient(circle, rgba(0, 82, 255, 0.30) 0%, rgba(56, 189, 248, 0.22) 50%, transparent 75%)',
           }}
         />
       </div>

@@ -16,7 +16,7 @@ const UTILITIES_SEO = [
   {
     id: 'workflow-recipes',
     name: '1-Click Workflow Recipes',
-    title: 'Free 1-Click Image Automation Recipes - Amazon, YouTube & Passport | ZailoGraph',
+    title: 'Free 1-Click Image Automation Recipes - Amazon, YouTube & Passport | Zailo Graph',
     description: 'Automate multi-step image workflows in one click. Instant presets for Amazon FBA white backgrounds, YouTube thumbnails, passport biometrics, and SEO WebP compression.',
     keywords: 'image automation, 1-click recipes, amazon product photo white background, youtube thumbnail resizer, passport photo maker, batch image optimization',
     category: 'recipes',
@@ -35,7 +35,7 @@ const UTILITIES_SEO = [
   {
     id: 'batch-resize',
     name: 'Batch Image Resizing',
-    title: 'Free Online Batch Image Resizer - Exact Pixels & Aspect Ratio | ZailoGraph',
+    title: 'Free Online Batch Image Resizer - Exact Pixels & Aspect Ratio | Zailo Graph',
     description: 'Resize multiple images simultaneously in your browser. Scale by exact width, height, percentage, or aspect ratio using high-fidelity Lanczos3 resampling with zero quality loss.',
     keywords: 'batch image resizer, resize images online free, bulk photo resize, lanczos3 scaling, high quality image downscaling, private image resizer',
     category: 'optimize',
@@ -54,7 +54,7 @@ const UTILITIES_SEO = [
   {
     id: 'compression',
     name: 'Image Compression Studio',
-    title: 'Free Online Image Compressor - Lossless & Lossy MozJPEG, WebP, OxiPNG | ZailoGraph',
+    title: 'Free Online Image Compressor - Lossless & Lossy MozJPEG, WebP, OxiPNG | Zailo Graph',
     description: 'Compress JPG, PNG, and WebP images by up to 90% without visible quality loss. Powered by native MozJPEG, OxiPNG, and WebP WebAssembly codecs with real-time split-screen preview.',
     keywords: 'compress image online, free photo compressor, reduce image size, mozjpeg wasm, oxipng optimizer, webp compression, lossless compression',
     category: 'optimize',
@@ -73,7 +73,7 @@ const UTILITIES_SEO = [
   {
     id: 'heic-converter',
     name: 'HEIC to JPG/PNG Converter',
-    title: 'Free Online Apple HEIC to JPG Converter - iPhone Live Photos | ZailoGraph',
+    title: 'Free Online Apple HEIC to JPG Converter - iPhone Live Photos | Zailo Graph',
     description: 'Convert iPhone and Apple HEIC/HEIF photos to standard JPG or PNG format directly in your browser. Batch conversion with 100% privacy and full EXIF metadata preservation.',
     keywords: 'heic to jpg, convert heic to png, apple heif converter, iphone photo to jpg, batch heic converter, free heic to jpeg online',
     category: 'convert',
@@ -92,7 +92,7 @@ const UTILITIES_SEO = [
   {
     id: 'webp-to-raster',
     name: 'WebP to PNG/JPG Converter',
-    title: 'Free Online WebP to PNG & JPG Converter - Lossless Decompression | ZailoGraph',
+    title: 'Free Online WebP to PNG & JPG Converter - Lossless Decompression | Zailo Graph',
     description: 'Convert Google WebP images into universally compatible PNG or JPG photos. Preserve full transparency, inspect color depth, and export high-resolution master copies.',
     keywords: 'webp to png, convert webp to jpg, webp decoder, free webp converter online, save webp as png, private webp to jpeg',
     category: 'convert',
@@ -111,7 +111,7 @@ const UTILITIES_SEO = [
   {
     id: 'raster-to-webp',
     name: 'PNG/JPG to WebP Converter',
-    title: 'Free Online PNG & JPG to Modern WebP Converter - 100% Private | ZailoGraph',
+    title: 'Free Online PNG & JPG to Modern WebP Converter - 100% Private | Zailo Graph',
     description: 'Convert legacy PNG, JPG, and BMP images into Google WebP format. Shrink image payload sizes by 30-70% for lightning-fast website performance and Google Core Web Vitals.',
     keywords: 'png to webp, jpg to webp, convert jpeg to webp, next-gen image format, webp encoder online, website speed optimization',
     category: 'convert',
@@ -130,7 +130,7 @@ const UTILITIES_SEO = [
   {
     id: 'svg-to-png',
     name: 'SVG to High-Res PNG Rasterizer',
-    title: 'Free Online SVG to High-Resolution PNG - Up to 16x Print Quality | ZailoGraph',
+    title: 'Free Online SVG to High-Resolution PNG - Up to 16x Print Quality | Zailo Graph',
     description: 'Rasterize scalable vector graphics (SVG) into crisp, pixel-perfect PNG images up to 16x scaling multiplier (300 DPI print grade). Powered by native Resvg WebAssembly.',
     keywords: 'svg to png, high resolution svg rasterizer, convert svg to png 300 dpi, print quality svg, resvg wasm, vector to raster converter',
     category: 'convert',
@@ -149,7 +149,7 @@ const UTILITIES_SEO = [
   {
     id: 'png-to-svg',
     name: 'PNG to SVG Vectorizer',
-    title: 'Free Online PNG to SVG Vectorizer - Trace Bitmap to Vector Paths | ZailoGraph',
+    title: 'Free Online PNG to SVG Vectorizer - Trace Bitmap to Vector Paths | Zailo Graph',
     description: 'Convert raster PNG, JPG, and logo graphics into clean, editable SVG vector paths. Auto-trace contours, reduce speckles, and extract multi-color layer paths in your browser.',
     keywords: 'png to svg, vectorizer online, convert logo to svg, image to vector paths, autotrace bitmap, free vectorizer tool',
     category: 'convert',
@@ -168,7 +168,7 @@ const UTILITIES_SEO = [
   {
     id: 'rotate-flip',
     name: 'Rotate & Flip Image Studio',
-    title: 'Free Online Image Rotator & Mirror Flip - 90°, 180° & Arbitrary Angles | ZailoGraph',
+    title: 'Free Online Image Rotator & Mirror Flip - 90°, 180° & Arbitrary Angles | Zailo Graph',
     description: 'Rotate photos by 90°, 180°, 270°, or any degree angle with automatic canvas bounding box expansion. Flip images horizontally and vertically with instant client preview.',
     keywords: 'rotate image online, flip photo horizontally, mirror image online, rotate 90 degrees, angle rotation canvas, free image flip',
     category: 'edit',
@@ -187,7 +187,7 @@ const UTILITIES_SEO = [
   {
     id: 'meme-generator',
     name: 'Meme & Caption Studio',
-    title: 'Free Online Meme Generator - Classic Impact Bold Text & Custom Captions | ZailoGraph',
+    title: 'Free Online Meme Generator - Classic Impact Bold Text & Custom Captions | Zailo Graph',
     description: 'Create viral memes with classic bold Impact typography. Customize top and bottom text, font sizes, text color, stroke outlines, and automatic line wrapping privately in your browser.',
     keywords: 'meme generator online, free meme maker, add caption to photo, impact font meme, custom meme creator, private meme maker',
     category: 'edit',
@@ -199,14 +199,14 @@ const UTILITIES_SEO = [
       'Download your high-resolution meme without forced watermarks.'
     ],
     faqs: [
-      { q: 'Does ZailoGraph add its own watermark to memes?', a: 'Never. Your memes are 100% yours, clean and unbranded.' },
+      { q: 'Does Zailo Graph add its own watermark to memes?', a: 'Never. Your memes are 100% yours, clean and unbranded.' },
       { q: 'Can I type long sentences?', a: 'Yes. Intelligent word wrapping automatically breaks long sentences into balanced multi-line captions.' }
     ]
   },
   {
     id: 'sharpen-enhance',
     name: 'Sharpen & Enhance Studio',
-    title: 'Free Online Image Sharpening & Color Enhancement - WebGL Real-Time | ZailoGraph',
+    title: 'Free Online Image Sharpening & Color Enhancement - WebGL Real-Time | Zailo Graph',
     description: 'Fix blurry photos, boost local contrast, and enhance clarity with hardware-accelerated 60fps WebGL filters. Fine-tune brightness, saturation, and unsharp masking.',
     keywords: 'sharpen blurry image, photo enhance online, unsharp mask tool, increase contrast photo, clear up blurry pictures, webgl image filter',
     category: 'edit',
@@ -225,7 +225,7 @@ const UTILITIES_SEO = [
   {
     id: 'avatar-crop',
     name: 'Circular Avatar & Image Cropper',
-    title: 'Free Online Circular Avatar Cropper - Profile Photos for Social Media | ZailoGraph',
+    title: 'Free Online Circular Avatar Cropper - Profile Photos for Social Media | Zailo Graph',
     description: 'Crop images into perfect circles, rounded rectangles, or standard aspect ratios (1:1, 4:5, 16:9). Includes pan, zoom, and transparent PNG background export.',
     keywords: 'circular crop photo, profile picture cropper, round avatar maker, crop image to circle online, square profile photo, avatar crop tool',
     category: 'edit',
@@ -244,7 +244,7 @@ const UTILITIES_SEO = [
   {
     id: 'social-presets',
     name: 'Social Media Presets',
-    title: 'Free Online Social Media Image Resizer - Instagram, YouTube, LinkedIn | ZailoGraph',
+    title: 'Free Online Social Media Image Resizer - Instagram, YouTube, LinkedIn | Zailo Graph',
     description: 'Instant resizing for Instagram posts, Stories, YouTube banners, LinkedIn covers, X/Twitter headers, and Open Graph cards with smart blur fill backgrounds.',
     keywords: 'social media image sizes, resize photo for instagram, youtube banner resizer, linkedin cover photo size, twitter header resizer, og image generator',
     category: 'social',
@@ -263,7 +263,7 @@ const UTILITIES_SEO = [
   {
     id: 'watermark',
     name: 'Image Watermarking Studio',
-    title: 'Free Online Image Watermarking - Text & Logo Branding on 9-Point Grid | ZailoGraph',
+    title: 'Free Online Image Watermarking - Text & Logo Branding on 9-Point Grid | Zailo Graph',
     description: 'Protect creative assets with customizable text typography or brand logo watermarks. Features full 9-point anchor alignment, opacity control, and angle rotation.',
     keywords: 'watermark photos online, add logo to image free, protect photos watermark, batch image watermarking, transparent logo overlay, photography watermark',
     category: 'edit',
@@ -282,7 +282,7 @@ const UTILITIES_SEO = [
   {
     id: 'collage-maker',
     name: 'Photo Grids & Collages',
-    title: 'Free Online Photo Grid & Collage Maker - Multi-Photo Layouts | ZailoGraph',
+    title: 'Free Online Photo Grid & Collage Maker - Multi-Photo Layouts | Zailo Graph',
     description: 'Combine multiple images into dynamic flex grids, split panels, polaroid arrays, and editorial photo collages directly in your browser with adjustable margins.',
     keywords: 'photo collage maker, photo grid online free, combine images side by side, picture collage maker, split photo grid, instagram collage maker',
     category: 'edit',
@@ -301,7 +301,7 @@ const UTILITIES_SEO = [
   {
     id: 'color-palette',
     name: 'Color Palette Generator',
-    title: 'Free Online Color Palette Generator - Extract HEX & CSS Swatches | ZailoGraph',
+    title: 'Free Online Color Palette Generator - Extract HEX & CSS Swatches | Zailo Graph',
     description: 'Extract dominant color palettes, HEX codes, RGB values, and CSS variables from any image using fast K-Means color quantization. Export swatch cards with one click.',
     keywords: 'color palette from image, extract hex codes photo, color scheme generator, image color picker, dominant colors extractor, css color palette',
     category: 'edit',
@@ -320,7 +320,7 @@ const UTILITIES_SEO = [
   {
     id: 'passport-photo',
     name: 'Passport & ID Photo Maker',
-    title: 'Free Online Passport & ID Photo Maker - Biometric Templates & Sheets | ZailoGraph',
+    title: 'Free Online Passport & ID Photo Maker - Biometric Templates & Sheets | Zailo Graph',
     description: 'Create standard biometric passport, visa, and ID photos for US, EU, UK, and India. Features head/chin height guidelines, whitened background, and printable 4×6 multi-print sheets.',
     keywords: 'passport photo maker, us passport photo 2x2 online, visa photo maker free, biometric id photo, 4x6 passport print sheet, id photo online',
     category: 'edit',
@@ -339,7 +339,7 @@ const UTILITIES_SEO = [
   {
     id: 'image-splitter',
     name: 'Image Grid Splitter',
-    title: 'Free Online Image Grid Splitter - 3x3 Instagram Grids & Carousels | ZailoGraph',
+    title: 'Free Online Image Grid Splitter - 3x3 Instagram Grids & Carousels | Zailo Graph',
     description: 'Slice large photos into 3×3 Instagram feed grids, 3×1 seamless panoramic carousels, or custom row × column puzzle tiles with automatic numbered ZIP export.',
     keywords: 'split image into 3x3 grid, instagram grid splitter, split photo for carousel, cut image into tiles, panoramic carousel splitter, image splitter online',
     category: 'social',
@@ -358,7 +358,7 @@ const UTILITIES_SEO = [
   {
     id: 'exif-viewer',
     name: 'EXIF Metadata Viewer',
-    title: 'Free Online EXIF Metadata Viewer & GPS Coordinates Map | ZailoGraph',
+    title: 'Free Online EXIF Metadata Viewer & GPS Coordinates Map | Zailo Graph',
     description: 'Inspect camera model, lens parameters, ISO, shutter speed, aperture, and embedded GPS coordinates with interactive mapping. 100% private in browser memory.',
     keywords: 'exif viewer online, read photo metadata, check camera settings image, find gps coordinates photo, inspect exif data free, private exif viewer',
     category: 'metadata',
@@ -377,7 +377,7 @@ const UTILITIES_SEO = [
   {
     id: 'exif-remover',
     name: 'Lossless EXIF Stripper',
-    title: 'Free Online Lossless EXIF Stripper - Sanitize GPS & Privacy Data | ZailoGraph',
+    title: 'Free Online Lossless EXIF Stripper - Sanitize GPS & Privacy Data | Zailo Graph',
     description: 'Sanitize GPS locations, device serial numbers, and personal timestamps from photos without re-compressing image pixels. Lossless bitstream metadata removal for JPEG and PNG.',
     keywords: 'remove exif data online, strip gps from photo, delete photo metadata, lossless exif remover, clean image metadata free, privacy photo stripper',
     category: 'metadata',
@@ -396,7 +396,7 @@ const UTILITIES_SEO = [
   {
     id: 'privacy-redact',
     name: 'Privacy Blur & Redact',
-    title: 'Free Online Privacy Blur & Image Redactor - Hide Faces & Numbers | ZailoGraph',
+    title: 'Free Online Privacy Blur & Image Redactor - Hide Faces & Numbers | Zailo Graph',
     description: 'Irreversibly blur, pixelate, or black out sensitive faces, license plates, credit card numbers, and confidential documents before sharing online.',
     keywords: 'blur faces photo online, redact image free, pixelate license plate, black out text on picture, blur sensitive info photo, private image redactor',
     category: 'metadata',
@@ -415,7 +415,7 @@ const UTILITIES_SEO = [
   {
     id: 'favicon-studio',
     name: 'Favicon & App Icon Studio',
-    title: 'Free Online Favicon & App Icon Generator - Multi-Resolution .ICO Pack | ZailoGraph',
+    title: 'Free Online Favicon & App Icon Generator - Multi-Resolution .ICO Pack | Zailo Graph',
     description: 'Generate multi-resolution .ico files (16×16, 32×32, 48×48), Apple Touch Icons, and manifest.json web app packages from any logo or image.',
     keywords: 'favicon generator, create ico file online, convert png to ico, apple touch icon maker, pwa manifest icon generator, favicon maker free',
     category: 'social',
@@ -434,7 +434,7 @@ const UTILITIES_SEO = [
   {
     id: 'image-to-base64',
     name: 'Image to Base64 URI Converter',
-    title: 'Free Online Image to Base64 Converter - Data URI, HTML & CSS | ZailoGraph',
+    title: 'Free Online Image to Base64 Converter - Data URI, HTML & CSS | Zailo Graph',
     description: 'Convert any image into a base64 data URI string, HTML <img> tag, or CSS background declaration. Instant 1-click clipboard copy with zero server uploads.',
     keywords: 'image to base64, convert photo to data uri, base64 image encoder, base64 html img tag, base64 string generator online, inline image css',
     category: 'convert',
@@ -453,7 +453,7 @@ const UTILITIES_SEO = [
   {
     id: 'base64-to-image',
     name: 'Base64 to Image Decoder',
-    title: 'Free Online Base64 to Image Decoder - Paste Data URI & Download | ZailoGraph',
+    title: 'Free Online Base64 to Image Decoder - Paste Data URI & Download | Zailo Graph',
     description: 'Paste base64 strings or data URIs to inspect, preview, and download as clean PNG, JPG, or WebP files. Instant decoding without server roundtrips.',
     keywords: 'base64 to image, decode base64 to png, data uri to image file, base64 to jpg converter, view base64 image online, free base64 decoder',
     category: 'convert',
@@ -472,7 +472,7 @@ const UTILITIES_SEO = [
   {
     id: 'camera-raw',
     name: 'Camera RAW to JPG Converter',
-    title: 'Free Online Camera RAW to JPG Studio - Canon, Nikon, Sony, DNG | ZailoGraph',
+    title: 'Free Online Camera RAW to JPG Studio - Canon, Nikon, Sony, DNG | Zailo Graph',
     description: 'Extract embedded previews and convert DSLR Camera RAW files (Canon CR2/CR3, Nikon NEF, Sony ARW, DNG, Fuji RAF) to high-quality JPEG in your browser.',
     keywords: 'raw to jpg converter, convert cr2 to jpg online, sony arw to jpeg, nikon nef to jpg, dng to jpg free, camera raw converter online',
     category: 'convert',
@@ -543,7 +543,7 @@ function generateHtmlPage(tool) {
   <meta property="og:title" content="${tool.title}">
   <meta property="og:description" content="${tool.description}">
   <meta property="og:image" content="https://zailograph.com/zailograph-banner.jpg">
-  <meta property="og:site_name" content="ZailoGraph">
+  <meta property="og:site_name" content="Zailo Graph">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
@@ -659,7 +659,7 @@ ${faqSchema}
       </div>
       <div class="p-6 bg-white rounded-3xl border border-neutral-200/80 shadow-2xs space-y-2">
         <h3 class="text-sm font-bold text-neutral-900">Connected Workflow</h3>
-        <p class="text-xs text-neutral-500 leading-relaxed">Send processed results directly into other ZailoGraph utilities without downloading and re-uploading.</p>
+        <p class="text-xs text-neutral-500 leading-relaxed">Send processed results directly into other Zailo Graph utilities without downloading and re-uploading.</p>
       </div>
     </section>
 

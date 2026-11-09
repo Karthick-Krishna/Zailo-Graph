@@ -164,15 +164,15 @@ export const SettingsModal: React.FC = () => {
                     src={user.avatarUrl} 
                     alt={currentDisplayName}
                     referrerPolicy="no-referrer"
-                    className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-violet-200"
+                    className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-blue-200"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 via-blue-700 to-sky-400 text-white flex items-center justify-center font-bold text-lg shadow-sm">
                     {(user.name?.[0] || realGoogleEmail?.[0] || 'Z').toUpperCase()}
                   </div>
                 )}
                 <div className="space-y-0.5 min-w-0">
-                  <h4 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+                  <h4 className="text-base font-bold text-neutral-900 flex items-center gap-2 font-display">
                     <span className="truncate">{currentDisplayName}</span>
                   </h4>
                   <div className="flex items-center gap-1.5 text-xs text-neutral-600 font-mono">
@@ -183,8 +183,8 @@ export const SettingsModal: React.FC = () => {
               </div>
 
               {/* Pro Status Pill */}
-              <div className="px-3 py-1.5 rounded-xl bg-violet-100/80 border border-violet-200 text-violet-900 flex items-center gap-1.5 shrink-0 shadow-2xs">
-                <Sparkles className="w-3.5 h-3.5 text-violet-600" />
+              <div className="px-3 py-1.5 rounded-xl bg-blue-100/80 border border-blue-200 text-blue-900 flex items-center gap-1.5 shrink-0 shadow-2xs">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
                 <span className="text-xs font-bold tracking-tight">PRO UNLOCKED</span>
               </div>
             </div>

@@ -91,7 +91,7 @@ export const Workspace: React.FC = () => {
           {/* Parameters Sheet Button */}
           <button
             onClick={() => setShowMobileControls(true)}
-            className="flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white flex items-center justify-center gap-1 sm:gap-1.5 transition text-xs font-bold shadow-sm shadow-violet-600/25 cursor-pointer min-h-[42px] sm:min-h-[44px]"
+            className="flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white flex items-center justify-center gap-1 sm:gap-1.5 transition text-xs font-bold shadow-sm shadow-blue-600/25 cursor-pointer min-h-[42px] sm:min-h-[44px]"
             title="Adjust Settings"
           >
             <Sliders className="w-3.5 sm:w-4 h-3.5 sm:h-4 shrink-0" />

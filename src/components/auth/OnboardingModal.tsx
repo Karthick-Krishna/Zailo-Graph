@@ -77,10 +77,10 @@ export const OnboardingModal: React.FC = () => {
                   src={user.avatarUrl} 
                   alt={user.google_name || 'Profile'}
                   referrerPolicy="no-referrer"
-                  className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-lg mx-auto ring-4 ring-violet-100"
+                  className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-lg mx-auto ring-4 ring-blue-100"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 text-white flex items-center justify-center font-bold text-xl shadow-lg mx-auto ring-4 ring-violet-100">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 via-blue-700 to-sky-400 text-white flex items-center justify-center font-bold text-xl shadow-lg mx-auto ring-4 ring-blue-100">
                   {(user.google_name?.[0] || user.email?.[0] || 'Z').toUpperCase()}
                 </div>
               )}
@@ -90,9 +90,9 @@ export const OnboardingModal: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <h2 id="onboarding-title" className="text-2xl font-extrabold text-neutral-900 tracking-tight flex items-center justify-center gap-2">
+              <h2 id="onboarding-title" className="text-2xl font-extrabold text-neutral-900 tracking-tight flex items-center justify-center gap-2 font-display">
                 <span>Welcome to Zailo Graph!</span>
-                <Sparkles className="w-5 h-5 text-violet-600" />
+                <Sparkles className="w-5 h-5 text-blue-600" />
               </h2>
               <p className="text-xs sm:text-sm text-neutral-500 max-w-xs mx-auto">
                 How would you like us to address you?
@@ -107,7 +107,7 @@ export const OnboardingModal: React.FC = () => {
                 htmlFor="onboarding-display-name" 
                 className="block text-xs font-bold uppercase tracking-wider text-neutral-600 flex items-center gap-1.5"
               >
-                <UserIcon className="w-3.5 h-3.5 text-violet-600" />
+                <UserIcon className="w-3.5 h-3.5 text-blue-600" />
                 <span>Enter your display name</span>
               </label>
 
@@ -127,7 +127,7 @@ export const OnboardingModal: React.FC = () => {
                   className={`w-full px-4 py-3 rounded-2xl border text-sm text-neutral-900 outline-none transition ${
                     validationError 
                       ? 'border-red-400 focus:border-red-600 focus:ring-2 focus:ring-red-500/20 bg-red-50/30' 
-                      : 'border-neutral-300 focus:border-violet-600 focus:ring-2 focus:ring-violet-500/20'
+                      : 'border-neutral-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20'
                   }`}
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-neutral-400 pointer-events-none">

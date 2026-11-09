@@ -2,7 +2,9 @@
 
 @layer base {
   :root {
-    --font-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-brand: 'Orbitron', 'Michroma', 'Space Grotesk', sans-serif;
+    --font-display: 'Space Grotesk', 'Orbitron', sans-serif;
+    --font-sans: 'Space Grotesk', 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
   }
 
@@ -24,6 +26,17 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Futuristic Extended Brand Typography matching Zailo Graph logo */
+  .font-brand {
+    font-family: var(--font-brand);
+    letter-spacing: 0.06em;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
   /* Senior Developer / Studio Typography: Tabular figures for numbers, dimensions, and telemetry */
   .font-mono, [data-tabular-nums] {
     font-family: var(--font-mono);
@@ -31,7 +44,7 @@
   }
 
   ::selection {
-    background-color: #8B5CF6;
+    background-color: #0052FF;
     color: #FFFFFF;
   }
 }

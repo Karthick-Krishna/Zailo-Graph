@@ -250,10 +250,10 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
           {/* Left Active Glow Indicator Pip */}
           <span className={`w-1 h-3.5 rounded-full transition-all shrink-0 ${
             isSelected 
-              ? 'bg-gradient-to-b from-violet-400 to-cyan-400 opacity-100' 
+              ? 'bg-gradient-to-b from-blue-500 to-sky-400 opacity-100' 
               : 'opacity-0'
           }`} />
-          <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? 'text-cyan-300' : 'text-neutral-500 group-hover:text-neutral-800'}`} />
+          <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? 'text-sky-300' : 'text-neutral-500 group-hover:text-neutral-800'}`} />
           <span className="text-xs truncate tracking-tight">{u.name}</span>
         </div>
 
@@ -287,8 +287,8 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
           <div className="w-12 h-1.5 rounded-full bg-neutral-300 mb-2"></div>
           <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-violet-600" />
-              <span className="text-sm font-bold text-neutral-900">Choose Utility</span>
+              <Layers className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-bold text-neutral-900 font-display">Choose Utility</span>
               <span className="text-[10px] font-mono text-neutral-500 bg-white px-2 py-0.5 rounded-full border border-neutral-200 font-semibold">
                 25 Tools
               </span>

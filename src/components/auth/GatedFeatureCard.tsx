@@ -19,7 +19,7 @@ export const GatedFeatureCard: React.FC<GatedFeatureCardProps> = ({ utility }) =
       </div>
 
       {/* Title & Description */}
-      <h2 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight mb-2">
+      <h2 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight mb-2 font-display">
         {utility.name}
       </h2>
       <p className="text-xs sm:text-sm text-neutral-500 max-w-md mb-6 leading-relaxed">
@@ -28,8 +28,8 @@ export const GatedFeatureCard: React.FC<GatedFeatureCardProps> = ({ utility }) =
 
       {/* Visual Showcase Box */}
       <div className="w-full p-5 rounded-2xl bg-neutral-50 border border-neutral-200/70 mb-6 text-left">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-3">
-          Unlocked with your Free ZailoGraph Account:
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-3 font-display">
+          Unlocked with your Free Zailo Graph Account:
         </h4>
         <div className="space-y-2.5">
           <div className="flex items-start gap-3">
