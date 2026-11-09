@@ -51,10 +51,6 @@ interface SessionContextType {
   batchProgress: BatchProgressState;
   isMobileToolsOpen: boolean;
   setIsMobileToolsOpen: (open: boolean) => void;
-  pendingConverterFiles: File[];
-  setPendingConverterFiles: (files: File[]) => void;
-  activeAppMode: 'studio' | 'converter';
-  setActiveAppMode: (mode: 'studio' | 'converter') => void;
   
   // Multi-step History Stack
   canUndo: boolean;
@@ -247,7 +243,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [activeImageId, setActiveImageId] = useState<string | null>(null);
   const [activeUtilityId, setActiveUtilityId] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      if (window.location.hash.includes('converter')) return 'webp-to-raster';
       const match = window.location.hash.match(/tool=([a-z0-9-]+)/i);
       if (match && match[1]) return match[1];
       const params = new URLSearchParams(window.location.search);
@@ -257,36 +252,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return 'workflow-recipes';
   });
 
-  const [activeAppMode, setActiveAppModeState] = useState<'studio' | 'converter'>(() => {
-    if (typeof window !== 'undefined' && window.location.hash.includes('converter')) {
-      return 'converter';
-    }
-    return 'studio';
-  });
-
-  const setActiveAppMode = useCallback((mode: 'studio' | 'converter') => {
-    setActiveAppModeState(mode);
-    if (typeof window !== 'undefined') {
-      if (mode === 'converter') {
-        window.location.hash = '#/converter';
-      } else {
-        if (window.location.hash.includes('converter')) {
-          window.location.hash = '#/';
-        }
-      }
-    }
-  }, []);
-
   useEffect(() => {
     const handleHash = () => {
-      if (window.location.hash.includes('converter')) {
-        setActiveAppModeState('converter');
-      } else {
-        setActiveAppModeState('studio');
-        const match = window.location.hash.match(/tool=([a-z0-9-]+)/i);
-        if (match && match[1]) {
-          setActiveUtilityId(match[1]);
-        }
+      const match = window.location.hash.match(/tool=([a-z0-9-]+)/i);
+      if (match && match[1]) {
+        setActiveUtilityId(match[1]);
       }
     };
     window.addEventListener('hashchange', handleHash);
@@ -295,7 +265,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [currentParams, setCurrentParams] = useState<any>({});
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [isMobileToolsOpen, setIsMobileToolsOpen] = useState<boolean>(false);
-  const [pendingConverterFiles, setPendingConverterFiles] = useState<File[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [worker, setWorker] = useState<Worker | null>(null);
 
@@ -1322,10 +1291,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         batchProgress,
         isMobileToolsOpen,
         setIsMobileToolsOpen,
-        pendingConverterFiles,
-        setPendingConverterFiles,
-        activeAppMode,
-        setActiveAppMode,
         addImages,
         addBase64Image,
         removeImage,

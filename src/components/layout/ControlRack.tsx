@@ -86,6 +86,7 @@ import { RecipeControls } from '../utilities/RecipeControls';
 import { RotateFlipControls } from '../utilities/RotateFlipControls';
 import { MemeControls } from '../utilities/MemeControls';
 import { ImageSplitterControls } from '../utilities/ImageSplitterControls';
+import { DocumentConversionPanel } from '../converter/DocumentConversionPanel';
 
 interface ControlRackProps {
   isMobileDrawer?: boolean;
@@ -107,6 +108,15 @@ export const ControlRack: React.FC<ControlRackProps> = ({
     : "hidden md:flex w-80 lg:w-88 h-full bg-white border-l border-neutral-200 flex-col justify-between overflow-y-auto shrink-0 relative z-20 shadow-xs";
 
   if (!activeImage) {
+    if (activeUtilityId === 'document-converter') {
+      return (
+        <aside className={containerClasses}>
+          <div className="p-4 sm:p-5 overflow-y-auto max-h-[85vh]">
+            <DocumentConversionPanel />
+          </div>
+        </aside>
+      );
+    }
     if (activeUtilityId === 'base64-to-image') {
       return (
         <aside className={containerClasses}>
@@ -143,6 +153,8 @@ export const ControlRack: React.FC<ControlRackProps> = ({
     switch (activeUtilityId) {
       case 'workflow-recipes':
         return <RecipeControls />;
+      case 'document-converter':
+        return <DocumentConversionPanel />;
       case 'batch-resize':
         return <ResizeControls />;
       case 'compression':

@@ -13,19 +13,11 @@ import {
   X
 } from 'lucide-react';
 import { Base64Controls } from '../utilities/Base64Controls';
+import { DocumentConversionPanel } from '../converter/DocumentConversionPanel';
 import { Footer } from './Footer';
 
 export const LandingWorkspace: React.FC = () => {
-  const { 
-    addImages, 
-    activeUtilityId, 
-    setActiveUtilityId, 
-    savedSessionCount, 
-    restoreSavedSession, 
-    clearSavedSession, 
-    setIsMobileToolsOpen,
-    setPendingConverterFiles 
-  } = useSession();
+  const { addImages, activeUtilityId, setActiveUtilityId, savedSessionCount, restoreSavedSession, clearSavedSession, setIsMobileToolsOpen } = useSession();
   const { isUtilityUnlocked } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
   const [showBase64Modal, setShowBase64Modal] = useState(false);
@@ -49,33 +41,13 @@ export const LandingWorkspace: React.FC = () => {
     setIsDragOver(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const files = Array.from(e.dataTransfer.files);
-      const isDoc = files.some(f => {
-        const n = f.name.toLowerCase();
-        return n.endsWith('.docx') || n.endsWith('.doc') || n.endsWith('.pdf') || f.type === 'application/pdf';
-      });
-      if (isDoc) {
-        setPendingConverterFiles(files);
-        setActiveUtilityId('webp-to-raster');
-      } else {
-        await addImages(files);
-      }
+      await addImages(Array.from(e.dataTransfer.files));
     }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const files = Array.from(e.target.files);
-      const isDoc = files.some(f => {
-        const n = f.name.toLowerCase();
-        return n.endsWith('.docx') || n.endsWith('.doc') || n.endsWith('.pdf') || f.type === 'application/pdf';
-      });
-      if (isDoc) {
-        setPendingConverterFiles(files);
-        setActiveUtilityId('webp-to-raster');
-      } else {
-        await addImages(files);
-      }
+      await addImages(Array.from(e.target.files));
       e.target.value = '';
     }
   };
@@ -225,7 +197,7 @@ export const LandingWorkspace: React.FC = () => {
         ref={fileInputRef}
         type="file"
         multiple
-        accept="image/*,.heic,.heif,.cr2,.cr3,.nef,.arw,.dng,.svg,.docx,.doc,.pdf"
+        accept="image/*,.heic,.heif,.cr2,.cr3,.nef,.arw,.dng,.svg"
         onChange={handleFileChange}
         className="hidden"
       />
@@ -347,18 +319,23 @@ export const LandingWorkspace: React.FC = () => {
           </div>
         )}
 
-        {/* Hero Interactive Drag & Drop Box */}
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-          className={`relative w-full rounded-2xl sm:rounded-3xl border-2 border-dashed p-4 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white/85 backdrop-blur-xl shadow-lg ${
-            isDragOver
-              ? 'border-blue-600 bg-blue-50/50 scale-[1.01] shadow-2xl shadow-blue-500/15'
-              : 'border-blue-200/80 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10'
-          }`}
-        >
+        {/* Hero Interactive Drag & Drop Box or Document Converter Studio */}
+        {activeUtilityId === 'document-converter' ? (
+          <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xl border border-neutral-200/90 rounded-3xl p-5 sm:p-7 shadow-xl">
+            <DocumentConversionPanel />
+          </div>
+        ) : (
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`relative w-full rounded-2xl sm:rounded-3xl border-2 border-dashed p-4 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white/85 backdrop-blur-xl shadow-lg ${
+              isDragOver
+                ? 'border-blue-600 bg-blue-50/50 scale-[1.01] shadow-2xl shadow-blue-500/15'
+                : 'border-blue-200/80 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10'
+            }`}
+          >
           {/* Subtle Ambient Radial Highlight */}
           <div className="absolute inset-0 bg-radial from-blue-50/40 via-transparent to-transparent opacity-70 pointer-events-none rounded-2xl sm:rounded-3xl"></div>
 
@@ -394,7 +371,7 @@ export const LandingWorkspace: React.FC = () => {
 
           {/* Supported Format Badges */}
           <div className="flex flex-wrap items-center justify-center gap-1 max-w-lg mb-4 sm:mb-8">
-            {['AVIF', 'WEBP', 'JPG', 'PNG', 'PDF', 'DOCX', 'SVG', 'HEIC', 'CR2/CR3', 'NEF', 'ARW', 'DNG'].map((fmt) => (
+            {['AVIF', 'WEBP', 'JPG', 'PNG', 'SVG', 'HEIC', 'CR2/CR3', 'NEF', 'ARW', 'DNG'].map((fmt) => (
               <span
                 key={fmt}
                 className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-medium border bg-neutral-100 text-neutral-600 border-neutral-200/60"
@@ -439,7 +416,8 @@ export const LandingWorkspace: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      )}
+    </div>
 
       {/* Clean Collaborative Footer */}
       <Footer />

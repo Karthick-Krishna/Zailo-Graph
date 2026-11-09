@@ -2,12 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { UTILITIES } from '../types/utility';
 
 describe('UTILITIES catalog', () => {
-  it('registers all 25 utilities with unique IDs', () => {
-    expect(UTILITIES.length).toBe(25);
+  it('registers all 26 utilities with unique IDs', () => {
+    expect(UTILITIES.length).toBe(26);
 
     const ids = UTILITIES.map(u => u.id);
     const uniqueIds = new Set(ids);
-    expect(uniqueIds.size).toBe(25);
+    expect(uniqueIds.size).toBe(26);
+    expect(ids).toContain('document-converter');
   });
 
   it('verifies all utilities have valid attributes', () => {
@@ -27,7 +28,7 @@ describe('UTILITIES catalog', () => {
     const freeUtilities = UTILITIES.filter(u => !u.isCompetitorPaid);
 
     expect(proUtilities.length).toBe(10);
-    expect(freeUtilities.length).toBe(15);
+    expect(freeUtilities.length).toBe(16);
 
     // Verify key Pro features
     const proIds = proUtilities.map(u => u.id);

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSession } from '../../context/SessionContext';
 import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
-import { Shield, Trash2, LogOut, ChevronDown, Keyboard, Undo2, Redo2, Layers, Settings, Repeat, Sparkles } from 'lucide-react';
+import { Shield, Trash2, LogOut, ChevronDown, Keyboard, Undo2, Redo2, Layers, Settings } from 'lucide-react';
 
 interface HeaderProps {
   onOpenShortcuts?: () => void;
@@ -10,18 +10,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
   const { user, logout, openAuthModal, openSettings } = useAuth();
-  const { 
-    images, 
-    clearWorkspace, 
-    undo, 
-    redo, 
-    canUndo, 
-    canRedo, 
-    activeHistory, 
-    activeHistoryIndex, 
-    isMobileToolsOpen, 
-    setIsMobileToolsOpen 
-  } = useSession();
+  const { images, clearWorkspace, undo, redo, canUndo, canRedo, activeHistory, activeHistoryIndex, isMobileToolsOpen, setIsMobileToolsOpen } = useSession();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -60,12 +49,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
           <button
             onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
             className="md:hidden flex items-center gap-1 px-1.5 min-[360px]:px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-900 border border-blue-200 text-xs font-bold transition cursor-pointer shadow-2xs min-h-[32px] shrink-0"
-            title="Browse all 25 Studio Tools"
-            aria-label="Open 25 Studio Tools Navigation"
+            title="Browse all Studio Tools"
+            aria-label="Open Studio Tools Navigation"
           >
             <Layers className="w-3.5 h-3.5 text-blue-600 shrink-0" />
             <span className="hidden min-[380px]:inline text-[11px]">Tools </span>
-            <span className="font-mono text-[10px] min-[360px]:text-[11px]">(25)</span>
+            <span className="font-mono text-[10px] min-[360px]:text-[11px]">(26)</span>
           </button>
         </div>
 

@@ -71,6 +71,25 @@ const UTILITIES_SEO = [
     ]
   },
   {
+    id: 'document-converter',
+    name: 'Document & File Converter',
+    title: 'Free Online Document Converter - Word, PDF, Excel, PowerPoint, Text & Archives | Zailo Graph',
+    description: 'Convert Word DOCX, PDF, Excel XLSX, PowerPoint PPTX, RTF, ODT, CSV, Images and Archives directly in your browser. 36 professional conversion tools with 100% privacy and zero cloud uploads.',
+    keywords: 'word to pdf, pdf to word docx, excel to pdf, pptx to pdf, pptx to images, csv to xlsx, odt to docx, rtf to pdf, image to pdf, pdf to jpg, extract zip online, private document converter',
+    category: 'convert',
+    h1: 'Privacy-First Document & File Converter',
+    howTo: [
+      'Select your conversion type from Documents, Presentations, Spreadsheets, Images to PDF, PDF to Images, or Archives.',
+      'Drop your Word, PDF, Excel, PowerPoint, image, or archive file into the converter.',
+      'Click Convert to execute genuine client-side formatting and layout transformation.',
+      'Download your converted file instantly or get all pages/slides in a clean ZIP package.'
+    ],
+    faqs: [
+      { q: 'Is my document uploaded to a third-party server?', a: 'No. All 36 document conversions run 100% inside your browser using WebAssembly and client-side document engines. Your files never touch a cloud server.' },
+      { q: 'Does PDF to Word produce editable text?', a: 'Yes. Our conversion engine extracts editable text, reconstructs tables, and outputs genuine OpenXML DOCX documents rather than image scans.' }
+    ]
+  },
+  {
     id: 'heic-converter',
     name: 'HEIC to JPG/PNG Converter',
     title: 'Free Online Apple HEIC to JPG Converter - iPhone Live Photos | Zailo Graph',
@@ -91,21 +110,21 @@ const UTILITIES_SEO = [
   },
   {
     id: 'webp-to-raster',
-    name: 'Universal File & Document Converter',
-    title: 'Free Online Universal File Converter - Word, PDF, Images & OCR | Zailo Graph',
-    description: 'Convert Word to PDF, PDF to Word, Images to PDF, PDF to Images, and Image to Word with OCR. 100% private, client-side, zero cloud uploads.',
-    keywords: 'universal file converter, word to pdf, pdf to word, image to pdf, pdf to image, image to word ocr, convert files online, private file converter',
+    name: 'WebP to PNG/JPG Converter',
+    title: 'Free Online WebP to PNG & JPG Converter - Lossless Decompression | Zailo Graph',
+    description: 'Convert Google WebP images into universally compatible PNG or JPG photos. Preserve full transparency, inspect color depth, and export high-resolution master copies.',
+    keywords: 'webp to png, convert webp to jpg, webp decoder, free webp converter online, save webp as png, private webp to jpeg',
     category: 'convert',
-    h1: 'Universal File & Document Converter',
+    h1: 'WebP to Lossless PNG & JPEG Converter',
     howTo: [
-      'Upload files (DOCX, PDF, JPG, PNG, WEBP).',
-      'Select your desired target format (PDF, Word DOCX, Image, or OCR).',
-      'Click Convert Now to process in real time in your browser.',
-      'Download your converted document or export all as a ZIP.'
+      'Upload one or more .webp image files.',
+      'Select output format: Lossless PNG (with alpha transparency) or standard JPEG.',
+      'Review output preview in real time.',
+      'Download your converted image.'
     ],
     faqs: [
-      { q: 'Are my files uploaded to any servers?', a: 'No, all conversions run 100% privately in your browser using local WebAssembly. Zero files leave your computer.' },
-      { q: 'Can I convert scanned images into editable Word documents?', a: 'Yes, our built-in OCR engine recognizes text and exports an editable .docx file.' }
+      { q: 'Will transparent backgrounds in WebP turn black or white in PNG?', a: 'Converting to PNG retains full transparent alpha channels without background fills.' },
+      { q: 'Can I batch convert WebP files?', a: 'Yes, add multiple WebP files to the queue and download as a ZIP archive.' }
     ]
   },
   {
@@ -745,7 +764,7 @@ Sitemap: https://zailograph.com/sitemap.xml
 }
 
 function run() {
-  console.log(`Generating 25 SEO HTML pages in ${TOOLS_DIR}...`);
+  console.log(`Generating ${UTILITIES_SEO.length} SEO HTML pages in ${TOOLS_DIR}...`);
   for (const tool of UTILITIES_SEO) {
     const html = generateHtmlPage(tool);
     const dest = path.join(TOOLS_DIR, `${tool.id}.html`);
@@ -754,7 +773,7 @@ function run() {
   }
   generateSitemap();
   generateRobots();
-  console.log('All 25 SEO tool pages generated successfully!');
+  console.log(`All ${UTILITIES_SEO.length} SEO tool pages generated successfully!`);
 }
 
 run();

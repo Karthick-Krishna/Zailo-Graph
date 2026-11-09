@@ -52,21 +52,6 @@ export default defineConfig({
             if (id.includes('jszip')) {
               return 'jszip';
             }
-            if (id.includes('pdfjs-dist')) {
-              return 'pdfjs';
-            }
-            if (id.includes('jspdf')) {
-              return 'jspdf';
-            }
-            if (id.includes('docx')) {
-              return 'docx';
-            }
-            if (id.includes('tesseract.js')) {
-              return 'tesseract';
-            }
-            if (id.includes('mammoth')) {
-              return 'mammoth';
-            }
             return 'vendor';
           }
         },

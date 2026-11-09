@@ -58,7 +58,27 @@ export const UTILITIES: UtilityDefinition[] = [
     outputFormats: ['image/jpeg', 'image/png', 'image/webp'],
     supportsBatch: true,
   },
-  // 3. HEIC to JPG/PNG
+  // 3. Document and File Converter System (Word, PDF, Excel, PowerPoint, Text, RTF, Images, Archives)
+  {
+    id: 'document-converter',
+    name: 'Document & File Converter',
+    description: 'Convert Word, PDF, Excel, PowerPoint, Text, RTF, Images, and Archives with 100% privacy.',
+    category: 'convert',
+    isCompetitorPaid: false,
+    icon: 'FileCode2',
+    badge: '36 Tools',
+    inputFormats: [
+      '.docx', '.doc', '.pdf', '.pptx', '.ppt', '.xlsx', '.xls', '.csv',
+      '.odt', '.rtf', '.txt', '.jpg', '.jpeg', '.png', '.webp', '.bmp',
+      '.tiff', '.tif', '.zip', '.tar', '.gz'
+    ],
+    outputFormats: [
+      '.pdf', '.docx', '.doc', '.txt', '.rtf', '.pptx', '.ppt', '.xlsx',
+      '.csv', '.ods', '.png', '.jpg', '.zip'
+    ],
+    supportsBatch: true,
+  },
+  // 4. HEIC to JPG/PNG
   {
     id: 'heic-converter',
     name: 'HEIC to JPG/PNG',
@@ -70,16 +90,16 @@ export const UTILITIES: UtilityDefinition[] = [
     outputFormats: ['image/jpeg', 'image/png'],
     supportsBatch: true,
   },
-  // 4. Universal File Converter
+  // 4. WebP to PNG/JPG
   {
     id: 'webp-to-raster',
-    name: 'Universal File Converter',
-    description: 'Convert between Word (DOC/DOCX), PDF, and Images (JPG, PNG, WebP) with OCR and multi-page batch export.',
+    name: 'WebP to PNG/JPG',
+    description: 'Decompress static and animated WebP images to lossless PNG or high-quality JPEG.',
     category: 'convert',
     isCompetitorPaid: false,
     icon: 'Repeat',
-    inputFormats: ['image/webp', 'image/jpeg', 'image/png', 'application/pdf', '.docx', '.doc', '.pdf'],
-    outputFormats: ['application/pdf', '.docx', 'image/png', 'image/jpeg', 'image/webp'],
+    inputFormats: ['image/webp'],
+    outputFormats: ['image/png', 'image/jpeg'],
     supportsBatch: true,
   },
   // 5. PNG/JPG to WebP

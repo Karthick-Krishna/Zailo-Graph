@@ -37,9 +37,9 @@ import {
   Layers,
   RotateCw,
   Type,
-  Grid,
-  ArrowRight
+  Grid
 } from 'lucide-react';
+import { DocumentConversionPanel } from '../converter/DocumentConversionPanel';
 
 const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   Sparkles,
@@ -73,7 +73,7 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
 };
 
 const CATEGORIES: Array<{ id: UtilityCategory | 'all'; label: string }> = [
-  { id: 'all', label: 'All (25)' },
+  { id: 'all', label: 'All (26)' },
   { id: 'recipes', label: 'Recipes' },
   { id: 'optimize', label: 'Optimize' },
   { id: 'convert', label: 'Convert' },
@@ -100,13 +100,6 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<UtilityCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const handleToolSelect = (id: string) => {
-    setActiveUtilityId(id);
-    if (isMobileDrawer && onCloseMobile) {
-      onCloseMobile();
-    }
-  };
 
   // Focus search input on keyboard shortcut '/' or '⌘K'
   useEffect(() => {
@@ -160,7 +153,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
       return (
         <div key={u.id} className="relative group mb-1.5">
           <button
-            onClick={() => handleToolSelect(u.id)}
+            onClick={() => setActiveUtilityId(u.id)}
             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
               isSelected
                 ? 'bg-neutral-900 text-cyan-300 shadow-sm ring-1 ring-neutral-800'
@@ -242,7 +235,12 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
     return (
       <button
         key={u.id}
-        onClick={() => handleToolSelect(u.id)}
+        onClick={() => {
+          setActiveUtilityId(u.id);
+          if (isMobileDrawer && onCloseMobile) {
+            onCloseMobile();
+          }
+        }}
         className={`w-full px-2.5 py-2 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between group mb-1 min-h-[40px] ${
           isSelected
             ? 'bg-neutral-900 text-white font-medium shadow-sm'
@@ -387,7 +385,17 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
 
       {/* Tool List Container */}
       <div className={`flex-1 overflow-y-auto px-2.5 py-3 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
-        {filteredUtilities.length === 0 ? (
+        {!isCollapsed && (selectedCategory === 'convert' || activeUtilityId === 'document-converter') && !searchQuery ? (
+          <div className="space-y-4">
+            <DocumentConversionPanel />
+            <div className="pt-3 border-t border-neutral-200">
+              <div className="px-2 mb-1.5 text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">
+                Image &amp; Vector Tools
+              </div>
+              {filteredUtilities.filter(u => u.id !== 'document-converter').map(u => renderToolButton(u))}
+            </div>
+          </div>
+        ) : filteredUtilities.length === 0 ? (
           <div className="p-4 text-center">
             <p className="text-xs text-neutral-400">No tools match "{searchQuery}"</p>
             <button
