@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { SessionProvider, useSession } from './context/SessionContext';
 import { Header } from './components/layout/Header';
 import { Workspace } from './components/layout/Workspace';
@@ -11,6 +11,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 const AppContent: React.FC = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const { closeAuthModal, closeSettings } = useAuth();
   const { 
     images, 
     activeImage, 
@@ -40,8 +41,10 @@ const AppContent: React.FC = () => {
         return;
       }
 
-      // 'Escape' closes Shortcuts HUD
+      // 'Escape' closes any open modal (Auth, Settings, Shortcuts)
       if (e.key === 'Escape') {
+        closeAuthModal();
+        closeSettings();
         setIsShortcutsOpen(false);
         return;
       }

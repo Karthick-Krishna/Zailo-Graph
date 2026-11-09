@@ -45,6 +45,20 @@ export const SettingsModal: React.FC = () => {
     }
   }, [user, isSettingsOpen]);
 
+  // Escape key handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isSettingsOpen) {
+        e.preventDefault();
+        closeSettings();
+      }
+    };
+    if (isSettingsOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isSettingsOpen, closeSettings]);
+
   if (!isSettingsOpen || !user) return null;
 
   const currentDisplayName = (user.name || user.email.split('@')[0] || 'Creator').trim();
@@ -97,32 +111,41 @@ export const SettingsModal: React.FC = () => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto"
-      onClick={closeSettings}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          closeSettings();
+        }
+      }}
     >
       <div 
         className="relative w-full max-w-lg bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-neutral-200 overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/70">
-          <div className="flex items-center gap-3">
+        <div className="p-4 sm:p-5 pb-3 sm:pb-4 border-b border-neutral-100 flex items-center justify-between gap-3 bg-neutral-50/70">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <ZailoGraphLogo size="sm" showText={false} />
-            <div>
-              <h3 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight flex items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight truncate flex items-center gap-2">
                 Account &amp; Workspace Settings
               </h3>
-              <p className="text-[11px] sm:text-xs text-neutral-500 font-medium mt-0.5">
+              <p className="text-[11px] sm:text-xs text-neutral-500 font-medium mt-0.5 truncate">
                 Manage your profile, credentials, and local studio storage
               </p>
             </div>
           </div>
           <button 
-            onClick={closeSettings}
-            className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60 rounded-xl transition cursor-pointer"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              closeSettings();
+            }}
+            className="shrink-0 p-2 text-neutral-400 hover:text-neutral-800 active:text-neutral-950 hover:bg-neutral-200/70 active:bg-neutral-300 rounded-xl transition cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center relative z-20 touch-manipulation"
             aria-label="Close settings"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 pointer-events-none" />
           </button>
         </div>
 
@@ -288,3 +311,4 @@ export const SettingsModal: React.FC = () => {
     </div>
   );
 };
+

@@ -18,6 +18,20 @@ export const AuthModal: React.FC = () => {
   const [manualName, setManualName] = useState('');
   const [manualEmail, setManualEmail] = useState('');
 
+  // Close modal when user presses Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && authModal.isOpen) {
+        e.preventDefault();
+        closeAuthModal();
+      }
+    };
+    if (authModal.isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [authModal.isOpen, closeAuthModal]);
+
   if (!authModal.isOpen) return null;
 
   const handleGoogleSignIn = async () => {
@@ -50,32 +64,41 @@ export const AuthModal: React.FC = () => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={closeAuthModal}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          closeAuthModal();
+        }
+      }}
     >
       <div 
         className="relative w-full max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-neutral-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header */}
-        <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-neutral-100 flex items-start justify-between bg-neutral-50/70">
-          <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="p-4 sm:p-5 pb-3 sm:pb-4 border-b border-neutral-100 flex items-center justify-between gap-3 bg-neutral-50/70">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
             <ZailoGraphLogo size="sm" showText={false} />
-            <div>
-              <h3 className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight truncate">
                 {getReasonTitle()}
               </h3>
-              <p className="text-[11px] sm:text-xs text-neutral-500 font-medium mt-0.5">
+              <p className="text-[11px] sm:text-xs text-neutral-500 font-medium mt-0.5 truncate">
                 Privacy-first image workspace • Zero passwords
               </p>
             </div>
           </div>
           <button 
-            onClick={closeAuthModal}
-            className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60 rounded-xl transition cursor-pointer"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              closeAuthModal();
+            }}
+            className="shrink-0 p-2 text-neutral-400 hover:text-neutral-800 active:text-neutral-950 hover:bg-neutral-200/70 active:bg-neutral-300 rounded-xl transition cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center relative z-20 touch-manipulation"
             aria-label="Close dialog"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 pointer-events-none" />
           </button>
         </div>
 

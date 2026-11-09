@@ -94,3 +94,4 @@ describe('Auth & Pro Gating Logic', () => {
     expect(validateDeletion('  karthick krishna  ', user.name)).toBe(true);
   });
 });
+
