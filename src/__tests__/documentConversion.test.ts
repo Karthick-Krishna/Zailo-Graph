@@ -15,7 +15,10 @@ import {
 import {
   convertCsvToXlsx,
   convertXlsxToCsv,
+  convertXlsxToPdf,
 } from '../services/conversion/spreadsheetConverter';
+import * as XLSX from 'xlsx';
+import JSZip from 'jszip';
 
 describe('Document Conversion System - Registry & Validation', () => {
   it('defines all 5 mandatory conversion categories', () => {
@@ -118,5 +121,38 @@ describe('Spreadsheet Conversions Engine', () => {
     const csvResult = await convertXlsxToCsv(xlsxFile);
     const roundtripText = await csvResult.primaryBlob.text();
     expect(roundtripText.trim()).toBe(originalCsv.trim());
+  });
+
+  it('converts Excel XLSX with embedded images to PDF with graphics preserved', async () => {
+    // Create valid base XLSX structure using SheetJS
+    const baseWb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([
+      ['Revenue', '$10,000'],
+      ['Expenses', '$6,000']
+    ]);
+    XLSX.utils.book_append_sheet(baseWb, ws, 'Sales Summary');
+    const baseBuffer = XLSX.write(baseWb, { type: 'array', bookType: 'xlsx' });
+
+    // Inject drawings, relationships and media image into the XLSX archive
+    const zip = await JSZip.loadAsync(baseBuffer);
+    zip.file('xl/worksheets/_rels/sheet1.xml.rels', '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>');
+    zip.file('xl/drawings/drawing1.xml', '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><xdr:twoCellAnchor><xdr:from><xdr:col>0</xdr:col><xdr:row>2</xdr:row></xdr:from><xdr:to><xdr:col>2</xdr:col><xdr:row>4</xdr:row></xdr:to><xdr:pic><xdr:blipFill><a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rId1"/></xdr:blipFill></xdr:pic></xdr:twoCellAnchor></xdr:wsDr>');
+    zip.file('xl/drawings/_rels/drawing1.xml.rels', '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image1.png"/></Relationships>');
+    
+    // 1x1 PNG image
+    const pngBytes = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 10, 73, 68, 65, 84, 120, 156, 99, 0, 1, 0, 0, 5, 0, 1, 13, 10, 45, 180, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130]);
+    zip.file('xl/media/image1.png', pngBytes);
+
+    const xlsxBuffer = await zip.generateAsync({ type: 'arraybuffer' });
+    const xlsxFile = new File([xlsxBuffer], 'report_with_logo.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    const result = await convertXlsxToPdf(xlsxFile);
+    expect(result.primaryBlob).toBeDefined();
+    expect(result.primaryBlob.size).toBeGreaterThan(1500);
+    expect(result.primaryMimeType).toBe('application/pdf');
+    expect(result.primaryFilename).toBe('report_with_logo_sheets.pdf');
+    expect(result.summary).toContain('embedded image');
   });
 });
