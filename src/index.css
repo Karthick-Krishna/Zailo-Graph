@@ -6,11 +6,19 @@
     --font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
   }
 
+  html, body, #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+    touch-action: pan-y pinch-zoom;
+    -webkit-overflow-scrolling: touch;
+  }
+
   body {
     font-family: var(--font-sans);
     background-color: #FAFAFA;
     color: #09090B;
-    overflow-x: hidden;
     letter-spacing: -0.012em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -87,11 +95,9 @@
 @keyframes aura-pulse-glow {
   0%, 100% {
     opacity: 0.35;
-    filter: blur(90px);
   }
   50% {
     opacity: 0.55;
-    filter: blur(120px);
   }
 }
 
@@ -112,5 +118,16 @@
 
 .animate-aura-glow {
   animation: aura-pulse-glow 8s ease-in-out infinite;
-  will-change: opacity, filter;
+  will-change: opacity;
+}
+
+/* On mobile / low-power devices, stop expensive continuous float transforms to prevent lag */
+@media (max-width: 768px), (pointer: coarse) {
+  .animate-aura-1,
+  .animate-aura-2,
+  .animate-aura-3,
+  .animate-aura-glow {
+    animation: none !important;
+    will-change: auto !important;
+  }
 }

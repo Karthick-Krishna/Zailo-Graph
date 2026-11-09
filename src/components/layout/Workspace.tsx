@@ -21,7 +21,7 @@ export const Workspace: React.FC = () => {
   const isUnlocked = isUtilityUnlocked(activeUtilityId);
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-56px)] overflow-hidden bg-transparent">
+    <div className="flex-1 w-full max-w-full flex flex-col h-[calc(100vh-56px)] overflow-x-hidden overflow-y-hidden bg-transparent">
       {/* Toast Notification Banner */}
       {toastMessage && (
         <div className="bg-neutral-900 text-white text-xs py-2 px-6 flex items-center justify-between z-30 animate-in slide-in-from-top duration-150 border-b border-neutral-800 shrink-0">
@@ -36,7 +36,7 @@ export const Workspace: React.FC = () => {
       )}
 
       {/* Main Studio Area: Left Vertical Navigation Sidebar + Center Canvas Viewport + Right Control Rack */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 w-full max-w-full flex overflow-x-hidden overflow-y-hidden">
         {/* Left Vertical Tool Navigation Sidebar (Desktop Rail / Expanded) */}
         <ToolSidebar
           isCollapsed={isSidebarCollapsed}
@@ -44,7 +44,7 @@ export const Workspace: React.FC = () => {
         />
 
         {/* Center Canvas Viewport */}
-        <main className={`flex-1 flex flex-col items-center justify-center overflow-hidden bg-transparent relative p-1.5 sm:p-4 ${
+        <main className={`flex-1 w-full max-w-full flex flex-col items-center justify-center overflow-x-hidden bg-transparent relative p-1.5 sm:p-4 ${
           images.length > 0 ? 'pb-20 sm:pb-4' : ''
         }`}>
           {images.length === 0 ? (

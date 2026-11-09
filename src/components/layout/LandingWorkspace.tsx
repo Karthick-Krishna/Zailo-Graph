@@ -190,7 +190,7 @@ export const LandingWorkspace: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-10 flex flex-col items-center">
+    <div className="w-full max-w-full flex-1 overflow-x-hidden overflow-y-auto px-3 sm:px-6 py-4 sm:py-10 flex flex-col items-center">
       {/* Hidden File Inputs */}
       <input
         ref={fileInputRef}
@@ -211,11 +211,6 @@ export const LandingWorkspace: React.FC = () => {
 
       {/* Main Container */}
       <div className="w-full max-w-5xl flex flex-col items-center space-y-8 sm:space-y-10 relative">
-        {/* Active Ambient Fluid Aurora Blooms */}
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-violet-600/35 via-indigo-500/30 to-cyan-400/35 blur-[100px] pointer-events-none rounded-full animate-aura-1"></div>
-        <div className="absolute top-1/3 -right-28 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/25 via-blue-500/20 to-violet-600/25 blur-[110px] pointer-events-none rounded-full animate-aura-2"></div>
-        <div className="absolute top-2/3 -left-28 w-[480px] h-[480px] bg-gradient-to-tr from-violet-600/30 to-fuchsia-600/20 blur-[100px] pointer-events-none rounded-full animate-aura-3"></div>
-
         {/* Hero Banner Header */}
         <div className="text-center space-y-4 sm:space-y-5 max-w-3xl relative z-10 flex flex-col items-center px-1">
           {/* Logo Brand Emblem with Subtle Glow */}

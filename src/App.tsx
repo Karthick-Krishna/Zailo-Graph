@@ -102,7 +102,7 @@ const AppContent: React.FC = () => {
   }, [images, activeImage, executeActiveUtility, downloadImage, clearWorkspace, setActiveUtilityId, undo, redo, canUndo, canRedo]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F9FB] text-[#09090B] relative overflow-hidden">
+    <div className="min-h-screen w-full max-w-full flex flex-col bg-[#F8F9FB] text-[#09090B] relative overflow-x-hidden">
       {/* Active Fluid Animated Aurora Gradient Background (Visible on all pages) */}
       <ActiveAuroraBackground />
 
