@@ -47,7 +47,7 @@ export const Workspace: React.FC = () => {
         <main className={`flex-1 w-full max-w-full flex flex-col items-center justify-center overflow-x-hidden bg-transparent relative p-1.5 sm:p-4 ${
           images.length > 0 ? 'pb-20 sm:pb-4' : ''
         }`}>
-          {images.length === 0 ? (
+          {images.length === 0 || !activeImage ? (
             <LandingWorkspace />
           ) : !isUnlocked ? (
             <div className="flex-1 flex items-center justify-center p-4 sm:p-6 w-full">
@@ -56,15 +56,15 @@ export const Workspace: React.FC = () => {
           ) : (
             <div className="flex-1 w-full h-full flex items-center justify-center min-h-0">
               <ComparisonSlider
-                originalUrl={activeImage!.url}
-                processedUrl={activeImage!.processedUrl}
-                originalSize={activeImage!.size}
-                processedSize={activeImage!.processedSize}
-                originalWidth={activeImage!.width}
-                originalHeight={activeImage!.height}
-                processedWidth={activeImage!.processedWidth}
-                processedHeight={activeImage!.processedHeight}
-                imageName={activeImage!.name}
+                originalUrl={activeImage.url}
+                processedUrl={activeImage.processedUrl}
+                originalSize={activeImage.size}
+                processedSize={activeImage.processedSize}
+                originalWidth={activeImage.width}
+                originalHeight={activeImage.height}
+                processedWidth={activeImage.processedWidth}
+                processedHeight={activeImage.processedHeight}
+                imageName={activeImage.name}
                 activeUtilityId={activeUtilityId}
               />
             </div>
@@ -72,11 +72,11 @@ export const Workspace: React.FC = () => {
         </main>
 
         {/* Right Utility Configuration Rack (Desktop) */}
-        {images.length > 0 && isUnlocked && <ControlRack />}
+        {images.length > 0 && activeImage && isUnlocked && <ControlRack />}
       </div>
 
       {/* Mobile Floating Command Dock (Optimized for all screen sizes down to 320px) */}
-      {images.length > 0 && isUnlocked && (
+      {images.length > 0 && activeImage && isUnlocked && (
         <div className="md:hidden fixed bottom-2 sm:bottom-3 left-2 right-2 sm:left-3 sm:right-3 z-40 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-2xl rounded-2xl p-1.5 flex items-center justify-between gap-1 sm:gap-1.5 pointer-events-auto">
           {/* Active Tool Picker Button */}
           <button

@@ -30,6 +30,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleReload = () => {
+    try {
+      if (window.location.hash || window.location.search) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } catch {}
     window.location.reload();
   };
 

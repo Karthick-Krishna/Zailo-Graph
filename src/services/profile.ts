@@ -194,3 +194,4 @@ export const getActiveSession = (): User | null => {
     return null;
   }
 };
+

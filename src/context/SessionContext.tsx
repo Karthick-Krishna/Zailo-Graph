@@ -424,7 +424,18 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, []);
 
-  const activeImage = images.find(img => img.id === activeImageId) || null;
+  const activeImage = images.find(img => img.id === activeImageId) || images[0] || null;
+
+  // Synchronize activeImageId safely with images list
+  useEffect(() => {
+    if (images.length > 0) {
+      if (!activeImageId || !images.some(img => img.id === activeImageId)) {
+        setActiveImageId(images[0].id);
+      }
+    } else if (activeImageId !== null) {
+      setActiveImageId(null);
+    }
+  }, [images, activeImageId]);
 
   const dismissToast = () => setToastMessage(null);
 

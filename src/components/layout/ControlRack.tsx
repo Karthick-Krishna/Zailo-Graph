@@ -313,18 +313,18 @@ export const ControlRack: React.FC<ControlRackProps> = ({
         )}
 
         {/* Download Button (when result exists) */}
-        {activeImage.processedBlob && (
+        {activeImage?.processedBlob && (
           <button
             onClick={() => downloadImage(activeImage.id)}
             className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs transition shadow-sm hover:shadow-md hover:shadow-emerald-600/20 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Download Result ({formatBytes(activeImage.processedSize!)})</span>
+            <span>Download Result ({formatBytes(activeImage.processedSize || 0)})</span>
           </button>
         )}
 
         {/* Connected Workflow "Send to..." Menu */}
-        {activeImage.processedBlob && (
+        {activeImage?.processedBlob && (
           <div className="pt-2 border-t border-neutral-200">
             <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
               Continue Workflow in...
