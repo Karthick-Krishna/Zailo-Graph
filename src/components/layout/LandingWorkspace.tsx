@@ -219,8 +219,11 @@ export const LandingWorkspace: React.FC = () => {
             <div className="hidden sm:block">
               <ZailoGraphLogo size="xl" showText={true} showTagline={true} className="relative drop-shadow-xl" />
             </div>
-            <div className="sm:hidden">
+            <div className="hidden min-[380px]:block sm:hidden">
               <ZailoGraphLogo size="lg" showText={true} showTagline={true} className="relative drop-shadow-lg" />
+            </div>
+            <div className="min-[380px]:hidden">
+              <ZailoGraphLogo size="md" showText={true} showTagline={false} className="relative drop-shadow-md" />
             </div>
           </div>
 
@@ -258,7 +261,7 @@ export const LandingWorkspace: React.FC = () => {
             </div>
           )}
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.1] font-display">
+          <h1 className="text-2xl min-[360px]:text-3xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.1] font-display">
             Your images. Your workflow. <br className="hidden sm:inline" />
             <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 bg-clip-text text-transparent">
               Your control.
@@ -382,7 +385,7 @@ export const LandingWorkspace: React.FC = () => {
               <span>No image on hand? Try instant sample:</span>
             </div>
 
-            <div className="flex items-center justify-center sm:justify-start gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 no-scrollbar">
+            <div className="flex items-center justify-center sm:justify-start gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 no-scrollbar touch-pan-x">
               <button
                 onClick={() => loadDemoSample('photo')}
                 className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1 shrink-0 min-h-[38px]"

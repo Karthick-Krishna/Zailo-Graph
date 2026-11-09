@@ -415,7 +415,10 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
 
       {/* Bottom Pro / System Status Banner (When expanded) */}
       {!isCollapsed && (
-        <div className={`p-3 border-t border-neutral-200/80 bg-neutral-50/60 ${isMobileDrawer ? 'pb-8 sm:pb-3.5' : ''}`}>
+        <div 
+          className="p-3 border-t border-neutral-200/80 bg-neutral-50/60"
+          style={isMobileDrawer ? { paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))' } : undefined}
+        >
           <div className="flex items-center justify-between text-[11px] text-neutral-500">
             <span className="font-medium text-neutral-700">100% Private Processing</span>
             <span className="text-[10px] font-mono text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60">

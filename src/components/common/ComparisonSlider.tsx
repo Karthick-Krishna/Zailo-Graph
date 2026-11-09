@@ -112,9 +112,11 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef({ x: 0, y: 0 });
   
-  // Ref on the actual image frame for accurate pixel-to-pixel split wipe
+  // Measure frame for accurate pixel-to-pixel split wipe
   const imageFrameRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const frameRectRef = useRef<DOMRect | null>(null);
+  const rafIdRef = useRef<number | null>(null);
 
   // Loupe hotkeys: Z toggles loupe, X switches zoom level
   useEffect(() => {
@@ -168,15 +170,19 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
   }, [processedUrl]);
 
   const updateSliderFromEvent = (clientX: number) => {
-    const frame = imageFrameRef.current || containerRef.current;
-    if (!frame) return;
-    const rect = frame.getBoundingClientRect();
+    const rect = frameRectRef.current || (imageFrameRef.current || containerRef.current)?.getBoundingClientRect();
+    if (!rect || rect.width === 0) return;
     const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
     const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
     setSliderPosition(percent);
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    const frame = imageFrameRef.current || containerRef.current;
+    if (frame) {
+      frameRectRef.current = frame.getBoundingClientRect();
+    }
+
     if (e.button === 1 || e.altKey || (zoomLevel > 1 && e.shiftKey)) {
       setIsPanning(true);
       panStartRef.current = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
@@ -192,23 +198,34 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
   const handlePointerUp = () => {
     setIsDragging(false);
     setIsPanning(false);
+    frameRectRef.current = null;
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
   };
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    setLoupePos({ x: e.clientX, y: e.clientY });
+    // Fast path: if not dragging, not panning, and loupe is inactive, skip immediately
+    // Prevents forced synchronous layout reflows and 120Hz React re-renders on passive cursor movement
+    if (!isDragging && !isPanning && !isLoupeActive) {
+      return;
+    }
 
-    // Measure frame for loupe tracking
-    const frame = imageFrameRef.current;
-    if (frame) {
-      const rect = frame.getBoundingClientRect();
-      setImageScreenRect(rect);
-      const isInside = (
-        e.clientX >= rect.left &&
-        e.clientX <= rect.right &&
-        e.clientY >= rect.top &&
-        e.clientY <= rect.bottom
-      );
-      setIsHoveringImage(isInside);
+    if (isLoupeActive) {
+      setLoupePos({ x: e.clientX, y: e.clientY });
+      const frame = imageFrameRef.current;
+      if (frame) {
+        const rect = frame.getBoundingClientRect();
+        setImageScreenRect(rect);
+        const isInside = (
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom
+        );
+        setIsHoveringImage(isInside);
+      }
     }
 
     if (isPanning) {
@@ -220,9 +237,13 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
     }
 
     if (isDragging && viewMode === 'slider') {
-      updateSliderFromEvent(e.clientX);
+      const clientX = e.clientX;
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = requestAnimationFrame(() => {
+        updateSliderFromEvent(clientX);
+      });
     }
-  }, [isDragging, isPanning, viewMode]);
+  }, [isDragging, isPanning, isLoupeActive, viewMode]);
 
   const zoomIn = () => setZoomLevel(prev => Math.min(prev + 0.5, 4));
   const zoomOut = () => setZoomLevel(prev => Math.max(prev - 0.5, 0.5));
@@ -360,9 +381,9 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
         </div>
 
         {/* Island 3: Optics, Inspection & Viewport Controls */}
-        <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200/90 shadow-2xs text-xs shrink-0">
-          {/* Pixel Inspection Loupe (2× / 4× Magnifier) */}
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 px-2 min-[360px]:px-2.5 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200/90 shadow-2xs text-xs shrink-0">
+          {/* Pixel Inspection Loupe (2× / 4× Magnifier - Desktop pointer tool) */}
+          <div className="hidden sm:flex items-center gap-1">
             <button
               onClick={() => setIsLoupeActive(prev => !prev)}
               className={`px-2 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border ${
@@ -401,7 +422,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           {/* 1:1 Pixel Inspection Button */}
           <button
             onClick={togglePixelInspection}
-            className={`px-2 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer flex items-center gap-1.5 border ${
+            className={`hidden sm:flex px-2 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer items-center gap-1.5 border ${
               zoomLevel >= 2
                 ? 'bg-neutral-900 border-neutral-900 text-white shadow-xs'
                 : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200'
@@ -409,11 +430,11 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
             title="Inspect 1:1 actual pixel resolution (100% scale)"
           >
             <Sparkles className="w-3 h-3 text-cyan-500" />
-            <span className="hidden sm:inline">{zoomLevel >= 2 ? 'Exit 100%' : '1:1'}</span>
+            <span>{zoomLevel >= 2 ? 'Exit 100%' : '1:1'}</span>
           </button>
 
           {/* Zoom Controls */}
-          <div className="flex items-center gap-0.5 pl-1 border-l border-neutral-200">
+          <div className="flex items-center gap-0.5 sm:pl-1 sm:border-l sm:border-neutral-200">
             <button 
               onClick={zoomOut}
               className="p-1 text-neutral-400 hover:text-neutral-800 rounded-lg transition cursor-pointer"
@@ -434,13 +455,6 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
             <button 
               onClick={resetZoom}
               className="p-1 text-neutral-400 hover:text-neutral-800 rounded-lg transition cursor-pointer"
-              title="Reset Zoom"
-            >
-              <RotateCcw className="w-3 h-3" />
-            </button>
-            <button 
-              onClick={resetZoom}
-              className="p-1 text-neutral-400 hover:text-neutral-800 rounded-lg transition cursor-pointer"
               title="Fit to Screen"
             >
               <Maximize2 className="w-3 h-3" />
@@ -457,10 +471,10 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
               {canvasTheme === 'light' ? <Moon className="w-3 h-3" /> : <Sun className="w-3 h-3" />}
             </button>
 
-            {/* Concept 1: Ambient Adaptive Aura Toggle */}
+            {/* Concept 1: Ambient Adaptive Aura Toggle (Desktop Only) */}
             <button
               onClick={() => setShowAura(prev => !prev)}
-              className={`p-1.5 rounded-lg text-[11px] font-semibold transition cursor-pointer border ${
+              className={`hidden sm:block p-1.5 rounded-lg text-[11px] font-semibold transition cursor-pointer border ${
                 showAura
                   ? 'bg-neutral-900 border-neutral-900 text-cyan-300 shadow-2xs'
                   : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-400 border-neutral-200'
@@ -480,7 +494,7 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
         onPointerMove={handlePointerMove}
-        className={`relative w-full flex-1 max-w-7xl min-h-[460px] overflow-hidden rounded-2xl select-none flex items-center justify-center touch-none transition-colors duration-200 ${
+        className={`relative w-full flex-1 max-w-7xl min-h-[260px] sm:min-h-[440px] overflow-hidden rounded-2xl select-none flex items-center justify-center touch-none transition-colors duration-200 ${
           canvasTheme === 'light' 
             ? 'bg-[#F4F4F6]/80 backdrop-blur-md border border-neutral-300/80 shadow-xs' 
             : 'bg-neutral-950/85 backdrop-blur-md border border-neutral-800 shadow-xl'
@@ -495,21 +509,21 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
           backgroundPosition: '0 0, 12px 12px',
         }}
       >
-        {/* Concept 1: Ambient Adaptive Aura (Dynamic Reactive Backlight from image) */}
+        {/* Concept 1: Ambient Adaptive Aura (Dynamic Reactive Backlight from image - Desktop Hardware Accelerated) */}
         {showAura && (
           <div 
-            className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden"
+            className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none z-0 overflow-hidden"
             aria-hidden="true"
+            style={{ contain: 'strict' }}
           >
             <div 
-              className={`w-4/5 h-4/5 max-w-5xl max-h-[80vh] rounded-full blur-[72px] transform scale-110 transition-all duration-700 pointer-events-none ${
-                canvasTheme === 'light' ? 'opacity-50 saturate-200' : 'opacity-70 saturate-150'
+              className={`w-4/5 h-4/5 max-w-5xl max-h-[80vh] rounded-full blur-[40px] transform scale-110 pointer-events-none will-change-transform ${
+                canvasTheme === 'light' ? 'opacity-35 saturate-150' : 'opacity-50 saturate-150'
               }`}
               style={{
                 backgroundImage: `url(${processedUrl || originalUrl})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                filter: 'blur(54px) contrast(1.2)',
               }}
             />
           </div>

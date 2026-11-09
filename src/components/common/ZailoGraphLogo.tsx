@@ -7,6 +7,7 @@ export interface ZailoGraphLogoProps {
   className?: string;
   theme?: 'dark' | 'light' | 'auto';
   variant?: 'vector' | 'banner' | 'image';
+  hideTextOnMobile?: boolean;
 }
 
 export const ZailoGraphLogo: React.FC<ZailoGraphLogoProps> = ({
@@ -16,6 +17,7 @@ export const ZailoGraphLogo: React.FC<ZailoGraphLogoProps> = ({
   className = '',
   theme = 'auto',
   variant = 'vector',
+  hideTextOnMobile = false,
 }) => {
   const sizeMap = {
     xs: { iconH: 22, text: 'text-xs', tagline: 'text-[8px]', gap: 'gap-1.5' },
@@ -53,7 +55,7 @@ export const ZailoGraphLogo: React.FC<ZailoGraphLogoProps> = ({
 
       {/* Brand Wordmark matching exact geometric extended typography */}
       {showText && (
-        <div className="flex flex-col justify-center overflow-visible">
+        <div className={`flex flex-col justify-center overflow-visible ${hideTextOnMobile ? 'hidden min-[480px]:flex' : ''}`}>
           <div className={`font-brand font-black flex items-baseline tracking-widest uppercase leading-none overflow-visible ${text}`}>
             {/* 'ZAILO' in Obsidian / Dark Navy (Light Mode) or Crisp White (Dark Mode) */}
             <span className={`inline-block mr-1.5 ${theme === 'dark' ? 'text-white' : 'text-slate-950'}`}>

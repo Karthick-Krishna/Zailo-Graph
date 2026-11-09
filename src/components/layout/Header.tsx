@@ -39,22 +39,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
 
   return (
     <header className="sticky top-0 z-30 w-full max-w-full bg-white border-b border-neutral-200 select-none overflow-visible">
-      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-14 flex items-center justify-between gap-1.5 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-2 min-[360px]:px-3 sm:px-6 h-14 flex items-center justify-between gap-1 sm:gap-4">
         {/* Brand with Official Vector Logo & Mobile Tools (25) Launcher */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          <ZailoGraphLogo size="sm" showText={true} />
+        <div className="flex items-center gap-1 min-[360px]:gap-2 sm:gap-3 shrink-0">
+          <ZailoGraphLogo size="sm" showText={true} hideTextOnMobile={true} />
           <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-400 pl-2 border-l border-neutral-200">
             by Coralgenz &amp; Zorquelz
           </span>
           <button
             onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
-            className="md:hidden flex items-center gap-1 px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-900 border border-blue-200 text-xs font-bold transition cursor-pointer shadow-2xs ml-0.5 min-h-[34px]"
+            className="md:hidden flex items-center gap-1 px-1.5 min-[360px]:px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-900 border border-blue-200 text-xs font-bold transition cursor-pointer shadow-2xs min-h-[32px] shrink-0"
             title="Browse all 25 Studio Tools"
             aria-label="Open 25 Studio Tools Navigation"
           >
             <Layers className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-            <span className="hidden min-[360px]:inline">Tools </span>
-            <span className="font-mono text-[11px]">(25)</span>
+            <span className="hidden min-[380px]:inline text-[11px]">Tools </span>
+            <span className="font-mono text-[10px] min-[360px]:text-[11px]">(25)</span>
           </button>
         </div>
 
@@ -133,12 +133,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
           )}
 
           {!user ? (
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {/* Secondary Sign In Button */}
               <button
                 type="button"
                 onClick={() => openAuthModal('manual', undefined, undefined, 'sign_in')}
-                className="px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-neutral-300 hover:border-neutral-400 bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-semibold transition cursor-pointer min-h-[34px] sm:min-h-[36px] whitespace-nowrap shadow-2xs"
+                className="px-2 min-[360px]:px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-neutral-300 hover:border-neutral-400 bg-white hover:bg-neutral-50 active:bg-neutral-100 text-neutral-800 text-[11px] min-[360px]:text-xs font-semibold transition cursor-pointer min-h-[32px] sm:min-h-[36px] whitespace-nowrap shadow-2xs shrink-0"
               >
                 Sign In
               </button>
@@ -147,7 +147,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
               <button
                 type="button"
                 onClick={() => openAuthModal('manual', undefined, undefined, 'sign_up')}
-                className="px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-neutral-900 via-blue-950 to-neutral-900 hover:from-blue-900 hover:to-blue-950 text-white text-xs font-semibold transition-all shadow-xs hover:shadow-md hover:shadow-blue-500/15 cursor-pointer flex items-center gap-1.5 border border-neutral-800 min-h-[34px] sm:min-h-[36px] whitespace-nowrap"
+                className="px-2.5 min-[360px]:px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-neutral-900 via-blue-950 to-neutral-900 hover:from-blue-900 hover:to-blue-950 text-white text-[11px] min-[360px]:text-xs font-semibold transition-all shadow-xs hover:shadow-md hover:shadow-blue-500/15 cursor-pointer flex items-center gap-1 sm:gap-1.5 border border-neutral-800 min-h-[32px] sm:min-h-[36px] whitespace-nowrap shrink-0"
               >
                 <span>Sign Up</span>
               </button>

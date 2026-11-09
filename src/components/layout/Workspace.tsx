@@ -21,7 +21,7 @@ export const Workspace: React.FC = () => {
   const isUnlocked = isUtilityUnlocked(activeUtilityId);
 
   return (
-    <div className="flex-1 w-full max-w-full flex flex-col h-[calc(100vh-56px)] overflow-x-hidden overflow-y-hidden bg-transparent">
+    <div className="flex-1 w-full max-w-full flex flex-col h-[calc(100dvh-56px)] overflow-x-hidden overflow-y-hidden bg-transparent">
       {/* Toast Notification Banner */}
       {toastMessage && (
         <div className="bg-neutral-900 text-white text-xs py-2 px-6 flex items-center justify-between z-30 animate-in slide-in-from-top duration-150 border-b border-neutral-800 shrink-0">
@@ -75,16 +75,19 @@ export const Workspace: React.FC = () => {
         {images.length > 0 && activeImage && isUnlocked && <ControlRack />}
       </div>
 
-      {/* Mobile Floating Command Dock (Optimized for all screen sizes down to 320px) */}
+      {/* Mobile Floating Command Dock (Optimized for all screen sizes down to 320px with safe area) */}
       {images.length > 0 && activeImage && isUnlocked && (
-        <div className="md:hidden fixed bottom-2 sm:bottom-3 left-2 right-2 sm:left-3 sm:right-3 z-40 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-2xl rounded-2xl p-1.5 flex items-center justify-between gap-1 sm:gap-1.5 pointer-events-auto">
+        <div 
+          className="md:hidden fixed left-2 right-2 sm:left-3 sm:right-3 z-40 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-2xl rounded-2xl p-1.5 flex items-center justify-between gap-1 sm:gap-1.5 pointer-events-auto"
+          style={{ bottom: 'max(0.5rem, env(safe-area-inset-bottom, 0.5rem))' }}
+        >
           {/* Active Tool Picker Button */}
           <button
             onClick={() => setIsMobileToolsOpen(true)}
             className="flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 flex items-center justify-center gap-1 sm:gap-1.5 transition text-xs font-semibold cursor-pointer min-h-[42px] sm:min-h-[44px]"
             title="Switch Tool"
           >
-            <Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-violet-600 shrink-0" />
+            <Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600 shrink-0" />
             <span className="truncate max-w-[75px] sm:max-w-[110px] text-[11px] sm:text-xs">{activeUtility.name}</span>
           </button>
 
