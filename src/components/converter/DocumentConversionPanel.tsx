@@ -1,4 +1,5 @@
 import React, { useState, useRef, useMemo } from 'react';
+import { useSession } from '../../context/SessionContext';
 import { 
   CONVERSION_CATEGORIES, 
   CONVERSIONS, 
@@ -58,6 +59,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
   isCompact = false,
   onClose,
 }) => {
+  const { setActiveUtilityId } = useSession();
   const [selectedConversionId, setSelectedConversionId] = useState<string | null>(initialConversionId || null);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     documents: true,
@@ -215,17 +217,28 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
       {/* 1. Category & Conversion Selector Mode */}
       {!selectedConversion ? (
         <div className="space-y-3.5">
-          {/* Header */}
-          <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
+          {/* Header with Back Button */}
+          <div className="flex items-center justify-between pb-2.5 border-b border-neutral-100">
+            <button
+              onClick={() => {
+                if (onClose) onClose();
+                else setActiveUtilityId('compression');
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-700 hover:text-neutral-950 text-xs font-semibold transition cursor-pointer active:scale-95 shadow-2xs"
+              title="Return to Image Studio"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-neutral-600" />
+              <span>Back to Studio</span>
+            </button>
+
             <div className="flex items-center gap-2">
-              <FileCode className="w-4 h-4 text-blue-600 shrink-0" />
-              <span className="text-xs font-bold text-neutral-900 tracking-tight font-display">
+              <span className="text-xs font-bold text-neutral-900 tracking-tight font-display hidden sm:inline">
                 Document &amp; File Converter
               </span>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 uppercase">
+                36 in 1 Suite
+              </span>
             </div>
-            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60">
-              36 Operations
-            </span>
           </div>
 
           {/* Quick Search */}
@@ -358,14 +371,27 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
         <div className="space-y-3.5 animate-in fade-in duration-200">
           {/* Top Bar with Back Button */}
           <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
-            <button
-              onClick={handleBackToCategories}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-950 transition cursor-pointer p-1 -ml-1 rounded-lg hover:bg-neutral-100 min-h-[36px]"
-              title="Return to conversion categories"
-            >
-              <ArrowLeft className="w-4 h-4 text-neutral-500" />
-              <span>All Conversions</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleBackToCategories}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-950 transition cursor-pointer px-2 py-1 rounded-lg hover:bg-neutral-100 min-h-[32px]"
+                title="Return to conversion categories"
+              >
+                <ArrowLeft className="w-4 h-4 text-neutral-500" />
+                <span>All Conversions</span>
+              </button>
+              <span className="text-neutral-300">|</span>
+              <button
+                onClick={() => {
+                  if (onClose) onClose();
+                  else setActiveUtilityId('compression');
+                }}
+                className="text-xs font-medium text-neutral-500 hover:text-neutral-900 transition cursor-pointer"
+                title="Exit back to Image Studio"
+              >
+                Exit to Studio
+              </button>
+            </div>
 
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 uppercase">
               {selectedConversion.sourceFormat} &rarr; {selectedConversion.targetFormat}
@@ -575,17 +601,30 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
                 </div>
               )}
 
-              {/* Convert Another File Button */}
-              <button
-                onClick={() => {
-                  setSelectedFiles([]);
-                  setConversionResult(null);
-                  setProgressState({ status: 'idle', phase: '', percent: 0 });
-                }}
-                className="w-full py-2 rounded-xl bg-white hover:bg-neutral-100 border border-neutral-300 text-neutral-700 text-xs font-semibold transition cursor-pointer min-h-[36px]"
-              >
-                Convert Another Document
-              </button>
+              {/* Action Buttons: Convert Another & Back to Studio */}
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <button
+                  onClick={() => {
+                    setSelectedFiles([]);
+                    setConversionResult(null);
+                    setProgressState({ status: 'idle', phase: '', percent: 0 });
+                  }}
+                  className="flex-1 w-full py-2 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-semibold text-xs transition cursor-pointer min-h-[36px] flex items-center justify-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Convert Another File</span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (onClose) onClose();
+                    else setActiveUtilityId('compression');
+                  }}
+                  className="w-full sm:w-auto py-2 px-3.5 rounded-xl bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 text-xs font-medium transition cursor-pointer min-h-[36px] flex items-center justify-center gap-1.5"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Back to Studio</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -609,3 +648,4 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
     </div>
   );
 };
+

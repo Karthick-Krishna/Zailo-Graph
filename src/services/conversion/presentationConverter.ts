@@ -401,3 +401,4 @@ export async function convertPptxToImages(
     summary: `Rendered ${slides.length} slides to high-res ${format.toUpperCase()} images with ZIP download.`,
   };
 }
+

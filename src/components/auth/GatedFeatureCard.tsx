@@ -1,7 +1,8 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useSession } from '../../context/SessionContext';
 import { UtilityDefinition } from '../../types/utility';
-import { Sparkles, Shield, Lock, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Shield, Lock, CheckCircle2, ArrowLeft } from 'lucide-react';
 
 interface GatedFeatureCardProps {
   utility: UtilityDefinition;
@@ -9,9 +10,20 @@ interface GatedFeatureCardProps {
 
 export const GatedFeatureCard: React.FC<GatedFeatureCardProps> = ({ utility }) => {
   const { openAuthModal } = useAuth();
+  const { setActiveUtilityId } = useSession();
 
   return (
     <div className="w-full max-w-xl mx-auto my-6 sm:my-10 p-6 sm:p-8 bg-white rounded-3xl border border-neutral-200 shadow-xl shadow-neutral-100/80 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-200">
+      {/* Back Button */}
+      <div className="w-full flex items-center justify-start mb-4">
+        <button
+          onClick={() => setActiveUtilityId('compression')}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-950 text-xs font-semibold transition cursor-pointer active:scale-95"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 text-neutral-600" />
+          <span>Back to Free Tools</span>
+        </button>
+      </div>
       {/* Badge */}
       <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold mb-5 shadow-2xs">
         <Lock className="w-3.5 h-3.5 text-amber-600" />

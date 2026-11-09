@@ -8,6 +8,7 @@ import { GatedFeatureCard } from '../auth/GatedFeatureCard';
 import { ControlRack } from './ControlRack';
 import { BatchDrawer } from './BatchDrawer';
 import { ToolSidebar } from './ToolSidebar';
+import { DocumentConversionPanel } from '../converter/DocumentConversionPanel';
 import { Sliders, Sparkles, Download, Layers, X } from 'lucide-react';
 
 export const Workspace: React.FC = () => {
@@ -45,9 +46,15 @@ export const Workspace: React.FC = () => {
 
         {/* Center Canvas Viewport */}
         <main className={`flex-1 w-full max-w-full flex flex-col items-center justify-center overflow-x-hidden bg-transparent relative p-1.5 sm:p-4 ${
-          images.length > 0 ? 'pb-20 sm:pb-4' : ''
+          images.length > 0 && activeUtilityId !== 'document-converter' ? 'pb-20 sm:pb-4' : ''
         }`}>
-          {images.length === 0 || !activeImage ? (
+          {activeUtilityId === 'document-converter' ? (
+            <div className="w-full h-full flex-1 overflow-y-auto py-2 sm:py-6 px-2 sm:px-6 flex flex-col items-center justify-start animate-in fade-in duration-150">
+              <div className="w-full max-w-3xl">
+                <DocumentConversionPanel />
+              </div>
+            </div>
+          ) : images.length === 0 || !activeImage ? (
             <LandingWorkspace />
           ) : !isUnlocked ? (
             <div className="flex-1 flex items-center justify-center p-4 sm:p-6 w-full">
@@ -72,7 +79,7 @@ export const Workspace: React.FC = () => {
         </main>
 
         {/* Right Utility Configuration Rack (Desktop) */}
-        {images.length > 0 && activeImage && isUnlocked && <ControlRack />}
+        {images.length > 0 && activeImage && isUnlocked && activeUtilityId !== 'document-converter' && <ControlRack />}
       </div>
 
       {/* Mobile Floating Command Dock (Optimized for all screen sizes down to 320px with safe area) */}

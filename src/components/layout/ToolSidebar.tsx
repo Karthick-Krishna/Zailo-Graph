@@ -39,7 +39,6 @@ import {
   Type,
   Grid
 } from 'lucide-react';
-import { DocumentConversionPanel } from '../converter/DocumentConversionPanel';
 
 const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   Sparkles,
@@ -147,6 +146,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
   const renderToolButton = (u: UtilityDefinition) => {
     const isSelected = u.id === activeUtilityId;
     const isLocked = !isUtilityUnlocked(u.id);
+    const isDocConverter = u.id === 'document-converter';
     const IconComponent = ICON_MAP[u.icon] || Sparkles;
 
     if (isCollapsed) {
@@ -155,14 +155,21 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
           <button
             onClick={() => setActiveUtilityId(u.id)}
             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
-              isSelected
+              isDocConverter
+                ? isSelected
+                  ? 'bg-gradient-to-br from-blue-600 via-blue-700 to-sky-500 text-white shadow-lg shadow-blue-500/30 ring-2 ring-blue-400'
+                  : 'bg-gradient-to-br from-blue-50 to-sky-100 text-blue-700 border-2 border-blue-400/90 shadow-2xs hover:border-blue-600 hover:scale-105'
+                : isSelected
                 ? 'bg-neutral-900 text-cyan-300 shadow-sm ring-1 ring-neutral-800'
                 : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100'
             }`}
             aria-label={u.name}
           >
             <IconComponent className="w-4 h-4 shrink-0" />
-            {isLocked && (
+            {isDocConverter && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-blue-600 ring-2 ring-white animate-pulse" />
+            )}
+            {isLocked && !isDocConverter && (
               <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center border border-amber-200">
                 <Lock className="w-2 h-2" />
               </span>
@@ -173,11 +180,15 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
           <div className="absolute left-full ml-2.5 top-1/2 -translate-y-1/2 z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center">
             <div className="px-2.5 py-1 rounded-lg bg-neutral-900 text-white text-xs font-medium tracking-tight shadow-xl border border-neutral-700/60 whitespace-nowrap flex items-center gap-1.5">
               <span>{u.name}</span>
-              {u.badge && (
+              {isDocConverter ? (
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-blue-600 text-white uppercase font-bold">
+                  36 in 1
+                </span>
+              ) : u.badge ? (
                 <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-neutral-800 text-cyan-300 uppercase">
                   {u.badge}
                 </span>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
@@ -185,6 +196,49 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
     }
 
     if (isMobileDrawer) {
+      if (isDocConverter) {
+        return (
+          <button
+            key={u.id}
+            onClick={() => {
+              setActiveUtilityId(u.id);
+              if (onCloseMobile) onCloseMobile();
+            }}
+            className={`w-full p-3 rounded-2xl text-left transition-all cursor-pointer flex items-center justify-between group mb-2.5 border-2 ${
+              isSelected
+                ? 'bg-gradient-to-r from-blue-600 to-sky-600 border-blue-400 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-300/40'
+                : 'bg-gradient-to-r from-blue-50 via-white to-sky-50 border-blue-400 text-blue-950 shadow-xs hover:border-blue-500'
+            }`}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition ${
+                isSelected ? 'bg-white/20 text-white' : 'bg-blue-600 text-white shadow-xs'
+              }`}>
+                <IconComponent className="w-4.5 h-4.5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-blue-950'}`}>
+                    {u.name}
+                  </span>
+                  <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full uppercase font-bold ${
+                    isSelected ? 'bg-white/20 text-white' : 'bg-blue-600 text-white'
+                  }`}>
+                    36 in 1
+                  </span>
+                </div>
+                <p className={`text-[11px] truncate mt-0.5 ${isSelected ? 'text-blue-100' : 'text-blue-700'}`}>
+                  Convert Word, PDF, PPT, Excel, Images &amp; Archives
+                </p>
+              </div>
+            </div>
+            <div className="pl-2 shrink-0">
+              <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-blue-600'}`}>&rarr;</span>
+            </div>
+          </button>
+        );
+      }
+
       return (
         <button
           key={u.id}
@@ -227,6 +281,51 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
             ) : (
               <span className={`text-xs ${isSelected ? 'text-cyan-400 font-bold' : 'text-neutral-400'}`}>&rarr;</span>
             )}
+          </div>
+        </button>
+      );
+    }
+
+    if (isDocConverter) {
+      return (
+        <button
+          key={u.id}
+          onClick={() => {
+            setActiveUtilityId(u.id);
+            if (isMobileDrawer && onCloseMobile) onCloseMobile();
+          }}
+          className={`w-full px-2.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer flex items-center justify-between group mb-2.5 border-2 relative overflow-hidden ${
+            isSelected
+              ? 'bg-gradient-to-r from-blue-600 via-blue-700 to-sky-600 text-white font-bold shadow-md shadow-blue-600/30 border-blue-400 ring-2 ring-blue-300/40'
+              : 'bg-gradient-to-r from-blue-50/95 via-sky-50/70 to-white hover:from-blue-100/90 hover:via-sky-100/80 hover:to-white text-blue-950 font-bold border-blue-400/90 hover:border-blue-600 shadow-2xs hover:shadow-sm'
+          }`}
+        >
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition ${
+              isSelected ? 'bg-white/20 text-white' : 'bg-blue-600 text-white shadow-2xs group-hover:scale-105'
+            }`}>
+              <IconComponent className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className={`text-xs font-bold truncate tracking-tight ${isSelected ? 'text-white' : 'text-blue-950'}`}>
+                  {u.name}
+                </span>
+              </div>
+              <p className={`text-[10px] truncate ${isSelected ? 'text-blue-100 font-normal' : 'text-blue-700/80 font-medium'}`}>
+                36 in 1 Universal Engine
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0 ml-1">
+            <span className={`text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
+              isSelected
+                ? 'bg-white/25 text-white ring-1 ring-white/40'
+                : 'bg-blue-600 text-white shadow-xs'
+            }`}>
+              36 in 1
+            </span>
           </div>
         </button>
       );
@@ -385,17 +484,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
 
       {/* Tool List Container */}
       <div className={`flex-1 overflow-y-auto px-2.5 py-3 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
-        {!isCollapsed && (selectedCategory === 'convert' || activeUtilityId === 'document-converter') && !searchQuery ? (
-          <div className="space-y-4">
-            <DocumentConversionPanel />
-            <div className="pt-3 border-t border-neutral-200">
-              <div className="px-2 mb-1.5 text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">
-                Image &amp; Vector Tools
-              </div>
-              {filteredUtilities.filter(u => u.id !== 'document-converter').map(u => renderToolButton(u))}
-            </div>
-          </div>
-        ) : filteredUtilities.length === 0 ? (
+        {filteredUtilities.length === 0 ? (
           <div className="p-4 text-center">
             <p className="text-xs text-neutral-400">No tools match "{searchQuery}"</p>
             <button

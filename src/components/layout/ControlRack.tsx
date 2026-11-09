@@ -32,7 +32,8 @@ import {
   Binary, 
   FileCode, 
   Camera,
-  Lock
+  Lock,
+  ArrowLeft
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
@@ -86,7 +87,6 @@ import { RecipeControls } from '../utilities/RecipeControls';
 import { RotateFlipControls } from '../utilities/RotateFlipControls';
 import { MemeControls } from '../utilities/MemeControls';
 import { ImageSplitterControls } from '../utilities/ImageSplitterControls';
-import { DocumentConversionPanel } from '../converter/DocumentConversionPanel';
 
 interface ControlRackProps {
   isMobileDrawer?: boolean;
@@ -97,7 +97,7 @@ export const ControlRack: React.FC<ControlRackProps> = ({
   isMobileDrawer = false,
   onCloseMobile,
 }) => {
-  const { activeImage, activeUtilityId, executeActiveUtility, downloadImage, sendToUtility, isProcessing } = useSession();
+  const { activeImage, activeUtilityId, setActiveUtilityId, setIsMobileToolsOpen, executeActiveUtility, downloadImage, sendToUtility, isProcessing } = useSession();
   const { isUtilityUnlocked, openAuthModal } = useAuth();
 
   const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
@@ -108,26 +108,23 @@ export const ControlRack: React.FC<ControlRackProps> = ({
     : "hidden md:flex w-80 lg:w-88 h-full bg-white border-l border-neutral-200 flex-col justify-between overflow-y-auto shrink-0 relative z-20 shadow-xs";
 
   if (!activeImage) {
-    if (activeUtilityId === 'document-converter') {
-      return (
-        <aside className={containerClasses}>
-          <div className="p-4 sm:p-5 overflow-y-auto max-h-[85vh]">
-            <DocumentConversionPanel />
-          </div>
-        </aside>
-      );
-    }
     if (activeUtilityId === 'base64-to-image') {
       return (
         <aside className={containerClasses}>
           <div className="p-5 sm:p-6 space-y-5">
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
+              <button
+                onClick={() => setActiveUtilityId('compression')}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100 rounded-lg transition cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 text-neutral-500" />
+                <span>Back to Tools</span>
+              </button>
+              <span className="text-[10px] font-semibold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md border border-neutral-200/80 uppercase">
+                {activeUtility.category}
+              </span>
+            </div>
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Settings</span>
-                <span className="text-[10px] font-semibold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md border border-neutral-200/80 uppercase">
-                  {activeUtility.category}
-                </span>
-              </div>
               <h3 className="text-base font-bold text-neutral-900 tracking-tight">
                 {activeUtility.name}
               </h3>
@@ -153,8 +150,6 @@ export const ControlRack: React.FC<ControlRackProps> = ({
     switch (activeUtilityId) {
       case 'workflow-recipes':
         return <RecipeControls />;
-      case 'document-converter':
-        return <DocumentConversionPanel />;
       case 'batch-resize':
         return <ResizeControls />;
       case 'compression':
@@ -232,6 +227,29 @@ export const ControlRack: React.FC<ControlRackProps> = ({
             </div>
           </div>
         )}
+
+        {/* Feature Navigation Bar with Back Button */}
+        <div className="flex items-center justify-between pb-2.5 border-b border-neutral-100">
+          <button
+            onClick={() => {
+              if (isMobileDrawer) {
+                onCloseMobile?.();
+                setIsMobileToolsOpen(true);
+              } else {
+                setActiveUtilityId('compression');
+              }
+            }}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-700 hover:text-neutral-950 text-xs font-semibold transition cursor-pointer active:scale-95 shadow-2xs"
+            title="Back to All Tools"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-neutral-600" />
+            <span>Back to Tools</span>
+          </button>
+
+          <span className="text-[10px] font-mono text-neutral-400 font-medium truncate max-w-[130px]">
+            {activeUtility.name}
+          </span>
+        </div>
 
         {/* Studio Active Tool Header */}
         <div className="flex items-start gap-3 pb-4 border-b border-neutral-100">

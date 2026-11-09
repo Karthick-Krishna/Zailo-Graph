@@ -541,3 +541,4 @@ export const validateFileForConversion = (
 
   return { isValid: true };
 };
+

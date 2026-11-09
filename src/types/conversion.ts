@@ -66,3 +66,4 @@ export interface ConversionProgressState {
   percent: number;
   error?: string;
 }
+

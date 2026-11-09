@@ -8,6 +8,7 @@ import {
   ShieldCheck, 
   Sparkles, 
   ArrowRight, 
+  ArrowLeft,
   Layers, 
   Camera, 
   X
@@ -319,6 +320,22 @@ export const LandingWorkspace: React.FC = () => {
           </div>
         )}
 
+        {/* Active Tool Back Bar (When a specific feature is selected) */}
+        {activeUtilityId !== 'compression' && (
+          <div className="w-full max-w-2xl flex items-center justify-between pb-1 animate-in fade-in duration-150">
+            <button
+              onClick={() => setActiveUtilityId('compression')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-neutral-100 border border-neutral-200/90 text-xs font-semibold text-neutral-700 hover:text-neutral-950 shadow-2xs transition cursor-pointer active:scale-95"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-neutral-600" />
+              <span>Back to Studio Tools</span>
+            </button>
+            <span className="text-[10px] font-mono font-semibold px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 uppercase">
+              {activeUtility.name}
+            </span>
+          </div>
+        )}
+
         {/* Hero Interactive Drag & Drop Box or Document Converter Studio */}
         {activeUtilityId === 'document-converter' ? (
           <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xl border border-neutral-200/90 rounded-3xl p-5 sm:p-7 shadow-xl">
@@ -438,7 +455,21 @@ export const LandingWorkspace: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
-              <h3 className="text-base font-bold text-neutral-900">Base64 to Image Decoder</h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setShowBase64Modal(false);
+                    if (activeUtilityId === 'base64-to-image') {
+                      setActiveUtilityId('compression');
+                    }
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-xs font-semibold text-neutral-700 transition cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back</span>
+                </button>
+                <h3 className="text-sm font-bold text-neutral-900">Base64 to Image Decoder</h3>
+              </div>
               <button
                 onClick={() => {
                   setShowBase64Modal(false);
