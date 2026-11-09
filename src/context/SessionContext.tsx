@@ -51,6 +51,8 @@ interface SessionContextType {
   batchProgress: BatchProgressState;
   isMobileToolsOpen: boolean;
   setIsMobileToolsOpen: (open: boolean) => void;
+  activeAppMode: 'studio' | 'converter';
+  setActiveAppMode: (mode: 'studio' | 'converter') => void;
   
   // Multi-step History Stack
   canUndo: boolean;
@@ -252,11 +254,36 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return 'workflow-recipes';
   });
 
+  const [activeAppMode, setActiveAppModeState] = useState<'studio' | 'converter'>(() => {
+    if (typeof window !== 'undefined' && window.location.hash.includes('converter')) {
+      return 'converter';
+    }
+    return 'studio';
+  });
+
+  const setActiveAppMode = useCallback((mode: 'studio' | 'converter') => {
+    setActiveAppModeState(mode);
+    if (typeof window !== 'undefined') {
+      if (mode === 'converter') {
+        window.location.hash = '#/converter';
+      } else {
+        if (window.location.hash.includes('converter')) {
+          window.location.hash = '#/';
+        }
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const handleHash = () => {
-      const match = window.location.hash.match(/tool=([a-z0-9-]+)/i);
-      if (match && match[1]) {
-        setActiveUtilityId(match[1]);
+      if (window.location.hash.includes('converter')) {
+        setActiveAppModeState('converter');
+      } else {
+        setActiveAppModeState('studio');
+        const match = window.location.hash.match(/tool=([a-z0-9-]+)/i);
+        if (match && match[1]) {
+          setActiveUtilityId(match[1]);
+        }
       }
     };
     window.addEventListener('hashchange', handleHash);
@@ -1291,6 +1318,8 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         batchProgress,
         isMobileToolsOpen,
         setIsMobileToolsOpen,
+        activeAppMode,
+        setActiveAppMode,
         addImages,
         addBase64Image,
         removeImage,
