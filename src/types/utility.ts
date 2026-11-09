@@ -78,40 +78,16 @@ export const UTILITIES: UtilityDefinition[] = [
     ],
     supportsBatch: true,
   },
-  // 4. HEIC to JPG/PNG
+  // 4. Universal Image Converter (HEIC, WebP, PNG, JPG, AVIF)
   {
-    id: 'heic-converter',
-    name: 'HEIC to JPG/PNG',
-    description: 'Extract and convert Apple iPhone HEIC/HEIF live photos and bursts directly in the browser.',
+    id: 'format-converter',
+    name: 'Universal Image Converter',
+    description: 'Convert between JPG, PNG, WebP, AVIF, and Apple HEIC with custom quality and background controls.',
     category: 'convert',
     isCompetitorPaid: false,
-    icon: 'Smartphone',
-    inputFormats: ['image/heic', 'image/heif', '.heic', '.heif'],
-    outputFormats: ['image/jpeg', 'image/png'],
-    supportsBatch: true,
-  },
-  // 4. WebP to PNG/JPG
-  {
-    id: 'webp-to-raster',
-    name: 'WebP to PNG/JPG',
-    description: 'Decompress static and animated WebP images to lossless PNG or high-quality JPEG.',
-    category: 'convert',
-    isCompetitorPaid: false,
-    icon: 'Repeat',
-    inputFormats: ['image/webp'],
-    outputFormats: ['image/png', 'image/jpeg'],
-    supportsBatch: true,
-  },
-  // 5. PNG/JPG to WebP
-  {
-    id: 'raster-to-webp',
-    name: 'PNG/JPG to WebP',
-    description: 'Convert legacy raster images to modern, highly compressed WebP format.',
-    category: 'convert',
-    isCompetitorPaid: false,
-    icon: 'Sparkles',
-    inputFormats: ['image/jpeg', 'image/png', 'image/bmp'],
-    outputFormats: ['image/webp'],
+    icon: 'ArrowRightLeft',
+    inputFormats: ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/heic', 'image/heif', '.heic', '.heif', 'image/bmp'],
+    outputFormats: ['image/jpeg', 'image/png', 'image/webp', 'image/avif'],
     supportsBatch: true,
   },
   // 6. SVG to High-Resolution PNG

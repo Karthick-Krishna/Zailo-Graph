@@ -37,7 +37,8 @@ import {
   Layers,
   RotateCw,
   Type,
-  Grid
+  Grid,
+  ArrowRightLeft
 } from 'lucide-react';
 
 export const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
@@ -69,10 +70,11 @@ export const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   RotateCw,
   Type,
   Grid,
+  ArrowRightLeft,
 };
 
 const CATEGORIES: Array<{ id: UtilityCategory | 'all'; label: string }> = [
-  { id: 'all', label: 'All (26)' },
+  { id: 'all', label: 'All (24)' },
   { id: 'recipes', label: 'Recipes' },
   { id: 'optimize', label: 'Optimize' },
   { id: 'convert', label: 'Convert' },

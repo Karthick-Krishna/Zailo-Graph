@@ -33,7 +33,8 @@ import {
   FileCode, 
   Camera,
   Lock,
-  ArrowLeft
+  ArrowLeft,
+  ArrowRightLeft
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
@@ -62,9 +63,11 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   Binary,
   FileCode,
   Camera,
+  ArrowRightLeft,
 };
 
 // Modular Utility Controls
+import { UniversalConverterControls } from '../utilities/UniversalConverterControls';
 import { ResizeControls } from '../utilities/ResizeControls';
 import { CompressionControls } from '../utilities/CompressionControls';
 import { HeicControls } from '../utilities/HeicControls';
@@ -154,12 +157,12 @@ export const ControlRack: React.FC<ControlRackProps> = ({
         return <ResizeControls />;
       case 'compression':
         return <CompressionControls />;
+      case 'format-converter':
+        return <UniversalConverterControls />;
       case 'heic-converter':
-        return <HeicControls />;
       case 'webp-to-raster':
-        return <WebpToRasterControls />;
       case 'raster-to-webp':
-        return <RasterToWebpControls />;
+        return <UniversalConverterControls />;
       case 'avatar-crop':
         return <CropControls />;
       case 'social-presets':

@@ -90,6 +90,25 @@ const UTILITIES_SEO = [
     ]
   },
   {
+    id: 'format-converter',
+    name: 'Universal Image Converter',
+    title: 'Free Universal Image Converter - Convert Between JPG, PNG, WebP & AVIF | Zailo Graph',
+    description: 'Convert any image format seamlessly in your browser. Convert Apple HEIC, WebP, PNG, JPEG, and AVIF with custom quality, EXIF metadata retention, and background fill options. 100% private.',
+    keywords: 'image converter, convert to jpg, convert to png, webp to jpg, heic to jpg, image format converter, avif converter, batch image converter',
+    category: 'convert',
+    h1: 'Universal Image Format Converter (JPG, PNG, WebP, AVIF)',
+    howTo: [
+      'Upload one or more images in any format (HEIC, PNG, WebP, JPG, AVIF, BMP).',
+      'Select your desired target output format (JPG, PNG, WebP, or AVIF).',
+      'Adjust conversion quality and optional background fill for transparent inputs.',
+      'Convert instantly and download individual files or a batch ZIP package.'
+    ],
+    faqs: [
+      { q: 'Can I convert to JPG from PNG or WebP with transparency?', a: 'Yes. You can choose a background fill color (white, black, or light gray) so transparent pixels render cleanly in JPG.' },
+      { q: 'Does conversion send my photos to a remote server?', a: 'No. All conversions happen entirely inside your web browser via WebAssembly and Canvas pipelines.' }
+    ]
+  },
+  {
     id: 'heic-converter',
     name: 'HEIC to JPG/PNG Converter',
     title: 'Free Online Apple HEIC to JPG Converter - iPhone Live Photos | Zailo Graph',

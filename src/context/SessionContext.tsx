@@ -98,6 +98,8 @@ export const getDefaultParamsForUtility = (utilityId: string, image: { width: nu
       };
     case 'compression':
       return { format: 'image/webp', quality: 0.8 };
+    case 'format-converter':
+      return { toFormat: 'image/jpeg', format: 'image/jpeg', quality: 0.90, preserveExif: true, bgColor: '#FFFFFF' };
     case 'heic-converter':
       return { toFormat: 'image/jpeg', quality: 0.92, preserveExif: true };
     case 'webp-to-raster':
@@ -751,8 +753,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     // 4. Direct handling for HEIC decoder
-    if (utilityToRun === 'heic-converter') {
-      const converted = await convertHeicToRaster(item.blob, effectiveParams);
+    const isHeic = item.type?.includes('heic') || item.type?.includes('heif') || item.name?.toLowerCase().endsWith('.heic') || item.name?.toLowerCase().endsWith('.heif');
+    if (utilityToRun === 'heic-converter' || (utilityToRun === 'format-converter' && isHeic)) {
+      const converted = await convertHeicToRaster(item.blob, {
+        toFormat: effectiveParams?.toFormat || effectiveParams?.format || 'image/jpeg',
+        quality: effectiveParams?.quality ?? 0.90,
+      });
       let pW = item.width;
       let pH = item.height;
       try {
@@ -854,6 +860,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         extraBitmaps,
         params: {
           ...effectiveParams,
+          format: effectiveParams?.toFormat || effectiveParams?.format || (utilityToRun === 'format-converter' ? 'image/jpeg' : undefined),
           logoBitmap: logoBmp,
         },
       },

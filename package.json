@@ -4,11 +4,11 @@
   "description": "Your images. Your workflow. Your control. Privacy-first web-native image utility workspace.",
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS=--max-old-space-size=4096 vite --port 5001 --host",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/generateSeoPages.js && tsc -b && NODE_OPTIONS=--max-old-space-size=4096 vite build",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 vite --port 5001 --host",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 node scripts/generateSeoPages.js && tsc -b && cross-env NODE_OPTIONS=--max-old-space-size=4096 vite build",
     "generate:seo": "node scripts/generateSeoPages.js",
-    "preview": "NODE_OPTIONS=--max-old-space-size=4096 vite preview --port 5001 --host",
-    "test": "NODE_OPTIONS=--max-old-space-size=4096 vitest run"
+    "preview": "cross-env NODE_OPTIONS=--max-old-space-size=4096 vite preview --port 5001 --host",
+    "test": "cross-env NODE_OPTIONS=--max-old-space-size=4096 vitest run"
   },
   "keywords": [
     "image-utility",
@@ -30,6 +30,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.1",
+    "cross-env": "^10.1.0",
     "jsdom": "^31.0.0",
     "tailwindcss": "^4.3.5",
     "typescript": "^5.7.3",
