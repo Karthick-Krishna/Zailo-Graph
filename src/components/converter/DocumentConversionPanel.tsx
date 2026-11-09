@@ -303,10 +303,10 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={() => universalDropInputRef.current?.click()}
-            className={`relative w-full rounded-2xl border-2 border-dashed p-5 sm:p-7 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center text-center group ${
+            className={`relative w-full rounded-2xl border-2 border-dashed p-5 sm:p-7 transition cursor-pointer flex flex-col items-center justify-center text-center group ${
               isDragOver
-                ? 'border-blue-600 bg-blue-50/70 scale-[1.01] shadow-lg shadow-blue-500/10'
-                : 'border-blue-200/90 hover:border-blue-500 bg-gradient-to-br from-blue-50/40 via-sky-50/20 to-white hover:bg-blue-50/30'
+                ? 'border-blue-600 bg-blue-50/40'
+                : 'border-neutral-300 hover:border-neutral-400 bg-white'
             }`}
           >
             <input
@@ -315,19 +315,19 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
               onChange={handleUniversalInputChange}
               className="hidden"
             />
-            <div className="w-11 h-11 rounded-2xl bg-white border border-blue-200 shadow-xs flex items-center justify-center mb-2.5 text-blue-600 group-hover:scale-105 transition-transform">
-              <UploadCloud className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-center mb-2.5 text-neutral-700">
+              <UploadCloud className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-neutral-900 mb-1">
+            <h3 className="text-sm font-semibold text-neutral-900 mb-1">
               Drop any document here for instant conversion
             </h3>
             <p className="text-xs text-neutral-500 max-w-md mb-2">
               Drag a file or click to browse. Supports DOCX, DOC, PDF, PPTX, XLSX, XLS, CSV, RTF, TXT, ODT, and images.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-1.5 text-[10px] font-mono text-neutral-500">
-              <span className="px-2 py-0.5 rounded-md bg-white border border-neutral-200/80 font-medium">Auto Format Detection</span>
+              <span className="px-2 py-0.5 rounded bg-neutral-100 border border-neutral-200">Auto format detection</span>
               <span>•</span>
-              <span className="px-2 py-0.5 rounded-md bg-white border border-neutral-200/80 font-medium">Up to 100 MB</span>
+              <span className="px-2 py-0.5 rounded bg-neutral-100 border border-neutral-200">Up to 100 MB</span>
             </div>
           </div>
 
@@ -409,13 +409,13 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
                 <button
                   onClick={() => setSelectedCategoryTab('all')}
-                  className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 min-h-[36px] ${
+                  className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 min-h-[34px] ${
                     selectedCategoryTab === 'all'
-                      ? 'bg-neutral-900 text-white shadow-sm'
-                      : 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/80 border border-neutral-200/60'
+                      ? 'bg-neutral-900 text-white shadow-xs'
+                      : 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200 border border-neutral-200'
                   }`}
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Layers className="w-3.5 h-3.5" />
                   <span>All ({CONVERSIONS.length})</span>
                 </button>
 
@@ -428,16 +428,16 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
                     <button
                       key={cat.id}
                       onClick={() => setSelectedCategoryTab(cat.id)}
-                      className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 min-h-[36px] ${
+                      className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 min-h-[34px] ${
                         isSelected
-                          ? 'bg-neutral-900 text-white shadow-sm'
-                          : 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/80 border border-neutral-200/60'
+                          ? 'bg-neutral-900 text-white shadow-xs'
+                          : 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200 border border-neutral-200'
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
                       <span>{cat.title}</span>
                       <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
-                        isSelected ? 'bg-neutral-800 text-cyan-300' : 'bg-neutral-200/80 text-neutral-500'
+                        isSelected ? 'bg-neutral-800 text-neutral-300' : 'bg-neutral-200 text-neutral-600'
                       }`}>
                         {catConversions.length}
                       </span>
@@ -491,22 +491,22 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
                       <div
                         key={conv.id}
                         onClick={() => handleSelectConversion(conv.id)}
-                        className="p-3.5 sm:p-4 rounded-2xl border border-neutral-200/90 hover:border-blue-400 bg-white hover:bg-gradient-to-br hover:from-blue-50/30 hover:to-white transition-all duration-150 cursor-pointer shadow-2xs hover:shadow-md hover:shadow-blue-500/5 group flex flex-col justify-between"
+                        className="p-3.5 sm:p-4 rounded-xl border border-neutral-200 hover:border-neutral-300 bg-white hover:bg-neutral-50/70 transition cursor-pointer shadow-xs group flex flex-col justify-between"
                       >
                         <div>
                           {/* Format Flow Badges */}
                           <div className="flex items-center gap-1.5 mb-2.5">
-                            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border ${sourceBadgeColor}`}>
+                            <span className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${sourceBadgeColor}`}>
                               {conv.sourceFormat}
                             </span>
                             <ArrowRight className="w-3 h-3 text-neutral-400" />
-                            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border ${targetBadgeColor}`}>
+                            <span className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${targetBadgeColor}`}>
                               {conv.targetFormat}
                             </span>
                           </div>
 
                           {/* Conversion Name */}
-                          <h4 className="text-xs sm:text-sm font-bold text-neutral-900 group-hover:text-blue-900 transition-colors">
+                          <h4 className="text-xs sm:text-sm font-semibold text-neutral-900 group-hover:text-blue-900 transition-colors">
                             {conv.name}
                           </h4>
 

@@ -66,14 +66,14 @@ export const Workspace: React.FC = () => {
             </div>
           ) : (
             <div className="flex-1 w-full h-full flex flex-col items-center justify-center min-h-0">
-              {/* Highlighted Active Feature Indicator on Main Screen */}
-              <div className="w-full max-w-4xl px-2 mb-2 flex items-center justify-between shrink-0 animate-in fade-in">
-                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-blue-400 shadow-md shadow-blue-500/10">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse shrink-0"></span>
-                  <span className="text-[11px] font-mono text-neutral-500 font-bold uppercase tracking-wider">Active Feature:</span>
-                  <span className="text-xs sm:text-sm font-black text-neutral-900 tracking-tight font-display">{activeUtility.name}</span>
+              {/* Active Tool Indicator */}
+              <div className="w-full max-w-4xl px-2 mb-2 flex items-center justify-between shrink-0">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white border border-neutral-200 text-xs shadow-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0"></span>
+                  <span className="text-neutral-500 font-mono text-[11px]">Tool:</span>
+                  <span className="font-semibold text-neutral-900">{activeUtility.name}</span>
                   {activeUtility.badge && (
-                    <span className="text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                    <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 border border-neutral-200">
                       {activeUtility.badge}
                     </span>
                   )}
@@ -81,10 +81,10 @@ export const Workspace: React.FC = () => {
 
                 <button
                   onClick={() => setIsMobileToolsOpen(true)}
-                  className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-neutral-100 border border-neutral-300 text-xs font-semibold text-neutral-700 shadow-2xs transition active:scale-95 cursor-pointer"
+                  className="md:hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-neutral-100 border border-neutral-300 text-xs font-medium text-neutral-700 transition cursor-pointer"
                 >
-                  <Layers className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Switch Feature</span>
+                  <Layers className="w-3.5 h-3.5 text-neutral-600" />
+                  <span>Tools</span>
                 </button>
               </div>
 

@@ -11,7 +11,11 @@ import {
   ArrowLeft,
   Layers, 
   Camera, 
-  X
+  X,
+  Image as ImageIcon,
+  User,
+  PenTool,
+  Palette
 } from 'lucide-react';
 import { Base64Controls } from '../utilities/Base64Controls';
 import { DocumentConversionPanel } from '../converter/DocumentConversionPanel';
@@ -218,74 +222,48 @@ export const LandingWorkspace: React.FC = () => {
       {/* Main Container */}
       <div className="w-full max-w-5xl flex flex-col items-center space-y-8 sm:space-y-10 relative">
         {/* Hero Banner Header */}
-        <div className="text-center space-y-4 sm:space-y-5 max-w-3xl relative z-10 flex flex-col items-center px-1">
-          {/* Logo Brand Emblem with Subtle Glow */}
-          <div className="relative group cursor-pointer py-1 sm:py-2" onClick={() => fileInputRef.current?.click()}>
-            <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 via-sky-500/15 to-blue-400/20 rounded-3xl blur-2xl group-hover:blur-3xl transition duration-500"></div>
+        <div className="text-center space-y-4 max-w-2xl relative z-10 flex flex-col items-center px-1">
+          {/* Logo Brand Emblem */}
+          <div className="cursor-pointer py-1" onClick={() => fileInputRef.current?.click()}>
             <div className="hidden sm:block">
-              <ZailoGraphLogo size="xl" showText={true} showTagline={true} className="relative drop-shadow-xl" />
+              <ZailoGraphLogo size="xl" showText={true} showTagline={true} />
             </div>
             <div className="hidden min-[380px]:block sm:hidden">
-              <ZailoGraphLogo size="lg" showText={true} showTagline={true} className="relative drop-shadow-lg" />
+              <ZailoGraphLogo size="lg" showText={true} showTagline={true} />
             </div>
             <div className="min-[380px]:hidden">
-              <ZailoGraphLogo size="md" showText={true} showTagline={false} className="relative drop-shadow-md" />
+              <ZailoGraphLogo size="md" showText={true} showTagline={false} />
             </div>
           </div>
 
-          {/* Privacy Trust Pill & Mobile 25 Tools Navigation Shortcut */}
+          {/* Privacy Trust Pill */}
           <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200/80 text-neutral-800 text-[11px] sm:text-xs font-semibold shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 animate-pulse"></span>
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-              <span>100% Private • Built by Coralgenz &amp; Zorquelz</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-neutral-200 text-neutral-700 text-xs shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <ShieldCheck className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+              <span>100% private • Browser WebAssembly • Zero server uploads</span>
             </div>
 
-            {/* Mobile Direct Navigation Button */}
+            {/* Mobile Navigation Shortcut */}
             <button
               onClick={() => setIsMobileToolsOpen(true)}
-              className="md:hidden inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition cursor-pointer active:scale-95"
+              className="md:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-medium transition cursor-pointer"
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Browse 25 Tools</span>
+              <span>All 24 tools</span>
               <ArrowRight className="w-3 h-3" />
             </button>
           </div>
 
-          {/* Active Primed Tool Badge (if non-default) */}
-          {activeUtilityId && activeUtilityId !== 'workflow-recipes' && (
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold animate-in fade-in">
-              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-              <span>Primed for: <strong>{activeUtility.name}</strong></span>
-              <button 
-                onClick={() => setActiveUtilityId('workflow-recipes')}
-                className="text-blue-500 hover:text-blue-900 font-bold ml-1 text-sm cursor-pointer"
-                title="Reset to default"
-              >
-                &times;
-              </button>
-            </div>
-          )}
-
-          <h1 className="text-2xl min-[360px]:text-3xl sm:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tight leading-[1.1] font-display">
-            Your images. Your workflow. <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 bg-clip-text text-transparent">
-              Your control.
+          <h1 className="text-3xl sm:text-5xl font-semibold text-neutral-900 tracking-tight leading-[1.15]">
+            Local-first image studio. <br className="hidden sm:inline" />
+            <span className="text-neutral-500 font-normal">
+              Private, fast, in your browser.
             </span>
           </h1>
 
-          {/* Brand Tagline Accent */}
-          <div className="flex items-center justify-center gap-3 w-full max-w-md pt-0.5">
-            <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-blue-300"></div>
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-widest text-neutral-400 uppercase">
-              THE BROWSER IMAGE STUDIO
-            </span>
-            <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-sky-300"></div>
-          </div>
-
-          <p className="text-xs sm:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed">
-            Compress, vectorize, crop, sharpen, and convert images with WebAssembly and Web Workers. 
-            All 25 tools run strictly in your browser — zero cloud latency, zero subscriptions, zero ads.
+          <p className="text-sm sm:text-base text-neutral-600 max-w-xl mx-auto leading-relaxed">
+            Compress, convert, resize, and edit images without uploading to cloud servers. 24 utilities running directly on your hardware.
           </p>
         </div>
 
@@ -335,18 +313,18 @@ export const LandingWorkspace: React.FC = () => {
           </div>
         ) : (
           <div className="w-full max-w-3xl flex flex-col items-center space-y-4">
-            {/* Highlighted Active Feature Card on Main Screen */}
-            <div className="w-full p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-blue-50/95 via-sky-50/80 to-white border-2 border-blue-400 shadow-xl shadow-blue-500/10 ring-2 ring-blue-300/40 animate-in fade-in duration-200">
-              <div className="flex items-center justify-between mb-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-600 text-white text-[11px] font-mono font-bold uppercase tracking-wider shadow-xs">
-                  <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-                  <span>Currently Chosen Feature</span>
+            {/* Active Feature Toolbar */}
+            <div className="w-full p-4 rounded-xl bg-white border border-neutral-200 shadow-xs">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="inline-flex items-center gap-2 text-xs font-mono text-neutral-500">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                  <span>Active tool</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {activeUtilityId !== 'compression' && (
                     <button
                       onClick={() => setActiveUtilityId('compression')}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white hover:bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-600 hover:text-neutral-900 transition active:scale-95 cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-xs font-medium text-neutral-600 hover:text-neutral-900 transition cursor-pointer"
                     >
                       <ArrowLeft className="w-3 h-3 text-neutral-500" />
                       <span>Reset</span>
@@ -354,45 +332,45 @@ export const LandingWorkspace: React.FC = () => {
                   )}
                   <button
                     onClick={() => setIsMobileToolsOpen(true)}
-                    className="md:hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-xs font-semibold text-blue-800 transition active:scale-95 cursor-pointer"
+                    className="md:hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-xs font-medium text-neutral-800 transition cursor-pointer"
                   >
-                    <Layers className="w-3 h-3 text-blue-600" />
+                    <Layers className="w-3 h-3 text-neutral-600" />
                     <span>Change</span>
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3.5">
-                <div className="w-11 sm:w-12 h-11 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-sky-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/25">
-                  <ActiveIcon className="w-5 sm:w-6 h-5 sm:h-6" />
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-neutral-900 text-white flex items-center justify-center shrink-0">
+                  <ActiveIcon className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 className="text-lg sm:text-xl font-black text-neutral-900 tracking-tight font-display">
+                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                    <h3 className="text-base font-semibold text-neutral-900 tracking-tight">
                       {activeUtility.name}
                     </h3>
                     {activeUtility.badge && (
-                      <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                      <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200">
                         {activeUtility.badge}
                       </span>
                     )}
-                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-neutral-200/80 text-neutral-700 font-semibold">
+                    <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600">
                       {activeUtility.category}
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
+                  <p className="text-xs text-neutral-500 leading-relaxed">
                     {activeUtility.description}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-3.5 pt-3 border-t border-blue-200/70 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                <div className="flex items-center gap-1.5 text-neutral-600">
-                  <span className="font-semibold text-neutral-800">Supported input:</span>
+              <div className="mt-3 pt-2.5 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-500">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-medium text-neutral-700">Supported formats:</span>
                   <span className="font-mono text-neutral-600">{activeUtility.inputFormats.slice(0, 5).join(', ')}</span>
                 </div>
-                <span className="font-semibold text-blue-700">
-                  Drop files below to process with this tool &darr;
+                <span className="text-neutral-500 font-mono text-[10px]">
+                  Drop files to process
                 </span>
               </div>
             </div>
@@ -403,95 +381,102 @@ export const LandingWorkspace: React.FC = () => {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`relative w-full rounded-2xl sm:rounded-3xl border-2 border-dashed p-4 sm:p-12 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group bg-white/85 backdrop-blur-xl shadow-lg ${
+              className={`relative w-full rounded-2xl border-2 border-dashed p-6 sm:p-12 transition cursor-pointer flex flex-col items-center justify-center text-center bg-white shadow-xs ${
                 isDragOver
-                  ? 'border-blue-600 bg-blue-50/50 scale-[1.01] shadow-2xl shadow-blue-500/15'
-                  : 'border-blue-200/80 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10'
+                  ? 'border-blue-600 bg-blue-50/30'
+                  : 'border-neutral-300 hover:border-neutral-400'
               }`}
             >
-            {/* Subtle Ambient Radial Highlight */}
-            <div className="absolute inset-0 bg-radial from-blue-50/40 via-transparent to-transparent opacity-70 pointer-events-none rounded-2xl sm:rounded-3xl"></div>
+              {/* Central Upload Icon */}
+              <div className="w-12 h-12 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center mb-3">
+                <UploadCloud className="w-6 h-6" />
+              </div>
 
-            {/* Central Cloud Icon with Logo Tint */}
-            <div className="w-12 sm:w-16 h-12 sm:h-16 rounded-2xl bg-gradient-to-br from-neutral-100 to-neutral-50 text-neutral-800 flex items-center justify-center mb-3 sm:mb-5 group-hover:from-blue-600 group-hover:to-sky-500 group-hover:text-white transition duration-300 shadow-xs border border-neutral-200/60 group-hover:border-transparent">
-              <UploadCloud className="w-6 sm:w-8 h-6 sm:h-8" />
+              <h2 className="text-base sm:text-lg font-semibold text-neutral-900 mb-1.5">
+                Drop files here for <span className="text-blue-600 font-medium">{activeUtility.name}</span>, paste from <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 border border-neutral-300 font-mono text-xs text-neutral-700">Ctrl+V</kbd>, or <span className="underline decoration-neutral-300 underline-offset-4 hover:decoration-neutral-600">browse</span>
+              </h2>
+              <p className="text-xs text-neutral-500 max-w-md mb-5 leading-relaxed">
+                Drag single files or an entire batch. Supports AVIF, JPEG, PNG, WebP, SVG, Apple HEIC, and Camera RAW.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-2 mb-6 w-full sm:w-auto" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs flex items-center justify-center gap-2 cursor-pointer transition min-h-[36px]"
+                >
+                  <UploadCloud className="w-4 h-4" />
+                  <span>Choose images</span>
+                </button>
+                <button
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="px-4 py-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-medium text-xs border border-neutral-300 flex items-center justify-center gap-2 cursor-pointer transition min-h-[36px]"
+                >
+                  <Camera className="w-4 h-4 text-neutral-600" />
+                  <span>Camera</span>
+                </button>
+              </div>
+
+              {/* Supported Format Badges */}
+              <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-lg mb-6">
+                {['AVIF', 'WEBP', 'JPG', 'PNG', 'SVG', 'HEIC', 'CR2/CR3', 'NEF', 'ARW', 'DNG'].map((fmt) => (
+                  <span
+                    key={fmt}
+                    className="px-2 py-0.5 rounded text-[10px] font-mono text-neutral-600 bg-neutral-100 border border-neutral-200"
+                  >
+                    {fmt}
+                  </span>
+                ))}
+              </div>
+
+              {/* 1-Click Test Drive Row */}
+              <div 
+                className="w-full pt-4 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center gap-1.5 text-xs text-neutral-500 font-mono">
+                  <span>Samples:</span>
+                </div>
+
+                <div className="flex items-center justify-center sm:justify-start gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 no-scrollbar">
+                  <button
+                    onClick={() => loadDemoSample('photo')}
+                    className="px-2.5 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-medium transition cursor-pointer flex items-center gap-1.5 shrink-0"
+                    title="Landscape photo sample"
+                  >
+                    <ImageIcon className="w-3.5 h-3.5 text-neutral-500" />
+                    <span>Landscape</span>
+                  </button>
+                  <button
+                    onClick={() => loadDemoSample('portrait')}
+                    className="px-2.5 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-medium transition cursor-pointer flex items-center gap-1.5 shrink-0"
+                    title="Portrait photo sample"
+                  >
+                    <User className="w-3.5 h-3.5 text-neutral-500" />
+                    <span>Portrait</span>
+                  </button>
+                  <button
+                    onClick={() => loadDemoSample('vector')}
+                    className="px-2.5 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-medium transition cursor-pointer flex items-center gap-1.5 shrink-0"
+                    title="Vector art sample"
+                  >
+                    <PenTool className="w-3.5 h-3.5 text-neutral-500" />
+                    <span>Vector</span>
+                  </button>
+                  <button
+                    onClick={() => loadDemoSample('art')}
+                    className="px-2.5 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-medium transition cursor-pointer flex items-center gap-1.5 shrink-0"
+                    title="Abstract art sample"
+                  >
+                    <Palette className="w-3.5 h-3.5 text-neutral-500" />
+                    <span>Palette</span>
+                  </button>
+                </div>
+              </div>
             </div>
-
-            <h2 className="text-base sm:text-2xl font-bold text-neutral-900 mb-2 leading-snug">
-              Drop files here for <span className="text-blue-600 font-extrabold">{activeUtility.name}</span>, paste with <kbd className="hidden sm:inline px-1.5 py-0.5 rounded-md bg-neutral-100 border border-neutral-300 font-mono text-xs text-neutral-700">Ctrl + V</kbd><span className="sm:hidden">clipboard</span>, or <span className="underline decoration-blue-300 underline-offset-4 group-hover:decoration-blue-600 transition">browse</span>
-            </h2>
-          <p className="text-xs text-neutral-500 max-w-md mb-4 sm:mb-5 leading-relaxed">
-            Drag single files or an entire batch. Supports high-res AVIF, JPEG, PNG, WebP, SVG, Apple HEIC, and Camera RAW.
-          </p>
-
-          {/* Mobile Direct Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-4 sm:mb-6 w-full sm:w-auto" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs shadow-md shadow-blue-600/25 flex items-center justify-center gap-2 cursor-pointer transition min-h-[44px]"
-            >
-              <UploadCloud className="w-4 h-4" />
-              <span>Choose Images</span>
-            </button>
-            <button
-              onClick={() => cameraInputRef.current?.click()}
-              className="flex-1 sm:flex-none px-3.5 sm:px-4 py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 font-semibold text-xs border border-neutral-300/80 flex items-center justify-center gap-2 cursor-pointer transition min-h-[44px]"
-            >
-              <Camera className="w-4 h-4 text-blue-600" />
-              <span>Take Photo</span>
-            </button>
           </div>
-
-          {/* Supported Format Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-1 max-w-lg mb-4 sm:mb-8">
-            {['AVIF', 'WEBP', 'JPG', 'PNG', 'SVG', 'HEIC', 'CR2/CR3', 'NEF', 'ARW', 'DNG'].map((fmt) => (
-              <span
-                key={fmt}
-                className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-medium border bg-neutral-100 text-neutral-600 border-neutral-200/60"
-              >
-                {fmt}
-              </span>
-            ))}
-          </div>
-
-          {/* Instant 1-Click Test Drive Row */}
-          <div 
-            className="w-full pt-4 sm:pt-6 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500">
-              <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-              <span>No image on hand? Try instant sample:</span>
-            </div>
-
-            <div className="flex items-center justify-center sm:justify-start gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 no-scrollbar touch-pan-x">
-              <button
-                onClick={() => loadDemoSample('photo')}
-                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1 shrink-0 min-h-[38px]"
-                title="4K Landscape photo for MozJPEG compression and sharpening"
-              >
-                <span>🏔️ Landscape</span>
-              </button>
-              <button
-                onClick={() => loadDemoSample('portrait')}
-                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1 shrink-0 min-h-[38px]"
-                title="Portrait shot for passport photo studio"
-              >
-                <span>👤 Portrait</span>
-              </button>
-              <button
-                onClick={() => loadDemoSample('vector')}
-                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold transition cursor-pointer flex items-center gap-1 shrink-0 min-h-[38px]"
-                title="Graphic design for SVG vectorization and palette extraction"
-              >
-                <span>🎨 Logo Art</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
-    )}
-  </div>
 
       {/* Clean Collaborative Footer */}
       <Footer />
