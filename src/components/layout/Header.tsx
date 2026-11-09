@@ -20,9 +20,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
     activeHistory, 
     activeHistoryIndex, 
     isMobileToolsOpen, 
-    setIsMobileToolsOpen,
-    activeAppMode,
-    setActiveAppMode 
+    setIsMobileToolsOpen 
   } = useSession();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -59,62 +57,27 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
           <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-400 pl-2 border-l border-neutral-200">
             by Coralgenz &amp; Zorquelz
           </span>
-          {activeAppMode === 'studio' && (
-            <button
-              onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
-              className="md:hidden flex items-center gap-1 px-1.5 min-[360px]:px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-900 border border-blue-200 text-xs font-bold transition cursor-pointer shadow-2xs min-h-[32px] shrink-0"
-              title="Browse all 25 Studio Tools"
-              aria-label="Open 25 Studio Tools Navigation"
-            >
-              <Layers className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-              <span className="hidden min-[380px]:inline text-[11px]">Tools </span>
-              <span className="font-mono text-[10px] min-[360px]:text-[11px]">(25)</span>
-            </button>
-          )}
-        </div>
-
-        {/* Navigation Switcher: Studio vs Universal File Converter */}
-        <div className="flex items-center gap-0.5 sm:gap-1 bg-neutral-100 p-0.5 rounded-xl border border-neutral-200/80 shadow-2xs shrink-0">
           <button
-            onClick={() => setActiveAppMode('studio')}
-            className={`px-2 min-[360px]:px-2.5 py-1 rounded-lg text-xs transition cursor-pointer flex items-center gap-1 min-h-[30px] ${
-              activeAppMode === 'studio'
-                ? 'bg-white text-blue-900 font-bold shadow-2xs'
-                : 'text-neutral-600 hover:text-neutral-900 font-medium'
-            }`}
-            title="Image Studio (25 Client-side Tools)"
+            onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
+            className="md:hidden flex items-center gap-1 px-1.5 min-[360px]:px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-900 border border-blue-200 text-xs font-bold transition cursor-pointer shadow-2xs min-h-[32px] shrink-0"
+            title="Browse all 25 Studio Tools"
+            aria-label="Open 25 Studio Tools Navigation"
           >
-            <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-            <span className="hidden lg:inline">Image Studio</span>
-            <span className="lg:hidden">Studio</span>
-          </button>
-          <button
-            onClick={() => setActiveAppMode('converter')}
-            className={`px-2 min-[360px]:px-2.5 py-1 rounded-lg text-xs transition cursor-pointer flex items-center gap-1 min-h-[30px] ${
-              activeAppMode === 'converter'
-                ? 'bg-white text-blue-900 font-bold shadow-2xs'
-                : 'text-neutral-600 hover:text-neutral-900 font-medium'
-            }`}
-            title="Universal File Converter (Word, PDF, Images)"
-          >
-            <Repeat className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-            <span className="hidden lg:inline">File Converter</span>
-            <span className="lg:hidden">Converter</span>
-            <span className="px-1 py-0.2 rounded bg-blue-100 text-blue-800 font-mono text-[9px] font-bold">
-              NEW
-            </span>
+            <Layers className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <span className="hidden min-[380px]:inline text-[11px]">Tools </span>
+            <span className="font-mono text-[10px] min-[360px]:text-[11px]">(25)</span>
           </button>
         </div>
 
         {/* Center: Quiet Status Indicators */}
-        <div className="hidden xl:flex items-center gap-4 text-xs">
+        <div className="hidden md:flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5 text-neutral-600">
             <span className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 animate-pulse"></span>
             <Shield className="w-3.5 h-3.5 text-blue-600" />
             <span className="font-medium text-neutral-700">100% Private • Zero Cloud Uploads</span>
           </div>
 
-          {activeAppMode === 'studio' && images.length > 0 && (
+          {images.length > 0 && (
             <>
               <span className="text-neutral-300">•</span>
               <span className="font-mono text-neutral-500">
@@ -127,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
         {/* Right: Actions & Account */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* History Undo / Redo */}
-          {activeAppMode === 'studio' && images.length > 0 && (
+          {images.length > 0 && (
             <div className="flex items-center gap-0.5 px-1 py-0.5 rounded-lg bg-neutral-100/90 border border-neutral-200 shadow-2xs">
               <button
                 onClick={undo}
@@ -155,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
             </div>
           )}
 
-          {activeAppMode === 'studio' && onOpenShortcuts && (
+          {onOpenShortcuts && (
             <button
               onClick={onOpenShortcuts}
               className="hidden sm:flex px-2.5 py-1.5 rounded-lg border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-100 text-xs font-mono text-neutral-600 hover:text-neutral-900 transition items-center gap-1.5 cursor-pointer shadow-2xs"
@@ -168,7 +131,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
             </button>
           )}
 
-          {activeAppMode === 'studio' && images.length > 0 && (
+          {images.length > 0 && (
             <button
               onClick={clearWorkspace}
               className="px-2 sm:px-2.5 py-1.5 rounded-lg border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-100 text-xs font-medium text-neutral-600 hover:text-red-600 transition flex items-center gap-1 cursor-pointer min-h-[32px]"

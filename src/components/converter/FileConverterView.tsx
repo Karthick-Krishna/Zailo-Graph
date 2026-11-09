@@ -1,4 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useSession } from '../../context/SessionContext';
 import { 
   CONVERSION_TYPES, 
   ConversionType, 
@@ -49,7 +50,12 @@ const ICON_COMPONENTS: Record<string, React.FC<{ className?: string }>> = {
   ScanText,
 };
 
-export const FileConverterView: React.FC = () => {
+export interface FileConverterViewProps {
+  initialFiles?: File[];
+}
+
+export const FileConverterView: React.FC<FileConverterViewProps> = ({ initialFiles }) => {
+  const { activeImage } = useSession();
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<ConversionType | 'all'>('all');
   const [queue, setQueue] = useState<ConverterQueueItem[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -107,6 +113,24 @@ export const FileConverterView: React.FC = () => {
 
     setQueue(prev => [...prev, ...items]);
   }, [selectedTypeFilter, pdfPageSize, pdfOrientation, combineImagesIntoSinglePdf, ocrLang]);
+
+  useEffect(() => {
+    if (initialFiles && initialFiles.length > 0) {
+      addFilesToQueue(initialFiles);
+    }
+  }, [initialFiles, addFilesToQueue]);
+
+  const handleConvertActiveStudioImage = async () => {
+    if (!activeImage) return;
+    try {
+      const res = await fetch(activeImage.url);
+      const blob = await res.blob();
+      const file = new File([blob], activeImage.name, { type: activeImage.type || 'image/png' });
+      addFilesToQueue([file]);
+    } catch (err) {
+      console.error('Failed to load active image for converter:', err);
+    }
+  };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -518,7 +542,7 @@ export const FileConverterView: React.FC = () => {
           </p>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          <div className="flex flex-wrap items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => fileInputRef.current?.click()}
               className="px-4 sm:px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs shadow-md shadow-blue-600/25 flex items-center justify-center gap-2 cursor-pointer transition min-h-[42px]"
@@ -526,6 +550,17 @@ export const FileConverterView: React.FC = () => {
               <UploadCloud className="w-4 h-4" />
               <span>Choose Files to Convert</span>
             </button>
+
+            {activeImage && (
+              <button
+                onClick={handleConvertActiveStudioImage}
+                className="px-3.5 sm:px-4 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 active:bg-blue-200 border border-blue-200 text-blue-900 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition min-h-[42px]"
+                title={`Convert active image (${activeImage.name})`}
+              >
+                <Sparkles className="w-4 h-4 text-blue-600" />
+                <span className="truncate max-w-[200px]">Use Studio Image: {activeImage.name}</span>
+              </button>
+            )}
           </div>
 
           {/* Format Badges */}
@@ -965,3 +1000,4 @@ export const FileConverterView: React.FC = () => {
     </div>
   );
 };
+

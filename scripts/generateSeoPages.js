@@ -91,21 +91,21 @@ const UTILITIES_SEO = [
   },
   {
     id: 'webp-to-raster',
-    name: 'WebP to PNG/JPG Converter',
-    title: 'Free Online WebP to PNG & JPG Converter - Lossless Decompression | Zailo Graph',
-    description: 'Convert Google WebP images into universally compatible PNG or JPG photos. Preserve full transparency, inspect color depth, and export high-resolution master copies.',
-    keywords: 'webp to png, convert webp to jpg, webp decoder, free webp converter online, save webp as png, private webp to jpeg',
+    name: 'Universal File & Document Converter',
+    title: 'Free Online Universal File Converter - Word, PDF, Images & OCR | Zailo Graph',
+    description: 'Convert Word to PDF, PDF to Word, Images to PDF, PDF to Images, and Image to Word with OCR. 100% private, client-side, zero cloud uploads.',
+    keywords: 'universal file converter, word to pdf, pdf to word, image to pdf, pdf to image, image to word ocr, convert files online, private file converter',
     category: 'convert',
-    h1: 'WebP to Lossless PNG & JPEG Converter',
+    h1: 'Universal File & Document Converter',
     howTo: [
-      'Upload one or more .webp image files.',
-      'Select output format: Lossless PNG (with alpha transparency) or standard JPEG.',
-      'Review output preview in real time.',
-      'Download your converted image.'
+      'Upload files (DOCX, PDF, JPG, PNG, WEBP).',
+      'Select your desired target format (PDF, Word DOCX, Image, or OCR).',
+      'Click Convert Now to process in real time in your browser.',
+      'Download your converted document or export all as a ZIP.'
     ],
     faqs: [
-      { q: 'Will transparent backgrounds in WebP turn black or white in PNG?', a: 'Converting to PNG retains full transparent alpha channels without background fills.' },
-      { q: 'Can I batch convert WebP files?', a: 'Yes, add multiple WebP files to the queue and download as a ZIP archive.' }
+      { q: 'Are my files uploaded to any servers?', a: 'No, all conversions run 100% privately in your browser using local WebAssembly. Zero files leave your computer.' },
+      { q: 'Can I convert scanned images into editable Word documents?', a: 'Yes, our built-in OCR engine recognizes text and exports an editable .docx file.' }
     ]
   },
   {

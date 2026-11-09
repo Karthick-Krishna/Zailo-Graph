@@ -70,16 +70,16 @@ export const UTILITIES: UtilityDefinition[] = [
     outputFormats: ['image/jpeg', 'image/png'],
     supportsBatch: true,
   },
-  // 4. WebP to PNG/JPG
+  // 4. Universal File Converter
   {
     id: 'webp-to-raster',
-    name: 'WebP to PNG/JPG',
-    description: 'Decompress static and animated WebP images to lossless PNG or high-quality JPEG.',
+    name: 'Universal File Converter',
+    description: 'Convert between Word (DOC/DOCX), PDF, and Images (JPG, PNG, WebP) with OCR and multi-page batch export.',
     category: 'convert',
     isCompetitorPaid: false,
     icon: 'Repeat',
-    inputFormats: ['image/webp'],
-    outputFormats: ['image/png', 'image/jpeg'],
+    inputFormats: ['image/webp', 'image/jpeg', 'image/png', 'application/pdf', '.docx', '.doc', '.pdf'],
+    outputFormats: ['application/pdf', '.docx', 'image/png', 'image/jpeg', 'image/webp'],
     supportsBatch: true,
   },
   // 5. PNG/JPG to WebP

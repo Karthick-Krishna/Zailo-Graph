@@ -3,6 +3,7 @@ import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
 import { UTILITIES } from '../../types/utility';
 import { LandingWorkspace } from './LandingWorkspace';
+import { FileConverterView } from '../converter/FileConverterView';
 import { ComparisonSlider } from '../common/ComparisonSlider';
 import { GatedFeatureCard } from '../auth/GatedFeatureCard';
 import { ControlRack } from './ControlRack';
@@ -11,7 +12,17 @@ import { ToolSidebar } from './ToolSidebar';
 import { Sliders, Sparkles, Download, Layers, X } from 'lucide-react';
 
 export const Workspace: React.FC = () => {
-  const { images, activeImage, activeUtilityId, downloadImage, toastMessage, dismissToast, isMobileToolsOpen, setIsMobileToolsOpen } = useSession();
+  const { 
+    images, 
+    activeImage, 
+    activeUtilityId, 
+    downloadImage, 
+    toastMessage, 
+    dismissToast, 
+    isMobileToolsOpen, 
+    setIsMobileToolsOpen,
+    pendingConverterFiles 
+  } = useSession();
   const { isUtilityUnlocked } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showMobileControls, setShowMobileControls] = useState(false);
@@ -45,9 +56,13 @@ export const Workspace: React.FC = () => {
 
         {/* Center Canvas Viewport */}
         <main className={`flex-1 w-full max-w-full flex flex-col items-center justify-center overflow-x-hidden bg-transparent relative p-1.5 sm:p-4 ${
-          images.length > 0 ? 'pb-20 sm:pb-4' : ''
+          images.length > 0 && activeUtilityId !== 'webp-to-raster' ? 'pb-20 sm:pb-4' : ''
         }`}>
-          {images.length === 0 || !activeImage ? (
+          {activeUtilityId === 'webp-to-raster' ? (
+            <div className="w-full h-full flex-1 overflow-y-auto">
+              <FileConverterView initialFiles={pendingConverterFiles} />
+            </div>
+          ) : images.length === 0 || !activeImage ? (
             <LandingWorkspace />
           ) : !isUnlocked ? (
             <div className="flex-1 flex items-center justify-center p-4 sm:p-6 w-full">
@@ -72,11 +87,11 @@ export const Workspace: React.FC = () => {
         </main>
 
         {/* Right Utility Configuration Rack (Desktop) */}
-        {images.length > 0 && activeImage && isUnlocked && <ControlRack />}
+        {images.length > 0 && activeImage && isUnlocked && activeUtilityId !== 'webp-to-raster' && <ControlRack />}
       </div>
 
       {/* Mobile Floating Command Dock (Optimized for all screen sizes down to 320px with safe area) */}
-      {images.length > 0 && activeImage && isUnlocked && (
+      {images.length > 0 && activeImage && isUnlocked && activeUtilityId !== 'webp-to-raster' && (
         <div 
           className="md:hidden fixed left-2 right-2 sm:left-3 sm:right-3 z-40 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-2xl rounded-2xl p-1.5 flex items-center justify-between gap-1 sm:gap-1.5 pointer-events-auto"
           style={{ bottom: 'max(0.5rem, env(safe-area-inset-bottom, 0.5rem))' }}

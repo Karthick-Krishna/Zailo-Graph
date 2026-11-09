@@ -132,3 +132,4 @@ export interface ConversionResult {
   pages?: ConvertedPageResult[];
   extraText?: string;
 }
+

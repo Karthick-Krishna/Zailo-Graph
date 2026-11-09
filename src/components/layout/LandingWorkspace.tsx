@@ -16,7 +16,16 @@ import { Base64Controls } from '../utilities/Base64Controls';
 import { Footer } from './Footer';
 
 export const LandingWorkspace: React.FC = () => {
-  const { addImages, activeUtilityId, setActiveUtilityId, savedSessionCount, restoreSavedSession, clearSavedSession, setIsMobileToolsOpen } = useSession();
+  const { 
+    addImages, 
+    activeUtilityId, 
+    setActiveUtilityId, 
+    savedSessionCount, 
+    restoreSavedSession, 
+    clearSavedSession, 
+    setIsMobileToolsOpen,
+    setPendingConverterFiles 
+  } = useSession();
   const { isUtilityUnlocked } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
   const [showBase64Modal, setShowBase64Modal] = useState(false);
@@ -40,13 +49,33 @@ export const LandingWorkspace: React.FC = () => {
     setIsDragOver(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      await addImages(Array.from(e.dataTransfer.files));
+      const files = Array.from(e.dataTransfer.files);
+      const isDoc = files.some(f => {
+        const n = f.name.toLowerCase();
+        return n.endsWith('.docx') || n.endsWith('.doc') || n.endsWith('.pdf') || f.type === 'application/pdf';
+      });
+      if (isDoc) {
+        setPendingConverterFiles(files);
+        setActiveUtilityId('webp-to-raster');
+      } else {
+        await addImages(files);
+      }
     }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      await addImages(Array.from(e.target.files));
+      const files = Array.from(e.target.files);
+      const isDoc = files.some(f => {
+        const n = f.name.toLowerCase();
+        return n.endsWith('.docx') || n.endsWith('.doc') || n.endsWith('.pdf') || f.type === 'application/pdf';
+      });
+      if (isDoc) {
+        setPendingConverterFiles(files);
+        setActiveUtilityId('webp-to-raster');
+      } else {
+        await addImages(files);
+      }
       e.target.value = '';
     }
   };
@@ -196,7 +225,7 @@ export const LandingWorkspace: React.FC = () => {
         ref={fileInputRef}
         type="file"
         multiple
-        accept="image/*,.heic,.heif,.cr2,.cr3,.nef,.arw,.dng,.svg"
+        accept="image/*,.heic,.heif,.cr2,.cr3,.nef,.arw,.dng,.svg,.docx,.doc,.pdf"
         onChange={handleFileChange}
         className="hidden"
       />
@@ -365,7 +394,7 @@ export const LandingWorkspace: React.FC = () => {
 
           {/* Supported Format Badges */}
           <div className="flex flex-wrap items-center justify-center gap-1 max-w-lg mb-4 sm:mb-8">
-            {['AVIF', 'WEBP', 'JPG', 'PNG', 'SVG', 'HEIC', 'CR2/CR3', 'NEF', 'ARW', 'DNG'].map((fmt) => (
+            {['AVIF', 'WEBP', 'JPG', 'PNG', 'PDF', 'DOCX', 'SVG', 'HEIC', 'CR2/CR3', 'NEF', 'ARW', 'DNG'].map((fmt) => (
               <span
                 key={fmt}
                 className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-medium border bg-neutral-100 text-neutral-600 border-neutral-200/60"

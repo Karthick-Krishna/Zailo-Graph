@@ -3,7 +3,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { SessionProvider, useSession } from './context/SessionContext';
 import { Header } from './components/layout/Header';
 import { Workspace } from './components/layout/Workspace';
-import { FileConverterView } from './components/converter/FileConverterView';
 import { AuthModal } from './components/auth/AuthModal';
 import { OnboardingModal } from './components/auth/OnboardingModal';
 import { SettingsModal } from './components/settings/SettingsModal';
@@ -26,7 +25,6 @@ const AppContent: React.FC = () => {
     redo,
     canUndo,
     canRedo,
-    activeAppMode,
   } = useSession();
 
   // Global Keyboard Shortcuts
@@ -115,11 +113,7 @@ const AppContent: React.FC = () => {
       <ActiveAuroraBackground />
 
       <Header onOpenShortcuts={() => setIsShortcutsOpen(true)} />
-      {activeAppMode === 'converter' ? (
-        <FileConverterView />
-      ) : (
-        <Workspace />
-      )}
+      <Workspace />
       <AuthModal />
       <OnboardingModal />
       <SettingsModal />

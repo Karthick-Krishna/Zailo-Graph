@@ -95,14 +95,13 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
   isMobileDrawer = false,
   onCloseMobile,
 }) => {
-  const { activeUtilityId, setActiveUtilityId, activeAppMode, setActiveAppMode } = useSession();
+  const { activeUtilityId, setActiveUtilityId } = useSession();
   const { user, isUtilityUnlocked } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<UtilityCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleToolSelect = (id: string) => {
-    setActiveAppMode('studio');
     setActiveUtilityId(id);
     if (isMobileDrawer && onCloseMobile) {
       onCloseMobile();
@@ -153,7 +152,7 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
   }, [selectedCategory, searchQuery]);
 
   const renderToolButton = (u: UtilityDefinition) => {
-    const isSelected = u.id === activeUtilityId && activeAppMode === 'studio';
+    const isSelected = u.id === activeUtilityId;
     const isLocked = !isUtilityUnlocked(u.id);
     const IconComponent = ICON_MAP[u.icon] || Sparkles;
 
@@ -383,33 +382,6 @@ export const ToolSidebar: React.FC<ToolSidebarProps> = ({
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Universal File Converter Feature Switcher */}
-      {!isCollapsed && (
-        <div className="px-3 pt-2.5 pb-1">
-          <button
-            onClick={() => {
-              setActiveAppMode('converter');
-              if (isMobileDrawer && onCloseMobile) onCloseMobile();
-            }}
-            className="w-full p-2.5 rounded-xl bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50 hover:from-blue-100 hover:to-sky-100 border border-blue-200/90 text-left transition cursor-pointer flex items-center justify-between group shadow-2xs"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
-                <Repeat className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-neutral-900 truncate flex items-center gap-1.5">
-                  <span>File Converter</span>
-                  <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-blue-600 text-white font-bold">NEW</span>
-                </p>
-                <p className="text-[10px] text-neutral-500 truncate">Word, PDF, OCR &amp; Images</p>
-              </div>
-            </div>
-            <ArrowRight className="w-3.5 h-3.5 text-blue-600 shrink-0 group-hover:translate-x-0.5 transition-transform" />
-          </button>
         </div>
       )}
 
