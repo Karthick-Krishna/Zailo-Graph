@@ -1,12 +1,13 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
-import { Shield, Check, X, Zap, Loader2, AlertCircle } from 'lucide-react';
+import { Shield, Check, X, Zap, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 
 export const AuthModal: React.FC = () => {
   const { 
     authModal, 
     closeAuthModal, 
+    setAuthModalMode,
     signInWithGoogle, 
     isLoading, 
     authError, 
@@ -29,6 +30,8 @@ export const AuthModal: React.FC = () => {
 
   if (!authModal.isOpen) return null;
 
+  const mode = authModal.mode || 'sign_in';
+
   const handleGoogleSignIn = async () => {
     await signInWithGoogle();
   };
@@ -44,7 +47,7 @@ export const AuthModal: React.FC = () => {
       case 'resolution_limit':
         return 'Unlock Unconstrained Master Exports';
       default:
-        return 'Continue to Imazora';
+        return mode === 'sign_up' ? 'Join Imazora Free' : 'Welcome Back to Imazora';
     }
   };
 
@@ -114,18 +117,61 @@ export const AuthModal: React.FC = () => {
           </div>
         )}
 
-        <div className="p-5 sm:p-6 space-y-5">
-          <div className="text-center space-y-1.5">
+        <div className="p-5 sm:p-6 space-y-4">
+          {/* Segmented Mode Selector: Sign In vs Sign Up */}
+          <div className="flex p-1 bg-neutral-100 rounded-2xl border border-neutral-200/80">
+            <button
+              type="button"
+              onClick={() => {
+                clearAuthError();
+                setAuthModalMode('sign_in');
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                mode === 'sign_in'
+                  ? 'bg-white text-neutral-900 shadow-xs font-bold'
+                  : 'text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <span>Sign In</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                clearAuthError();
+                setAuthModalMode('sign_up');
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                mode === 'sign_up'
+                  ? 'bg-white text-neutral-900 shadow-xs font-bold'
+                  : 'text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${mode === 'sign_up' ? 'text-violet-600' : 'text-neutral-400'}`} />
+              <span>Sign Up</span>
+            </button>
+          </div>
+
+          {/* Contextual Description */}
+          <div className="text-center space-y-1">
             <h4 className="text-base sm:text-lg font-bold text-neutral-900">
-              Sign in with Google
+              {mode === 'sign_up' ? 'Create Your Account' : 'Welcome Back'}
             </h4>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">
-              Authenticate instantly with your Google account. Your image files are processed 100% locally in your browser.
+              {mode === 'sign_up'
+                ? 'Sign up with Google to unlock all 25 pro tools, batch queues, and RAW editing.'
+                : 'Sign in with Google to access your private workspace and unlocked features.'}
             </p>
           </div>
 
-          {/* Primary Google-Only Sign In Action */}
-          <div className="space-y-3 pt-1">
+          {/* Smart Notice for Existing Users on Sign Up */}
+          {mode === 'sign_up' && (
+            <div className="p-2.5 rounded-xl bg-violet-50/80 border border-violet-100 text-[11px] text-violet-900 leading-relaxed text-center">
+              💡 <span className="font-semibold">Already have an account?</span> Signing up with your existing Google account will automatically log you directly into your workspace.
+            </div>
+          )}
+
+          {/* Primary Google-Only Action */}
+          <div className="space-y-2.5 pt-1">
             <button
               type="button"
               onClick={handleGoogleSignIn}
@@ -158,14 +204,45 @@ export const AuthModal: React.FC = () => {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                     />
                   </svg>
-                  <span className="text-neutral-800 font-medium text-sm">Continue with Google</span>
+                  <span className="text-neutral-800 font-medium text-sm">
+                    {mode === 'sign_up' ? 'Sign Up with Google' : 'Sign In with Google'}
+                  </span>
                 </>
               )}
             </button>
 
-            <p className="text-[11px] text-center text-neutral-400">
-              One-click instant authentication • No password required
-            </p>
+            {/* Mode switch link */}
+            <div className="text-center pt-1">
+              {mode === 'sign_in' ? (
+                <p className="text-xs text-neutral-500">
+                  Don't have an account yet?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearAuthError();
+                      setAuthModalMode('sign_up');
+                    }}
+                    className="font-semibold text-violet-600 hover:text-violet-700 underline underline-offset-2 cursor-pointer"
+                  >
+                    Sign Up
+                  </button>
+                </p>
+              ) : (
+                <p className="text-xs text-neutral-500">
+                  Already have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearAuthError();
+                      setAuthModalMode('sign_in');
+                    }}
+                    className="font-semibold text-violet-600 hover:text-violet-700 underline underline-offset-2 cursor-pointer"
+                  >
+                    Sign In
+                  </button>
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Feature Highlights Grid */}

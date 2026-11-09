@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { User, UserTier, Entitlements, AuthModalState, AuthModalReason, PRO_GATED_UTILITIES } from '../types/auth';
+import { User, UserTier, Entitlements, AuthModalState, AuthModalReason, AuthModalMode, PRO_GATED_UTILITIES } from '../types/auth';
 import { auth, googleProvider } from '../services/firebase';
 import { 
   onAuthStateChanged, 
@@ -66,8 +66,9 @@ interface AuthContextType {
   // Actions (STRICTLY Google Only)
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
-  openAuthModal: (reason: AuthModalReason, targetUtilityId?: string, customMessage?: string) => void;
+  openAuthModal: (reason?: AuthModalReason, targetUtilityId?: string, customMessage?: string, mode?: AuthModalMode) => void;
   closeAuthModal: () => void;
+  setAuthModalMode: (mode: AuthModalMode) => void;
   clearAuthError: () => void;
   openSettings: () => void;
   closeSettings: () => void;
@@ -95,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [authModal, setAuthModal] = useState<AuthModalState>({
     isOpen: false,
+    mode: 'sign_in',
     reason: 'manual',
   });
 
@@ -111,17 +113,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Process authenticated user returned from Google OAuth
   const handleAuthSuccess = useCallback((fbUser: FirebaseUser) => {
+    setAuthError(null);
+    setToast(null);
     const { profile, isNewUser } = createOrSyncProfile(fbUser);
     const mapped = mapProfileToUser(profile);
     setUser(mapped);
     closeAuthModal();
 
     if (isNewUser) {
-      // First-time login: show smooth display-name onboarding screen
+      // First-time signup: show smooth display-name onboarding screen
       setIsOnboardingOpen(true);
     } else {
-      // Returning user: onboarding already complete, restore profile and welcome back
-      showToast('Successfully signed in with Google.', 'success');
+      // User has already signed up: automatically log into existing account and welcome back
+      showToast(`Welcome back, ${mapped.name || 'Creator'}!`, 'success');
     }
   }, [showToast]);
 
@@ -151,6 +155,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Authenticated with Google: sync profile while strictly preserving custom display names
         const { profile } = createOrSyncProfile(fbUser);
         setUser(mapProfileToUser(profile));
+        setAuthError(null);
+        // Automatically close auth modal if it was open
+        setAuthModal((prev) => (prev.isOpen ? { ...prev, isOpen: false } : prev));
       } else {
         // If not authenticated in Firebase, check if an existing session is cached
         const cached = getActiveSession();
@@ -165,10 +172,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, [handleAuthSuccess, showToast]);
 
-  const openAuthModal = (reason: AuthModalReason, targetUtilityId?: string, customMessage?: string) => {
+  const openAuthModal = (
+    reason: AuthModalReason = 'manual', 
+    targetUtilityId?: string, 
+    customMessage?: string,
+    mode: AuthModalMode = 'sign_in'
+  ) => {
     setAuthError(null);
     setAuthModal({
       isOpen: true,
+      mode,
       reason,
       targetUtilityId,
       customMessage,
@@ -178,6 +191,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const closeAuthModal = () => {
     setAuthError(null);
     setAuthModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const setAuthModalMode = (mode: AuthModalMode) => {
+    setAuthModal(prev => ({ ...prev, mode }));
   };
 
   const clearAuthError = () => {
@@ -197,6 +214,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * - Eliminates manual confirmation step
    * - Uses popup flow with same-origin-allow-popups for immediate completion
    * - Automatically detects authenticated session
+   * - Eliminates false 'cancelled' toasts by verifying auth.currentUser resolution
    * - Seamlessly transitions to onboarding (new user) or workspace (returning user)
    */
   const signInWithGoogle = async () => {
@@ -208,13 +226,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const result = await signInWithPopup(auth, googleProvider);
       if (result?.user) {
         handleAuthSuccess(result.user);
+        return;
       }
     } catch (popupErr: any) {
-      console.warn('Google Sign-In Popup error:', popupErr);
+      console.warn('Google Sign-In Popup event:', popupErr);
+
+      // Verify if authentication actually succeeded despite popup close event timing
+      if (auth.currentUser) {
+        handleAuthSuccess(auth.currentUser);
+        return;
+      }
+
+      // Check if auth state resolves during a brief grace window (OAuth postMessage handshake delay)
+      let resolvedUser: FirebaseUser | null = auth.currentUser;
+      if (!resolvedUser) {
+        for (let i = 0; i < 5; i++) {
+          await new Promise((r) => setTimeout(r, 250));
+          if (auth.currentUser) {
+            resolvedUser = auth.currentUser;
+            break;
+          }
+        }
+      }
+
+      if (resolvedUser) {
+        handleAuthSuccess(resolvedUser);
+        return;
+      }
 
       if (popupErr.code === 'auth/popup-closed-by-user') {
-        showToast('Google sign-in was cancelled.', 'info');
-        setAuthError('Google sign-in was cancelled.');
+        // Only show cancellation if authentication truly was not completed after grace period
+        if (!auth.currentUser) {
+          showToast('Google sign-in was cancelled.', 'info');
+          setAuthError('Google sign-in was cancelled.');
+        }
       } else if (popupErr.code === 'auth/cancelled-popup-request') {
         // A prior popup was superseded, silently ignore
       } else if (popupErr.code === 'auth/network-request-failed') {
@@ -426,6 +471,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         openAuthModal,
         closeAuthModal,
+        setAuthModalMode,
         clearAuthError,
         openSettings,
         closeSettings,

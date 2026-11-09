@@ -85,6 +85,18 @@ export const createOrSyncProfile = (fbUser: FirebaseUser): { profile: UserProfil
   const realEmail = fbUser.email || '';
   const photoUrl = fbUser.photoURL || undefined;
 
+  // Determine if this user already signed up previously:
+  // 1. Existing local profile already completed onboarding
+  // 2. Existing local profile has a saved display name
+  // 3. Firebase account metadata creation time is earlier than the last sign-in time by >10s
+  const isPreviouslyRegistered = !!(
+    existing?.onboarding_completed ||
+    (existing?.display_name && existing.display_name.trim().length > 0 && existing.display_name !== googleName) ||
+    (fbUser.metadata?.creationTime &&
+      fbUser.metadata?.lastSignInTime &&
+      new Date(fbUser.metadata.creationTime).getTime() < new Date(fbUser.metadata.lastSignInTime).getTime() - 10000)
+  );
+
   if (existing) {
     // Returning user: update latest Google credentials while strictly preserving custom display name
     const updated: UserProfile = {
@@ -92,23 +104,25 @@ export const createOrSyncProfile = (fbUser: FirebaseUser): { profile: UserProfil
       email: realEmail || existing.email,
       google_name: googleName,
       avatar_url: photoUrl || existing.avatar_url,
+      onboarding_completed: isPreviouslyRegistered ? true : existing.onboarding_completed,
       updated_at: now,
     };
     saveUserProfile(updated);
     return {
       profile: updated,
-      isNewUser: !updated.onboarding_completed,
+      isNewUser: !isPreviouslyRegistered,
     };
   }
 
-  // First-time new user: initialize draft profile
+  // User profile not found in current localStorage:
+  // If they previously registered (e.g. established Firebase account), mark onboarding completed
   const newProfile: UserProfile = {
     id: fbUser.uid,
     email: realEmail,
     google_name: googleName,
     avatar_url: photoUrl,
     display_name: googleName,
-    onboarding_completed: false,
+    onboarding_completed: isPreviouslyRegistered,
     created_at: fbUser.metadata?.creationTime || now,
     updated_at: now,
   };
@@ -116,7 +130,7 @@ export const createOrSyncProfile = (fbUser: FirebaseUser): { profile: UserProfil
   saveUserProfile(newProfile);
   return {
     profile: newProfile,
-    isNewUser: true,
+    isNewUser: !isPreviouslyRegistered,
   };
 };
 

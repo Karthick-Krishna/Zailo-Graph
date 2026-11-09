@@ -56,8 +56,11 @@ export type AuthModalReason =
   | 'resolution_limit'
   | 'manual';
 
+export type AuthModalMode = 'sign_in' | 'sign_up';
+
 export interface AuthModalState {
   isOpen: boolean;
+  mode: AuthModalMode;
   reason: AuthModalReason;
   targetUtilityId?: string;
   customMessage?: string;

@@ -109,12 +109,23 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
           )}
 
           {!user ? (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Secondary Sign In Button */}
               <button
-                onClick={() => openAuthModal('manual')}
-                className="px-2.5 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 hover:from-violet-950 hover:to-indigo-950 text-white text-xs font-semibold transition-all shadow-xs hover:shadow-md hover:shadow-violet-500/10 cursor-pointer flex items-center gap-1.5 border border-neutral-800 min-h-[34px] sm:min-h-[38px] whitespace-nowrap"
+                type="button"
+                onClick={() => openAuthModal('manual', undefined, undefined, 'sign_in')}
+                className="px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-neutral-300 hover:border-neutral-400 bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-semibold transition cursor-pointer min-h-[34px] sm:min-h-[36px] whitespace-nowrap shadow-2xs"
               >
-                <span>Sign In</span>
+                Sign In
+              </button>
+
+              {/* Primary Sign Up Button */}
+              <button
+                type="button"
+                onClick={() => openAuthModal('manual', undefined, undefined, 'sign_up')}
+                className="px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 hover:from-violet-950 hover:to-indigo-950 text-white text-xs font-semibold transition-all shadow-xs hover:shadow-md hover:shadow-violet-500/10 cursor-pointer flex items-center gap-1.5 border border-neutral-800 min-h-[34px] sm:min-h-[36px] whitespace-nowrap"
+              >
+                <span>Sign Up</span>
               </button>
             </div>
           ) : (

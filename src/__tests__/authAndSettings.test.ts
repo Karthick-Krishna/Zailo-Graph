@@ -191,4 +191,46 @@ describe('Imazora Google Authentication, Profile Architecture & Settings', () =>
       expect(isConfirmed('  Alex Kumar  ')).toBe(true);
     });
   });
+
+  describe('Sign In vs Sign Up & Returning User Recognition', () => {
+    it('automatically logs in an already signed up user when they click sign up again', () => {
+      const user = {
+        uid: 'user_signed_up_already',
+        email: 'returning.creator@gmail.com',
+        displayName: 'Returning Creator',
+        metadata: {
+          creationTime: '2026-11-01T00:00:00.000Z',
+          lastSignInTime: '2026-11-09T10:00:00.000Z',
+        },
+      } as any;
+
+      // First signup session
+      const first = createOrSyncProfile(user);
+      expect(first.isNewUser).toBe(false); // Because creationTime is earlier than lastSignInTime by >10s
+      completeOnboarding(user.uid, 'Custom Creative Alias');
+
+      // User signs out, then later clicks "Sign Up" button again
+      const second = createOrSyncProfile(user);
+      expect(second.isNewUser).toBe(false);
+      expect(second.profile.onboarding_completed).toBe(true);
+      expect(second.profile.display_name).toBe('Custom Creative Alias');
+    });
+
+    it('identifies prior Firebase account creation even without local storage', () => {
+      const existingFirebaseUser = {
+        uid: 'established_uid_456',
+        email: 'prior.account@gmail.com',
+        displayName: 'Prior Account',
+        metadata: {
+          creationTime: '2026-10-01T00:00:00.000Z',
+          lastSignInTime: '2026-11-09T00:00:00.000Z',
+        },
+      } as any;
+
+      const result = createOrSyncProfile(existingFirebaseUser);
+      // Because creationTime is well in the past, they already signed up in a prior session
+      expect(result.isNewUser).toBe(false);
+      expect(result.profile.onboarding_completed).toBe(true);
+    });
+  });
 });
