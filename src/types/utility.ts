@@ -34,11 +34,11 @@ export const UTILITIES: UtilityDefinition[] = [
     outputFormats: ['image/webp', 'image/avif', 'image/jpeg', 'image/png'],
     supportsBatch: true,
   },
-  // 1. Batch Image Resizing
+  // 1. Image Resolution Converter
   {
     id: 'batch-resize',
-    name: 'Batch Image Resizing',
-    description: 'Scale multiple images by exact dimensions, percentage, or aspect ratio using high-fidelity resampling.',
+    name: 'Image Resolution Converter',
+    description: 'Convert and scale image resolution by exact pixel dimensions, percentage, or aspect ratio using high-fidelity resampling.',
     category: 'optimize',
     isCompetitorPaid: false,
     icon: 'Maximize2',
@@ -152,18 +152,6 @@ export const UTILITIES: UtilityDefinition[] = [
     outputFormats: ['image/jpeg', 'image/png', 'image/webp'],
     supportsBatch: true,
   },
-  // 11. Circular Avatar and Image Cropper
-  {
-    id: 'avatar-crop',
-    name: 'Circular Avatar & Cropper',
-    description: 'Crop images into perfect circles, rounded rectangles, or standard aspect ratios with pan/zoom.',
-    category: 'edit',
-    isCompetitorPaid: false,
-    icon: 'Crop',
-    inputFormats: ['image/jpeg', 'image/png', 'image/webp'],
-    outputFormats: ['image/png'],
-    supportsBatch: false,
-  },
   // 12. Social Media Image Presets
   {
     id: 'social-presets',
@@ -239,29 +227,42 @@ export const UTILITIES: UtilityDefinition[] = [
     outputFormats: ['image/png', 'image/jpeg', 'application/zip'],
     supportsBatch: false,
   },
-  // 19. EXIF Metadata Viewer and Extractor
+  // 18. Favicon and App Icon Studio
   {
-    id: 'exif-viewer',
-    name: 'EXIF Metadata Viewer',
-    description: 'Inspect camera parameters, lens settings, exposure, and interactive GPS coordinates on a private map.',
+    id: 'favicon-studio',
+    name: 'Favicon & App Icon Studio',
+    description: 'Generate multi-size .ico files, Apple Touch Icons, and manifest.json web app packages.',
+    category: 'social',
+    isCompetitorPaid: true,
+    badge: 'Pro Unlocked',
+    icon: 'AppWindow',
+    inputFormats: ['image/png', 'image/jpeg', 'image/svg+xml'],
+    outputFormats: ['image/x-icon', 'image/png', 'application/zip'],
+    supportsBatch: false,
+  },
+  // 19. Photo Metadata Editor
+  {
+    id: 'photo-metadata-editor',
+    name: 'Photo Metadata Editor',
+    description: 'View, edit, add, or strip EXIF and IPTC metadata: Author, Copyright, Date, Camera info, and GPS coordinates.',
     category: 'metadata',
     isCompetitorPaid: false,
     icon: 'FileSearch',
-    inputFormats: ['image/jpeg', 'image/png', 'image/webp', 'image/tiff'],
-    outputFormats: ['application/json'],
-    supportsBatch: false,
+    inputFormats: ['image/jpeg', 'image/png', 'image/webp', 'image/tiff', 'image/avif'],
+    outputFormats: ['image/jpeg', 'image/png', 'image/webp'],
+    supportsBatch: true,
   },
-  // 20. EXIF Metadata Removal
+  // 20. Video Metadata Editor
   {
-    id: 'exif-remover',
-    name: 'Lossless EXIF Stripper',
-    description: 'Sanitize GPS, timestamps, and device serial numbers losslessly without re-compressing image pixels.',
+    id: 'video-metadata-editor',
+    name: 'Video Metadata Editor',
+    description: 'Inspect and edit video container tags: Title, Author, Year, Description, and Copyright for MP4, MOV, and WebM.',
     category: 'metadata',
     isCompetitorPaid: true,
     badge: 'Pro Unlocked',
-    icon: 'ShieldCheck',
-    inputFormats: ['image/jpeg', 'image/png', 'image/webp'],
-    outputFormats: ['image/jpeg', 'image/png', 'image/webp'],
+    icon: 'Video',
+    inputFormats: ['video/mp4', 'video/webm', 'video/quicktime', '.mp4', '.mov', '.webm'],
+    outputFormats: ['video/mp4', 'video/webm', 'video/quicktime'],
     supportsBatch: true,
   },
   // 21. Privacy Blur and Redaction
@@ -276,57 +277,6 @@ export const UTILITIES: UtilityDefinition[] = [
     inputFormats: ['image/jpeg', 'image/png', 'image/webp'],
     outputFormats: ['image/png', 'image/jpeg'],
     supportsBatch: false,
-  },
-  // 22. Favicon and App Icon Studio
-  {
-    id: 'favicon-studio',
-    name: 'Favicon & App Icon Studio',
-    description: 'Generate multi-size .ico files, Apple Touch Icons, and manifest.json web app packages.',
-    category: 'social',
-    isCompetitorPaid: true,
-    badge: 'Pro Unlocked',
-    icon: 'AppWindow',
-    inputFormats: ['image/png', 'image/jpeg', 'image/svg+xml'],
-    outputFormats: ['image/x-icon', 'image/png', 'application/zip'],
-    supportsBatch: false,
-  },
-  // 23. Image to Base64 URI
-  {
-    id: 'image-to-base64',
-    name: 'Image to Base64 URI',
-    description: 'Convert any image to a data URI string, HTML <img> tag, or CSS background declaration.',
-    category: 'convert',
-    isCompetitorPaid: false,
-    icon: 'Binary',
-    inputFormats: ['image/*'],
-    outputFormats: ['text/plain'],
-    supportsBatch: true,
-  },
-  // 24. Base64 to Image Decoder
-  {
-    id: 'base64-to-image',
-    name: 'Base64 to Image Decoder',
-    description: 'Paste base64 strings or data URIs to inspect, preview, and download as clean image files.',
-    category: 'convert',
-    isCompetitorPaid: false,
-    icon: 'FileCode',
-    inputFormats: ['text/plain'],
-    outputFormats: ['image/png', 'image/jpeg', 'image/webp'],
-    supportsBatch: false,
-  },
-  // 25. Camera RAW to JPG Conversion
-  {
-    id: 'camera-raw',
-    name: 'Camera RAW to JPG Studio',
-    description: 'Instant preview extraction and true 14-bit demosaicing for Canon CR2, Nikon NEF, Sony ARW, and DNG.',
-    category: 'convert',
-    isCompetitorPaid: true,
-    badge: 'Pro Unlocked',
-    icon: 'Camera',
-    inputFormats: ['.cr2', '.cr3', '.nef', '.arw', '.dng', '.orf', '.raf'],
-    outputFormats: ['image/jpeg', 'image/png'],
-    supportsBatch: true,
-    isCloudHybrid: true,
   },
 ];
 

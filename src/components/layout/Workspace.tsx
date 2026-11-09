@@ -20,6 +20,7 @@ export const Workspace: React.FC = () => {
 
   const activeUtility = UTILITIES.find(u => u.id === activeUtilityId) || UTILITIES[0];
   const isUnlocked = isUtilityUnlocked(activeUtilityId);
+  const isStandalone = typeof window !== 'undefined' && window.location.pathname.includes('/tools/');
 
   return (
     <div className="flex-1 w-full max-w-full flex flex-col h-[calc(100dvh-56px)] overflow-x-hidden overflow-y-hidden bg-transparent">
@@ -36,13 +37,15 @@ export const Workspace: React.FC = () => {
         </div>
       )}
 
-      {/* Main Studio Area: Left Vertical Navigation Sidebar + Center Canvas Viewport + Right Control Rack */}
+      {/* Main Studio Area: Left Vertical Navigation Sidebar (hidden in standalone mode) + Center Canvas Viewport + Right Control Rack */}
       <div className="flex-1 w-full max-w-full flex overflow-x-hidden overflow-y-hidden">
-        {/* Left Vertical Tool Navigation Sidebar (Desktop Rail / Expanded) */}
-        <ToolSidebar
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
-        />
+        {/* Left Vertical Tool Navigation Sidebar (Only rendered on main studio hub) */}
+        {!isStandalone && (
+          <ToolSidebar
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
+          />
+        )}
 
         {/* Center Canvas Viewport */}
         <main className={`flex-1 w-full max-w-full flex flex-col items-center justify-center overflow-x-hidden bg-transparent relative p-1.5 sm:p-4 ${

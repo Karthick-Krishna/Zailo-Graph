@@ -5,11 +5,10 @@ export const PRO_GATED_UTILITIES: string[] = [
   'workflow-recipes',
   'svg-to-png',
   'png-to-svg',
-  'camera-raw',
   'watermark',
   'collage-maker',
   'passport-photo',
-  'exif-remover',
+  'video-metadata-editor',
   'privacy-redact',
   'favicon-studio',
 ];

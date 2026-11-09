@@ -38,7 +38,8 @@ import {
   RotateCw,
   Type,
   Grid,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Video
 } from 'lucide-react';
 
 export const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
@@ -71,10 +72,11 @@ export const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   Type,
   Grid,
   ArrowRightLeft,
+  Video,
 };
 
 const CATEGORIES: Array<{ id: UtilityCategory | 'all'; label: string }> = [
-  { id: 'all', label: 'All (24)' },
+  { id: 'all', label: 'All (20)' },
   { id: 'recipes', label: 'Recipes' },
   { id: 'optimize', label: 'Optimize' },
   { id: 'convert', label: 'Convert' },

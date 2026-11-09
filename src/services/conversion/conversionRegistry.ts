@@ -6,7 +6,7 @@ export const CONVERSION_CATEGORIES: ConversionCategory[] = [
     title: 'Documents',
     description: 'Word DOCX, DOC, PDF, RTF, ODT, and TXT conversions with layout preservation',
     icon: 'FileText',
-    badge: '11 Formats',
+    badge: '10 Formats',
   },
   {
     id: 'presentations',
@@ -90,18 +90,6 @@ export const CONVERSIONS: ConversionDefinition[] = [
     outputExtension: 'doc',
     outputMimeType: 'application/msword',
     description: 'Export modern DOCX to classic Word document format for legacy compatibility.',
-  },
-  {
-    id: 'pdf-to-txt',
-    name: 'PDF to TXT',
-    category: 'documents',
-    sourceFormat: 'PDF',
-    targetFormat: 'TXT',
-    acceptsExtensions: ['.pdf'],
-    acceptsMimeTypes: ['application/pdf'],
-    outputExtension: 'txt',
-    outputMimeType: 'text/plain',
-    description: 'Extract raw text, paragraphs, and sections from PDF into clean UTF-8 plain text.',
   },
   {
     id: 'txt-to-pdf',

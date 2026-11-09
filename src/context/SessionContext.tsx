@@ -152,10 +152,10 @@ export const getDefaultParamsForUtility = (utilityId: string, image: { width: nu
         targetHeightMm: 51,
         whitenedBackground: true,
       };
-    case 'exif-viewer':
-      return {};
-    case 'exif-remover':
-      return { stripMetadata: true };
+    case 'photo-metadata-editor':
+      return { stripMetadata: false };
+    case 'video-metadata-editor':
+      return { stripMetadata: false };
     case 'privacy-redact':
       return {
         regions: [
@@ -170,12 +170,6 @@ export const getDefaultParamsForUtility = (utilityId: string, image: { width: nu
       };
     case 'favicon-studio':
       return { size: 32, asIco: false };
-    case 'image-to-base64':
-      return {};
-    case 'base64-to-image':
-      return {};
-    case 'camera-raw':
-      return { engineMode: 'fast_preview', exposureEv: 0, temperature: 5500 };
     case 'workflow-recipes':
       return { recipeId: 'ecommerce' };
     default:
@@ -250,6 +244,14 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const params = new URLSearchParams(window.location.search);
       const queryTool = params.get('tool');
       if (queryTool) return queryTool;
+      const pathMatch = window.location.pathname.match(/\/tools\/([a-z0-9-]+)(?:\.html)?/i);
+      if (pathMatch && pathMatch[1]) {
+        const id = pathMatch[1];
+        if (UTILITIES.some(u => u.id === id) || id === 'heic-converter' || id === 'webp-to-raster' || id === 'raster-to-webp') {
+          return id;
+        }
+        return 'document-converter';
+      }
     }
     return 'workflow-recipes';
   });
@@ -723,33 +725,38 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       throw new Error(`Security Violation: Access to Pro feature [${utilityToRun}] is restricted. A verified Google login is required.`);
     }
 
-    // 1. Direct handling for Lossless EXIF Stripping
-    if (utilityToRun === 'exif-remover' || (utilityToRun === 'exif-viewer' && effectiveParams?.stripMetadata)) {
-      const strippedBlob = await stripAllImageMetadata(item.blob);
-      let sW = item.width;
-      let sH = item.height;
-      try {
-        const b = await createImageBitmap(strippedBlob);
-        sW = b.width;
-        sH = b.height;
-        b.close();
-      } catch {}
-      return { blob: strippedBlob, size: strippedBlob.size, width: sW, height: sH };
+    // 1. Direct handling for Photo Metadata Editor
+    if (utilityToRun === 'photo-metadata-editor') {
+      if (effectiveParams?.stripMetadata) {
+        const strippedBlob = await stripAllImageMetadata(item.blob);
+        let sW = item.width;
+        let sH = item.height;
+        try {
+          const b = await createImageBitmap(strippedBlob);
+          sW = b.width;
+          sH = b.height;
+          b.close();
+        } catch {}
+        return { blob: strippedBlob, size: strippedBlob.size, width: sW, height: sH };
+      }
+      return { 
+        blob: item.blob, 
+        size: item.size, 
+        width: item.width, 
+        height: item.height, 
+        extraData: effectiveParams 
+      };
     }
 
-    // 2. Direct handling for EXIF Viewer Inspection
-    if (utilityToRun === 'exif-viewer') {
-      return { blob: item.blob, size: item.size, width: item.width, height: item.height, extraData: item.metadata };
-    }
-
-    // 3. Direct handling for Image to Base64
-    if (utilityToRun === 'image-to-base64') {
-      const b64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(item.blob);
-      });
-      return { blob: item.blob, size: item.size, width: item.width, height: item.height, extraData: { base64: b64 } };
+    // 2. Direct handling for Video Metadata Editor
+    if (utilityToRun === 'video-metadata-editor') {
+      return { 
+        blob: item.blob, 
+        size: item.size, 
+        width: item.width, 
+        height: item.height, 
+        extraData: effectiveParams 
+      };
     }
 
     // 4. Direct handling for HEIC decoder

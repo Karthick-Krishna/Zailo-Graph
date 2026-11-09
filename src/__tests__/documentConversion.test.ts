@@ -34,15 +34,14 @@ describe('Document Conversion System - Registry & Validation', () => {
     expect(categoryIds).toContain('pdf_to_images');
   });
 
-  it('contains all 38 specified conversion operations', () => {
-    expect(CONVERSIONS.length).toBe(38);
+  it('contains all 37 specified conversion operations', () => {
+    expect(CONVERSIONS.length).toBe(37);
 
     // Verify key operations exist
     expect(getConversionById('word-to-pdf')).toBeDefined();
     expect(getConversionById('pdf-to-word')).toBeDefined();
     expect(getConversionById('word-doc-to-docx')).toBeDefined();
     expect(getConversionById('docx-to-doc')).toBeDefined();
-    expect(getConversionById('pdf-to-txt')).toBeDefined();
     expect(getConversionById('txt-to-pdf')).toBeDefined();
     expect(getConversionById('pptx-to-pdf')).toBeDefined();
     expect(getConversionById('pptx-to-images')).toBeDefined();
@@ -62,7 +61,7 @@ describe('Document Conversion System - Registry & Validation', () => {
 
   it('categorizes operations accurately', () => {
     const docs = getConversionsByCategory('documents');
-    expect(docs.length).toBe(11);
+    expect(docs.length).toBe(10);
 
     const presentations = getConversionsByCategory('presentations');
     expect(presentations.length).toBe(6);

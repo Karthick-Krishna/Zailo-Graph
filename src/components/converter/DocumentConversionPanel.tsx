@@ -72,7 +72,20 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
   onClose,
 }) => {
   const { setActiveUtilityId } = useSession();
-  const [selectedConversionId, setSelectedConversionId] = useState<string | null>(initialConversionId || null);
+  const [selectedConversionId, setSelectedConversionId] = useState<string | null>(() => {
+    if (initialConversionId) return initialConversionId;
+    if (typeof window !== 'undefined') {
+      const match = window.location.pathname.match(/\/tools\/([a-z0-9-]+)(?:\.html)?/i);
+      if (match && match[1] && getConversionById(match[1])) {
+        return match[1];
+      }
+      const hashMatch = window.location.hash.match(/(?:conversion|tool)=([a-z0-9-]+)/i);
+      if (hashMatch && hashMatch[1] && getConversionById(hashMatch[1])) {
+        return hashMatch[1];
+      }
+    }
+    return null;
+  });
   const [selectedCategoryTab, setSelectedCategoryTab] = useState<ConversionCategoryId | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 

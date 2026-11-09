@@ -141,17 +141,16 @@ describe('Zailo Graph Google Authentication, Profile Architecture & Settings', (
   });
 
   describe('Pro Utility Gating', () => {
-    it('correctly locks the 11 Pro utilities for guests and unlocks all 26 for authenticated users', () => {
-      expect(PRO_GATED_UTILITIES).toHaveLength(11);
+    it('correctly locks the 10 Pro utilities for guests and unlocks all 20 for authenticated users', () => {
+      expect(PRO_GATED_UTILITIES).toHaveLength(10);
       expect(PRO_GATED_UTILITIES).toContain('document-converter');
       expect(PRO_GATED_UTILITIES).toContain('workflow-recipes');
       expect(PRO_GATED_UTILITIES).toContain('svg-to-png');
       expect(PRO_GATED_UTILITIES).toContain('png-to-svg');
-      expect(PRO_GATED_UTILITIES).toContain('camera-raw');
       expect(PRO_GATED_UTILITIES).toContain('watermark');
       expect(PRO_GATED_UTILITIES).toContain('collage-maker');
       expect(PRO_GATED_UTILITIES).toContain('passport-photo');
-      expect(PRO_GATED_UTILITIES).toContain('exif-remover');
+      expect(PRO_GATED_UTILITIES).toContain('video-metadata-editor');
       expect(PRO_GATED_UTILITIES).toContain('privacy-redact');
       expect(PRO_GATED_UTILITIES).toContain('favicon-studio');
 
@@ -164,7 +163,7 @@ describe('Zailo Graph Google Authentication, Profile Architecture & Settings', (
 
       expect(isUtilityUnlocked('compression', null)).toBe(true);
       expect(isUtilityUnlocked('document-converter', null)).toBe(false);
-      expect(isUtilityUnlocked('camera-raw', null)).toBe(false);
+      expect(isUtilityUnlocked('video-metadata-editor', null)).toBe(false);
       expect(isUtilityUnlocked('watermark', null)).toBe(false);
 
       const loggedInUser = {
