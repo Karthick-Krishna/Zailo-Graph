@@ -1,29 +1,15 @@
 import React, { useRef, useState } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/AuthContext';
-import { UTILITIES, UtilityCategory } from '../../types/utility';
+import { UTILITIES } from '../../types/utility';
 import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
 import { 
   UploadCloud, 
   ShieldCheck, 
-  Zap, 
   Sparkles, 
   ArrowRight, 
   Layers, 
-  Cpu, 
   Camera, 
-  FileCode2, 
-  Maximize2,
-  FileDown,
-  Palette,
-  EyeOff,
-  IdCard,
-  Lock,
-  Scissors,
-  CheckCircle2,
-  Sliders,
-  Share2,
-  Image as ImageIcon,
   X
 } from 'lucide-react';
 import { Base64Controls } from '../utilities/Base64Controls';
@@ -31,9 +17,8 @@ import { Footer } from './Footer';
 
 export const LandingWorkspace: React.FC = () => {
   const { addImages, activeUtilityId, setActiveUtilityId, savedSessionCount, restoreSavedSession, clearSavedSession, setIsMobileToolsOpen } = useSession();
-  const { user, openAuthModal, isUtilityUnlocked } = useAuth();
+  const { isUtilityUnlocked } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<UtilityCategory | 'all'>('all');
   const [showBase64Modal, setShowBase64Modal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -203,10 +188,6 @@ export const LandingWorkspace: React.FC = () => {
       }
     }, 'image/png');
   };
-
-  const filteredUtilities = selectedFilter === 'all' 
-    ? UTILITIES 
-    : UTILITIES.filter(u => u.category === selectedFilter);
 
   return (
     <div className="w-full flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-10 flex flex-col items-center">
@@ -431,63 +412,9 @@ export const LandingWorkspace: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* 4 Feature Studio Highlights */}
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-amber-300 hover:shadow-md hover:shadow-amber-500/5 transition group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/60 text-amber-700 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Zap className="w-5 h-5 text-amber-600" />
-            </div>
-            <h3 className="text-sm font-bold text-neutral-900">MozJPEG &amp; OxiPNG</h3>
-            <p className="text-xs text-neutral-500 leading-relaxed">
-              Industry-standard WASM codecs with interactive side-by-side Before/After diff sliders.
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-violet-300 hover:shadow-md hover:shadow-violet-500/5 transition group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200/60 text-violet-700 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Cpu className="w-5 h-5 text-violet-600" />
-            </div>
-            <h3 className="text-sm font-bold text-neutral-900">Multi-Thread Web Workers</h3>
-            <p className="text-xs text-neutral-500 leading-relaxed">
-              Parallel background threads with OffscreenCanvas for instant 60fps image processing without UI lockup.
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-cyan-300 hover:shadow-md hover:shadow-cyan-500/5 transition group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-50 to-sky-50 border border-cyan-200/60 text-cyan-700 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <FileCode2 className="w-5 h-5 text-cyan-600" />
-            </div>
-            <h3 className="text-sm font-bold text-neutral-900">SVG &amp; Vectorizer</h3>
-            <p className="text-xs text-neutral-500 leading-relaxed">
-              Convert PNGs to crisp SVG vectors, and render complex vector drawings up to 16,384px print formats.
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex flex-col space-y-2 hover:border-rose-300 hover:shadow-md hover:shadow-rose-500/5 transition group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-200/60 text-rose-700 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Camera className="w-5 h-5 text-rose-600" />
-            </div>
-            <h3 className="text-sm font-bold text-neutral-900">Camera RAW Studio</h3>
-            <p className="text-xs text-neutral-500 leading-relaxed">
-              Instant binary preview extraction (&lt;50ms) and 14-bit RAW demosaicing for professional DSLR cameras.
-            </p>
-          </div>
-        </div>
-
-        {/* Collaborative Product Trust Bar */}
-        <div className="w-full pt-8 pb-4 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400 font-mono">
-          <div>ZAILO GRAPH • A COLLABORATIVE PRODUCT BY CORALGENZ &amp; ZORQUELZ</div>
-          <div className="flex items-center gap-4">
-            <span>ZERO CLOUD TRANSMISSION</span>
-            <span>•</span>
-            <span>100% PRIVATE &amp; FREE</span>
-          </div>
-        </div>
-
       </div>
 
-      {/* Comprehensive Navigation Footer */}
+      {/* Clean Collaborative Footer */}
       <Footer />
 
       {/* Base64 to Image Decoder Modal */}
