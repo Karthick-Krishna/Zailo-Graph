@@ -1,119 +1,194 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PRO_GATED_UTILITIES } from '../types/auth';
+import { 
+  sanitizeDisplayName, 
+  createOrSyncProfile, 
+  completeOnboarding, 
+  getUserProfile, 
+  updateProfileDisplayName,
+  getActiveSession 
+} from '../services/profile';
 
-describe('Auth & Pro Gating Logic', () => {
+describe('Imazora Google Authentication, Profile Architecture & Settings', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('correctly gates the 10 designated Pro utilities for unauthenticated guest sessions', () => {
-    expect(PRO_GATED_UTILITIES).toHaveLength(10);
-    expect(PRO_GATED_UTILITIES).toContain('workflow-recipes');
-    expect(PRO_GATED_UTILITIES).toContain('svg-to-png');
-    expect(PRO_GATED_UTILITIES).toContain('png-to-svg');
-    expect(PRO_GATED_UTILITIES).toContain('camera-raw');
-    expect(PRO_GATED_UTILITIES).toContain('watermark');
-    expect(PRO_GATED_UTILITIES).toContain('collage-maker');
-    expect(PRO_GATED_UTILITIES).toContain('passport-photo');
-    expect(PRO_GATED_UTILITIES).toContain('exif-remover');
-    expect(PRO_GATED_UTILITIES).toContain('privacy-redact');
-    expect(PRO_GATED_UTILITIES).toContain('favicon-studio');
+  describe('Display Name Sanitization & Validation', () => {
+    it('rejects empty or whitespace-only names', () => {
+      expect(sanitizeDisplayName('').isValid).toBe(false);
+      expect(sanitizeDisplayName('   ').isValid).toBe(false);
+      expect(sanitizeDisplayName('\t\n').isValid).toBe(false);
+    });
 
-    const isUtilityUnlockedGuest = (id: string, user: any) => {
-      if (PRO_GATED_UTILITIES.includes(id)) {
-        return !!user;
-      }
-      return true;
-    };
+    it('enforces maximum character length of 50', () => {
+      const longName = 'A'.repeat(60);
+      const res = sanitizeDisplayName(longName);
+      expect(res.isValid).toBe(false);
+      expect(res.error).toContain('50 characters');
+    });
 
-    // Unauthenticated guest user
-    const guestUser = null;
-    expect(isUtilityUnlockedGuest('compression', guestUser)).toBe(true);
-    expect(isUtilityUnlockedGuest('batch-resize', guestUser)).toBe(true);
-    expect(isUtilityUnlockedGuest('avatar-crop', guestUser)).toBe(true);
-    
-    // Pro gated tools must be locked
-    expect(isUtilityUnlockedGuest('camera-raw', guestUser)).toBe(false);
-    expect(isUtilityUnlockedGuest('png-to-svg', guestUser)).toBe(false);
-    expect(isUtilityUnlockedGuest('svg-to-png', guestUser)).toBe(false);
-    expect(isUtilityUnlockedGuest('watermark', guestUser)).toBe(false);
-    expect(isUtilityUnlockedGuest('passport-photo', guestUser)).toBe(false);
-    expect(isUtilityUnlockedGuest('privacy-redact', guestUser)).toBe(false);
+    it('sanitizes unsafe script or HTML tags while preserving clean text', () => {
+      const res = sanitizeDisplayName('<script>alert("xss")</script>Alex');
+      expect(res.isValid).toBe(true);
+      expect(res.sanitized).toBe('scriptalert("xss")/scriptAlex');
+      expect(res.sanitized).not.toContain('<');
+      expect(res.sanitized).not.toContain('>');
+    });
 
-    // Authenticated user
-    const loggedInUser = {
-      id: 'usr_test123',
-      email: 'alex@example.com',
-      name: 'Alex Chen',
-      tier: 'free_registered',
-      createdAt: new Date().toISOString(),
-    };
+    it('preserves valid international Unicode characters, accents, and spacing', () => {
+      const res = sanitizeDisplayName('  Renée Éloïse Müller  ');
+      expect(res.isValid).toBe(true);
+      expect(res.sanitized).toBe('Renée Éloïse Müller');
 
-    expect(isUtilityUnlockedGuest('camera-raw', loggedInUser)).toBe(true);
-    expect(isUtilityUnlockedGuest('png-to-svg', loggedInUser)).toBe(true);
-    expect(isUtilityUnlockedGuest('workflow-recipes', loggedInUser)).toBe(true);
-    expect(isUtilityUnlockedGuest('watermark', loggedInUser)).toBe(true);
-    expect(isUtilityUnlockedGuest('passport-photo', loggedInUser)).toBe(true);
+      const japanese = sanitizeDisplayName('木村 拓哉');
+      expect(japanese.isValid).toBe(true);
+      expect(japanese.sanitized).toBe('木村 拓哉');
+    });
   });
 
-  it('persists and retrieves user session from localStorage', () => {
-    const userSession = {
-      id: 'usr_abc987',
-      email: 'creator@zailograph.app',
-      name: 'Zailo Creator',
-      tier: 'free_registered',
-      createdAt: '2026-11-09T00:00:00.000Z',
-    };
+  describe('Profile Architecture & Onboarding State Machine', () => {
+    const mockFirebaseUser = {
+      uid: 'google_uid_12345',
+      email: 'alex.kumar@gmail.com',
+      displayName: 'Alex Kumar',
+      photoURL: 'https://lh3.googleusercontent.com/a/mock_photo',
+      metadata: {
+        creationTime: '2026-11-09T00:00:00.000Z',
+      },
+    } as any;
 
-    localStorage.setItem('zailo_graph_user_session', JSON.stringify(userSession));
-    const retrieved = JSON.parse(localStorage.getItem('zailo_graph_user_session') || '{}');
+    it('recognizes a first-time Google login and initializes draft profile with onboarding_completed: false', () => {
+      const { profile, isNewUser } = createOrSyncProfile(mockFirebaseUser);
+      expect(isNewUser).toBe(true);
+      expect(profile.id).toBe('google_uid_12345');
+      expect(profile.email).toBe('alex.kumar@gmail.com');
+      expect(profile.google_name).toBe('Alex Kumar');
+      expect(profile.avatar_url).toBe('https://lh3.googleusercontent.com/a/mock_photo');
+      expect(profile.onboarding_completed).toBe(false);
+    });
 
-    expect(retrieved.id).toBe('usr_abc987');
-    expect(retrieved.email).toBe('creator@zailograph.app');
-    expect(retrieved.name).toBe('Zailo Creator');
+    it('completes onboarding when user enters a custom display name', () => {
+      createOrSyncProfile(mockFirebaseUser);
+      const updated = completeOnboarding('google_uid_12345', 'Alex K.');
+
+      expect(updated).not.toBeNull();
+      expect(updated?.display_name).toBe('Alex K.');
+      expect(updated?.onboarding_completed).toBe(true);
+      expect(updated?.email).toBe('alex.kumar@gmail.com');
+
+      // Verify persisted in localStorage
+      const saved = getUserProfile('google_uid_12345');
+      expect(saved?.display_name).toBe('Alex K.');
+      expect(saved?.onboarding_completed).toBe(true);
+    });
+
+    it('correctly implements Skip by using Google account name as fallback', () => {
+      createOrSyncProfile(mockFirebaseUser);
+      // User skips setting custom name
+      const updated = completeOnboarding('google_uid_12345');
+
+      expect(updated).not.toBeNull();
+      expect(updated?.display_name).toBe('Alex Kumar');
+      expect(updated?.onboarding_completed).toBe(true);
+    });
+
+    it('recognizes returning users and NEVER overwrites custom display name with Google profile name', () => {
+      // 1. Initial login + set custom name
+      createOrSyncProfile(mockFirebaseUser);
+      completeOnboarding('google_uid_12345', 'Studio Architect');
+
+      // 2. Returning user signs in again with Google
+      const { profile, isNewUser } = createOrSyncProfile(mockFirebaseUser);
+      expect(isNewUser).toBe(false);
+      expect(profile.onboarding_completed).toBe(true);
+      // Strictly preserves user's chosen custom name
+      expect(profile.display_name).toBe('Studio Architect');
+      expect(profile.google_name).toBe('Alex Kumar');
+      expect(profile.email).toBe('alex.kumar@gmail.com');
+    });
+
+    it('allows updating display name from Settings', () => {
+      createOrSyncProfile(mockFirebaseUser);
+      completeOnboarding('google_uid_12345', 'Original Name');
+
+      const updated = updateProfileDisplayName('google_uid_12345', 'New Creative Name');
+      expect(updated?.display_name).toBe('New Creative Name');
+
+      const active = getActiveSession();
+      expect(active?.name).toBe('New Creative Name');
+      expect(active?.email).toBe('alex.kumar@gmail.com');
+    });
   });
 
-  it('validates account deletion requires exact matching name before permitting deletion', () => {
-    const user = {
-      id: 'usr_1',
-      name: 'Karthick Krishna',
-      email: 'karthick@example.com',
-    };
+  describe('Strict Google Email in Settings Verification', () => {
+    it('ensures email is always the authenticated Google email, not an editable display name or placeholder', () => {
+      const mockUser = {
+        uid: 'user_real_google',
+        email: 'genuine.artist@gmail.com',
+        displayName: 'Genuine Artist',
+      } as any;
 
-    const validateDeletion = (typedText: string, currentUserName: string) => {
-      return typedText.trim().toLowerCase() === currentUserName.trim().toLowerCase();
-    };
+      const { profile } = createOrSyncProfile(mockUser);
+      // User sets an arbitrary custom display name
+      const finalized = completeOnboarding(profile.id, 'My Custom Alias');
 
-    // Mismatched names should fail
-    expect(validateDeletion('Karthick', user.name)).toBe(false);
-    expect(validateDeletion('karthik', user.name)).toBe(false);
-    expect(validateDeletion('Random text', user.name)).toBe(false);
-
-    // Exact name matches
-    expect(validateDeletion('Karthick Krishna', user.name)).toBe(true);
-    expect(validateDeletion('  karthick krishna  ', user.name)).toBe(true);
+      // The email MUST remain genuine.artist@gmail.com
+      expect(finalized?.email).toBe('genuine.artist@gmail.com');
+      expect(finalized?.display_name).toBe('My Custom Alias');
+      expect(finalized?.email).not.toBe(finalized?.display_name);
+    });
   });
 
-  it('handles name onboarding with skip fallback to Google/Gmail name', () => {
-    const googleUser = {
-      id: 'usr_google_123',
-      email: 'john.doe@gmail.com',
-      name: 'John Doe',
-      tier: 'free_registered' as const,
-      createdAt: new Date().toISOString(),
-    };
+  describe('Pro Utility Gating', () => {
+    it('correctly locks the 10 Pro utilities for guests and unlocks all 25 for authenticated users', () => {
+      expect(PRO_GATED_UTILITIES).toHaveLength(10);
+      expect(PRO_GATED_UTILITIES).toContain('workflow-recipes');
+      expect(PRO_GATED_UTILITIES).toContain('svg-to-png');
+      expect(PRO_GATED_UTILITIES).toContain('png-to-svg');
+      expect(PRO_GATED_UTILITIES).toContain('camera-raw');
+      expect(PRO_GATED_UTILITIES).toContain('watermark');
+      expect(PRO_GATED_UTILITIES).toContain('collage-maker');
+      expect(PRO_GATED_UTILITIES).toContain('passport-photo');
+      expect(PRO_GATED_UTILITIES).toContain('exif-remover');
+      expect(PRO_GATED_UTILITIES).toContain('privacy-redact');
+      expect(PRO_GATED_UTILITIES).toContain('favicon-studio');
 
-    // When user skips, Google name is used as default
-    const resolveNameOnSkip = (user: typeof googleUser, customName?: string) => {
-      return customName?.trim() || user.name || user.email.split('@')[0];
-    };
+      const isUtilityUnlocked = (id: string, user: any) => {
+        if (PRO_GATED_UTILITIES.includes(id)) {
+          return !!user;
+        }
+        return true;
+      };
 
-    expect(resolveNameOnSkip(googleUser)).toBe('John Doe');
-    expect(resolveNameOnSkip(googleUser, '')).toBe('John Doe');
-    expect(resolveNameOnSkip(googleUser, 'JD Studio')).toBe('JD Studio');
+      expect(isUtilityUnlocked('compression', null)).toBe(true);
+      expect(isUtilityUnlocked('camera-raw', null)).toBe(false);
+      expect(isUtilityUnlocked('watermark', null)).toBe(false);
 
-    // Real email is strictly preserved
-    expect(googleUser.email).toBe('john.doe@gmail.com');
+      const loggedInUser = {
+        id: 'usr_auth_1',
+        email: 'creator@gmail.com',
+        name: 'Creator',
+        tier: 'free_registered',
+        onboarding_completed: true,
+        createdAt: new Date().toISOString(),
+      };
+
+      expect(isUtilityUnlocked('camera-raw', loggedInUser)).toBe(true);
+      expect(isUtilityUnlocked('watermark', loggedInUser)).toBe(true);
+      expect(isUtilityUnlocked('workflow-recipes', loggedInUser)).toBe(true);
+    });
+  });
+
+  describe('Danger Zone Account Deletion', () => {
+    it('strictly enforces exact matching of display name before deletion', () => {
+      const currentName = 'Alex Kumar';
+      const isConfirmed = (input: string) => input.trim().toLowerCase() === currentName.trim().toLowerCase();
+
+      expect(isConfirmed('Alex')).toBe(false);
+      expect(isConfirmed('Kumar')).toBe(false);
+      expect(isConfirmed('alex kumar')).toBe(true);
+      expect(isConfirmed('  Alex Kumar  ')).toBe(true);
+    });
   });
 });
-

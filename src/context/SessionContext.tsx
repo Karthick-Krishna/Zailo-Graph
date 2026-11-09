@@ -45,7 +45,6 @@ interface SessionContextType {
   activeUtilityId: string;
   isProcessing: boolean;
   toastMessage: string | null;
-  showToast: (msg: string) => void;
   currentParams: any;
   savedSessionCount: number;
   batchProgress: BatchProgressState;
@@ -428,7 +427,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const activeImage = images.find(img => img.id === activeImageId) || null;
 
   const dismissToast = () => setToastMessage(null);
-  const showToast = useCallback((msg: string) => setToastMessage(msg), []);
 
   const addImages = useCallback(async (files: File[]) => {
     if (!files || files.length === 0) return;
@@ -1269,7 +1267,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         activeUtilityId,
         isProcessing,
         toastMessage,
-        showToast,
         currentParams,
         savedSessionCount,
         canUndo,

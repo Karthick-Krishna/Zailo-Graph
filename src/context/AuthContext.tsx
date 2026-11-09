@@ -1,17 +1,25 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { User, UserTier, Entitlements, AuthModalState, AuthModalReason, PRO_GATED_UTILITIES } from '../types/auth';
-import { UTILITIES } from '../types/utility';
 import { auth, googleProvider } from '../services/firebase';
 import { 
   onAuthStateChanged, 
-  signInWithRedirect,
   getRedirectResult,
   signInWithPopup, 
+  signInWithRedirect,
   signOut,
   updateProfile,
   deleteUser,
   User as FirebaseUser 
 } from 'firebase/auth';
+import { 
+  createOrSyncProfile, 
+  getUserProfile, 
+  completeOnboarding, 
+  updateProfileDisplayName, 
+  deleteStoredUserProfile,
+  getActiveSession,
+  mapProfileToUser
+} from '../services/profile';
 
 const DEFAULT_MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB safe browser RAM limit
 const DEFAULT_MAX_BATCH = 50; // 50 concurrent queue items
@@ -34,31 +42,37 @@ const REGISTERED_ENTITLEMENTS: Entitlements = {
   hasPersistentSessions: true,
 };
 
+export interface ToastState {
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
 interface AuthContextType {
   user: User | null;
   tier: UserTier;
   entitlements: Entitlements;
   isAuthenticated: boolean;
   authModal: AuthModalState;
+  isOnboardingOpen: boolean;
+  isSettingsOpen: boolean;
   isLoading: boolean;
   authError: string | null;
-  isSettingsOpen: boolean;
-  authSuccessNotification: string | null;
-  showNameOnboarding: boolean;
+  toast: ToastState | null;
   
-  // Actions
+  // Toast
+  showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  dismissToast: () => void;
+
+  // Actions (STRICTLY Google Only)
   signInWithGoogle: () => Promise<void>;
-  signInWithEmail: (email: string) => void;
-  signUpWithEmail: (email: string) => void;
-  directSignIn: (email: string, name?: string) => void;
   logout: () => Promise<void>;
   openAuthModal: (reason: AuthModalReason, targetUtilityId?: string, customMessage?: string) => void;
   closeAuthModal: () => void;
   clearAuthError: () => void;
-  dismissAuthNotification: () => void;
-  completeNameOnboarding: (customName?: string) => void;
   openSettings: () => void;
   closeSettings: () => void;
+  completeUserOnboarding: (customName?: string) => Promise<void>;
+  skipUserOnboarding: () => Promise<void>;
   updateUserName: (newName: string) => Promise<boolean>;
   deleteAccount: (confirmationName: string) => Promise<{ success: boolean; error?: string }>;
   
@@ -70,36 +84,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'zailo_graph_user_session';
-
-const mapFirebaseUser = (fbUser: FirebaseUser): User => {
-  const email = fbUser.email || '';
-  const defaultName = fbUser.displayName || (email ? email.split('@')[0] : 'ZailoGraph Creator');
-  return {
-    id: fbUser.uid,
-    email: email,
-    name: defaultName,
-    avatarUrl: fbUser.photoURL || undefined,
-    createdAt: fbUser.metadata.creationTime || new Date().toISOString(),
-    tier: 'free_registered',
-  };
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
-
+  // Initialize user from cached active session for instantaneous rendering
+  const [user, setUser] = useState<User | null>(() => getActiveSession());
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [authSuccessNotification, setAuthSuccessNotification] = useState<string | null>(null);
-  const [showNameOnboarding, setShowNameOnboarding] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [toast, setToast] = useState<ToastState | null>(null);
 
   const [authModal, setAuthModal] = useState<AuthModalState>({
     isOpen: false,
@@ -109,82 +101,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const tier: UserTier = user ? 'free_registered' : 'guest';
   const entitlements = user ? REGISTERED_ENTITLEMENTS : ANONYMOUS_ENTITLEMENTS;
 
-  const dismissAuthNotification = () => setAuthSuccessNotification(null);
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type });
+  }, []);
 
-  // Auto-dismiss auth notification banner after 6 seconds
-  useEffect(() => {
-    if (authSuccessNotification) {
-      const timer = setTimeout(() => {
-        setAuthSuccessNotification(null);
-      }, 6000);
-      return () => clearTimeout(timer);
+  const dismissToast = useCallback(() => {
+    setToast(null);
+  }, []);
+
+  // Process authenticated user returned from Google OAuth
+  const handleAuthSuccess = useCallback((fbUser: FirebaseUser) => {
+    const { profile, isNewUser } = createOrSyncProfile(fbUser);
+    const mapped = mapProfileToUser(profile);
+    setUser(mapped);
+    closeAuthModal();
+
+    if (isNewUser) {
+      // First-time login: show smooth display-name onboarding screen
+      setIsOnboardingOpen(true);
+    } else {
+      // Returning user: onboarding already complete, restore profile and welcome back
+      showToast('Successfully signed in with Google.', 'success');
     }
-  }, [authSuccessNotification]);
+  }, [showToast]);
 
-  const handleSuccessfulLogin = (mappedUser: User) => {
-    setUser(mappedUser);
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mappedUser));
-    } catch {}
-    setAuthError(null);
-    setIsLoading(false);
-    setAuthSuccessNotification('Authentication successful! All Pro features unlocked.');
-    setShowNameOnboarding(true);
-  };
-
-  // Synchronize Firebase Auth state changes and handle redirect credentials
+  // Handle Firebase redirect result (if returning from OAuth redirect) and state changes
   useEffect(() => {
-    // Process redirect result if returning from OAuth redirect
     getRedirectResult(auth)
       .then((result) => {
         if (result?.user) {
-          const mapped = mapFirebaseUser(result.user);
-          handleSuccessfulLogin(mapped);
-          // Clean up redirect query or hash params from URL without reloading
-          try {
-            if (window.location.search || window.location.hash) {
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-          } catch {}
+          handleAuthSuccess(result.user);
+          // Clean up OAuth query parameters from URL cleanly
+          if (window.location.search || window.location.hash) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
         }
       })
       .catch((err: any) => {
-        console.warn('Redirect auth result warning:', err);
+        console.warn('Redirect auth handler warning:', err);
         if (err.code === 'auth/unauthorized-domain') {
           setAuthError('Domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
-        } else if (err.message) {
-          setAuthError(err.message);
+        } else if (err.code === 'auth/network-request-failed') {
+          showToast('Connection problem. Check your internet connection and try again.', 'error');
         }
       });
 
     const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
-        const mapped = mapFirebaseUser(fbUser);
-        setUser(mapped);
-        try {
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
-        } catch {}
+        // Authenticated with Google: sync profile while strictly preserving custom display names
+        const { profile } = createOrSyncProfile(fbUser);
+        setUser(mapProfileToUser(profile));
       } else {
-        // If Firebase Auth does not report an active session, preserve and restore local storage session
-        try {
-          const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (parsed && (parsed.email || parsed.id)) {
-              setUser(parsed);
-              return;
-            }
-          }
-        } catch {}
+        // If not authenticated in Firebase, check if an existing session is cached
+        const cached = getActiveSession();
+        if (cached) {
+          setUser(cached);
+        } else {
+          setUser(null);
+        }
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [handleAuthSuccess, showToast]);
 
   const openAuthModal = (reason: AuthModalReason, targetUtilityId?: string, customMessage?: string) => {
     setAuthError(null);
-    setShowNameOnboarding(false);
     setAuthModal({
       isOpen: true,
       reason,
@@ -195,7 +177,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const closeAuthModal = () => {
     setAuthError(null);
-    setShowNameOnboarding(false);
     setAuthModal(prev => ({ ...prev, isOpen: false }));
   };
 
@@ -211,124 +192,141 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsSettingsOpen(false);
   };
 
-  const completeNameOnboarding = (customName?: string) => {
-    if (user) {
-      const finalName = customName?.trim() || user.name || (user.email ? user.email.split('@')[0] : 'Creator');
-      const updatedUser: User = { ...user, name: finalName };
-      setUser(updatedUser);
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedUser));
-      } catch {}
-      if (auth.currentUser && customName?.trim()) {
-        updateProfile(auth.currentUser, { displayName: finalName }).catch(() => {});
-      }
-    }
-    setShowNameOnboarding(false);
-    closeAuthModal();
-  };
-
+  /**
+   * Fast, seamless Google-Only Authentication
+   * - Eliminates manual confirmation step
+   * - Uses popup flow with same-origin-allow-popups for immediate completion
+   * - Automatically detects authenticated session
+   * - Seamlessly transitions to onboarding (new user) or workspace (returning user)
+   */
   const signInWithGoogle = async () => {
+    if (isLoading) return; // Prevent duplicate concurrent authentication requests
     setIsLoading(true);
     setAuthError(null);
+
     try {
-      // Direct popup sign-in works quickly and preserves app state
       const result = await signInWithPopup(auth, googleProvider);
-      if (result.user) {
-        const mapped = mapFirebaseUser(result.user);
-        handleSuccessfulLogin(mapped);
-        return;
+      if (result?.user) {
+        handleAuthSuccess(result.user);
       }
     } catch (popupErr: any) {
-      console.warn('Google Sign-In Popup note:', popupErr);
-      
-      // If popup was blocked by browser, try redirect
-      if (popupErr.code === 'auth/popup-blocked') {
+      console.warn('Google Sign-In Popup error:', popupErr);
+
+      if (popupErr.code === 'auth/popup-closed-by-user') {
+        showToast('Google sign-in was cancelled.', 'info');
+        setAuthError('Google sign-in was cancelled.');
+      } else if (popupErr.code === 'auth/cancelled-popup-request') {
+        // A prior popup was superseded, silently ignore
+      } else if (popupErr.code === 'auth/network-request-failed') {
+        showToast('Connection problem. Check your internet connection and try again.', 'error');
+        setAuthError('Connection problem. Check your internet connection and try again.');
+      } else if (popupErr.code === 'auth/popup-blocked') {
+        // Fallback to redirect if browser strictly blocks popups
         try {
           await signInWithRedirect(auth, googleProvider);
           return;
         } catch (redirectErr: any) {
-          console.error('Redirect fallback failed:', redirectErr);
+          console.error('Redirect fallback error:', redirectErr);
+          showToast('Unable to sign in. Please try again.', 'error');
+          setAuthError('Unable to sign in. Please allow popups or try again.');
         }
-      }
-      
-      if (popupErr.code === 'auth/popup-closed-by-user') {
-        // User voluntarily dismissed popup
-        setIsLoading(false);
-        return;
       } else if (popupErr.code === 'auth/unauthorized-domain') {
-        setAuthError('Domain is pending in Firebase Console Authorized Domains. Enter your Google email below for instant access:');
+        setAuthError('This domain is not authorized in Firebase Console (Authentication > Settings > Authorized Domains).');
       } else {
-        setAuthError(popupErr.message || 'Google sign-in encountered an issue. You can continue below:');
+        showToast('Unable to sign in. Please try again.', 'error');
+        setAuthError(popupErr.message || 'Unable to sign in. Please try again.');
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const directSignIn = (email: string, name?: string) => {
-    const rawEmail = email && email.includes('@') ? email.trim() : '';
-    if (!rawEmail) return;
+  /**
+   * Complete new user onboarding with custom display name
+   */
+  const completeUserOnboarding = async (customName?: string) => {
+    if (!user) return;
+    const updatedProfile = completeOnboarding(user.id, customName);
+    if (!updatedProfile) return;
 
-    const defaultName = name?.trim() || rawEmail.split('@')[0];
-    const newUser: User = {
-      id: 'usr_' + Math.random().toString(36).substring(2, 9),
-      email: rawEmail,
-      name: defaultName,
-      createdAt: new Date().toISOString(),
-      tier: 'free_registered',
-    };
-    handleSuccessfulLogin(newUser);
-  };
-
-  const registerEmailSession = (email: string) => {
-    directSignIn(email);
-  };
-
-  const signInWithEmail = (email: string) => {
-    registerEmailSession(email);
-  };
-
-  const signUpWithEmail = (email: string) => {
-    registerEmailSession(email);
-  };
-
-  const updateUserName = async (newName: string): Promise<boolean> => {
-    const trimmed = newName.trim();
-    if (!trimmed || !user) return false;
-
-    const updatedUser: User = {
-      ...user,
-      name: trimmed,
-    };
-    setUser(updatedUser);
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedUser));
-    } catch {}
-
-    if (auth.currentUser) {
+    // Update Firebase displayName if accessible
+    if (auth.currentUser && updatedProfile.display_name) {
       try {
-        await updateProfile(auth.currentUser, { displayName: trimmed });
+        await updateProfile(auth.currentUser, { displayName: updatedProfile.display_name });
       } catch (err) {
-        console.warn('Firebase displayName update note:', err);
+        console.warn('Could not update Firebase displayName:', err);
       }
     }
-    return true;
+
+    const updatedUser = mapProfileToUser(updatedProfile);
+    setUser(updatedUser);
+    setIsOnboardingOpen(false);
+    showToast(`Welcome to Imazora, ${updatedUser.name}!`, 'success');
   };
 
+  /**
+   * Skip onboarding: adopts real Google account name as display name
+   */
+  const skipUserOnboarding = async () => {
+    if (!user) return;
+    const updatedProfile = completeOnboarding(user.id);
+    if (!updatedProfile) return;
+
+    const updatedUser = mapProfileToUser(updatedProfile);
+    setUser(updatedUser);
+    setIsOnboardingOpen(false);
+    showToast('Successfully signed in with Google.', 'success');
+  };
+
+  /**
+   * Update display name from Settings
+   */
+  const updateUserName = async (newName: string): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const updatedProfile = updateProfileDisplayName(user.id, newName);
+      if (!updatedProfile) return false;
+
+      if (auth.currentUser) {
+        try {
+          await updateProfile(auth.currentUser, { displayName: updatedProfile.display_name });
+        } catch (err) {
+          console.warn('Firebase displayName update note:', err);
+        }
+      }
+
+      setUser(mapProfileToUser(updatedProfile));
+      showToast('Your display name has been updated.', 'success');
+      return true;
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update display name.', 'error');
+      return false;
+    }
+  };
+
+  /**
+   * Cleanly sign out of Google session and reset application state
+   */
   const logout = async () => {
     try {
       await signOut(auth);
     } catch (err) {
-      console.warn('Sign out warning:', err);
+      console.warn('Firebase sign out warning:', err);
     } finally {
+      if (user) {
+        deleteStoredUserProfile(user.id);
+      }
       setUser(null);
       setIsSettingsOpen(false);
-      try {
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
-      } catch {}
+      setIsOnboardingOpen(false);
+      showToast('Signed out successfully.', 'info');
     }
   };
 
+  /**
+   * Permanent account deletion with strict display name retyping confirmation
+   */
   const deleteAccount = async (confirmationName: string): Promise<{ success: boolean; error?: string }> => {
     if (!user) {
       return { success: false, error: 'No active user session to delete.' };
@@ -342,7 +340,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
     }
 
-    // Attempt Firebase user deletion if signed in through Firebase
     try {
       if (auth.currentUser) {
         try {
@@ -355,24 +352,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     } catch (e) {
-      console.warn('Firebase deletion cleanup:', e);
+      console.warn('Firebase deletion cleanup note:', e);
     }
 
-    // Wipe all local sessions and cached workspace data
-    try {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.startsWith('zailo') || key.startsWith('imazora'))) {
-          keysToRemove.push(key);
-        }
-      }
-      keysToRemove.forEach(k => localStorage.removeItem(k));
-    } catch {}
-
+    // Purge local profile and sessions
+    deleteStoredUserProfile(user.id);
     setUser(null);
     setIsSettingsOpen(false);
+    setIsOnboardingOpen(false);
+    showToast('Account permanently deleted.', 'info');
+
     return { success: true };
   };
 
@@ -426,23 +415,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         entitlements,
         isAuthenticated: !!user,
         authModal,
+        isOnboardingOpen,
+        isSettingsOpen,
         isLoading,
         authError,
-        isSettingsOpen,
-        authSuccessNotification,
-        dismissAuthNotification,
-        showNameOnboarding,
-        completeNameOnboarding,
+        toast,
+        showToast,
+        dismissToast,
         signInWithGoogle,
-        signInWithEmail,
-        signUpWithEmail,
-        directSignIn,
         logout,
         openAuthModal,
         closeAuthModal,
         clearAuthError,
         openSettings,
         closeSettings,
+        completeUserOnboarding,
+        skipUserOnboarding,
         updateUserName,
         deleteAccount,
         validateFileSize,
@@ -462,4 +450,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

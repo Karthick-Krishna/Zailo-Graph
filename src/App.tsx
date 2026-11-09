@@ -4,8 +4,10 @@ import { SessionProvider, useSession } from './context/SessionContext';
 import { Header } from './components/layout/Header';
 import { Workspace } from './components/layout/Workspace';
 import { AuthModal } from './components/auth/AuthModal';
+import { OnboardingModal } from './components/auth/OnboardingModal';
 import { SettingsModal } from './components/settings/SettingsModal';
 import { ShortcutsModal } from './components/common/ShortcutsModal';
+import { ToastNotification } from './components/common/ToastNotification';
 import { ActiveAuroraBackground } from './components/common/ActiveAuroraBackground';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
@@ -113,8 +115,10 @@ const AppContent: React.FC = () => {
       <Header onOpenShortcuts={() => setIsShortcutsOpen(true)} />
       <Workspace />
       <AuthModal />
+      <OnboardingModal />
       <SettingsModal />
       <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+      <ToastNotification />
     </div>
   );
 };
