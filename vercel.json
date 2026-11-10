@@ -1,6 +1,8 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
@@ -10,6 +12,13 @@
           "value": "same-origin-allow-popups"
         }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/tools/:path*",
+      "destination": "/:path*",
+      "permanent": true
     }
   ],
   "rewrites": [
