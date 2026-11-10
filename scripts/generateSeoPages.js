@@ -1439,7 +1439,7 @@ function cleanObsoleteFiles(toolsList) {
 }
 
 function run() {
-  const phaseArg = process.env.PHASE || process.argv[2] || '1';
+  const phaseArg = process.env.PHASE || process.argv[2] || 'all';
   let targetTools = ALL_TOOLS_SEO;
   if (phaseArg === '1') {
     targetTools = ALL_TOOLS_SEO.slice(0, 30);
