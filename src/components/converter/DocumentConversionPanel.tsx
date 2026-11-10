@@ -75,7 +75,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
   const [selectedConversionId, setSelectedConversionId] = useState<string | null>(() => {
     if (initialConversionId) return initialConversionId;
     if (typeof window !== 'undefined') {
-      const match = window.location.pathname.match(/\/tools\/([a-z0-9-]+)(?:\.html)?/i);
+      const match = window.location.pathname.match(/(?:\/tools\/|\/)([a-z0-9-]+)(?:\.html)?/i);
       if (match && match[1] && getConversionById(match[1])) {
         return match[1];
       }
@@ -123,7 +123,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
     }
 
     if (typeof window !== 'undefined') {
-      const targetUrl = `/tools/${conversionId}.html`;
+      const targetUrl = `/${conversionId}.html`;
       if (window.location.pathname !== targetUrl) {
         window.history.pushState({ conversion: conversionId }, '', targetUrl);
       }
@@ -140,7 +140,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
     setConversionResult(null);
 
     if (typeof window !== 'undefined') {
-      const targetUrl = `/tools/document-converter.html`;
+      const targetUrl = `/document-converter.html`;
       if (window.location.pathname !== targetUrl) {
         window.history.pushState({ tool: 'document-converter' }, '', targetUrl);
       }
@@ -150,7 +150,7 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
   useEffect(() => {
     const handlePopState = () => {
       if (typeof window !== 'undefined') {
-        const match = window.location.pathname.match(/\/tools\/([a-z0-9-]+)(?:\.html)?/i);
+        const match = window.location.pathname.match(/(?:\/tools\/|\/)([a-z0-9-]+)(?:\.html)?/i);
         if (match && match[1] && getConversionById(match[1])) {
           setSelectedConversionId(match[1]);
         } else if (match && match[1] === 'document-converter') {

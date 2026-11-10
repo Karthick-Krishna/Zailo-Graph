@@ -244,8 +244,8 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const params = new URLSearchParams(window.location.search);
       const queryTool = params.get('tool');
       if (queryTool) return queryTool;
-      const pathMatch = window.location.pathname.match(/\/tools\/([a-z0-9-]+)(?:\.html)?/i);
-      if (pathMatch && pathMatch[1]) {
+      const pathMatch = window.location.pathname.match(/(?:\/tools\/|\/)([a-z0-9-]+)(?:\.html)?/i);
+      if (pathMatch && pathMatch[1] && pathMatch[1] !== 'index') {
         const id = pathMatch[1];
         if (UTILITIES.some(u => u.id === id) || id === 'heic-converter' || id === 'webp-to-raster' || id === 'raster-to-webp') {
           return id;
@@ -258,8 +258,8 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     const handleUrlChange = () => {
-      const pathMatch = window.location.pathname.match(/\/tools\/([a-z0-9-]+)(?:\.html)?/i);
-      if (pathMatch && pathMatch[1]) {
+      const pathMatch = window.location.pathname.match(/(?:\/tools\/|\/)([a-z0-9-]+)(?:\.html)?/i);
+      if (pathMatch && pathMatch[1] && pathMatch[1] !== 'index') {
         const id = pathMatch[1];
         if (UTILITIES.some(u => u.id === id) || id === 'heic-converter' || id === 'webp-to-raster' || id === 'raster-to-webp') {
           setActiveUtilityId(id);
@@ -273,7 +273,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setActiveUtilityId(match[1]);
         return;
       }
-      if (window.location.pathname === '/') {
+      if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
         setActiveUtilityId('workflow-recipes');
       }
     };
@@ -919,7 +919,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (typeof window !== 'undefined') {
       const targetUrl = newUtilityId === 'workflow-recipes' && window.location.pathname === '/'
         ? '/'
-        : `/tools/${newUtilityId}.html`;
+        : `/${newUtilityId}.html`;
       if (window.location.pathname !== targetUrl) {
         window.history.pushState({ tool: newUtilityId }, '', targetUrl);
       }

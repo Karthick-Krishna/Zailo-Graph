@@ -6,16 +6,16 @@ import fs from 'fs';
 import path from 'path';
 
 function getMultiPageInputs() {
-  const toolsDir = fileURLToPath(new URL('./tools', import.meta.url));
+  const rootDir = fileURLToPath(new URL('.', import.meta.url));
   const inputs: Record<string, string> = {
-    main: fileURLToPath(new URL('./index.html', import.meta.url)),
+    main: path.resolve(rootDir, 'index.html'),
   };
-  if (fs.existsSync(toolsDir)) {
-    const files = fs.readdirSync(toolsDir);
+  if (fs.existsSync(rootDir)) {
+    const files = fs.readdirSync(rootDir);
     for (const f of files) {
-      if (f.endsWith('.html')) {
-        const key = `tools/${path.basename(f, '.html')}`;
-        inputs[key] = path.join(toolsDir, f);
+      if (f.endsWith('.html') && f !== 'index.html' && !f.includes('report')) {
+        const key = path.basename(f, '.html');
+        inputs[key] = path.resolve(rootDir, f);
       }
     }
   }

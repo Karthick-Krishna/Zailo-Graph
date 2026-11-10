@@ -4,18 +4,15 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, '..');
-const TOOLS_DIR = path.join(ROOT_DIR, 'tools');
-const PUBLIC_TOOLS_DIR = path.join(ROOT_DIR, 'public', 'tools');
-const SITEMAP_FILE = path.join(ROOT_DIR, 'public', 'sitemap.xml');
-const ROBOTS_FILE = path.join(ROOT_DIR, 'public', 'robots.txt');
+const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
+const SITEMAP_FILE = path.join(PUBLIC_DIR, 'sitemap.xml');
+const ROBOTS_FILE = path.join(PUBLIC_DIR, 'robots.txt');
 
-[TOOLS_DIR, PUBLIC_TOOLS_DIR].forEach(dir => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-});
+if (!fs.existsSync(PUBLIC_DIR)) {
+  fs.mkdirSync(PUBLIC_DIR, { recursive: true });
+}
 
-// All 60 tool definitions (20 primary + 3 legacy format aliases + 37 document conversions)
+// All 61 tool definitions (20 primary + avatar-crop + 3 legacy format aliases + 37 document conversions)
 export const ALL_TOOLS_SEO = [
   // ==========================================
   // SECTION 1: 20 PRIMARY STUDIO UTILITIES
@@ -227,6 +224,25 @@ export const ALL_TOOLS_SEO = [
     faqs: [
       { q: 'How does Unsharp Mask differ from basic contrast?', a: 'Unsharp Mask detects high-frequency pixel edges and sharpens contrast along boundaries without blowing out flat areas.' },
       { q: 'Can it fix out-of-focus photos?', a: 'It significantly restores edge clarity and micro-detail on soft photos.' }
+    ]
+  },
+  {
+    id: 'avatar-crop',
+    name: 'Avatar & Profile Cropper',
+    title: 'Free Avatar & Profile Picture Cropper - Circle & Square Crop Online | Zailo Graph',
+    description: 'Crop photos into perfect circular avatars and square profile pictures for Instagram, LinkedIn, Discord, and Twitter with instant preview and lossless export.',
+    keywords: 'avatar cropper, circle photo crop, profile picture cropper, linkedin pfp maker, discord avatar cropper, square photo crop, round avatar generator',
+    category: 'transform',
+    h1: 'Circular & Square Avatar Profile Photo Cropper',
+    howTo: [
+      'Upload your portrait or headshot into the avatar cropper.',
+      'Adjust the circular or square crop overlay to center your face.',
+      'Fine-tune zoom, rotation, and alignment with live circular mask preview.',
+      'Download your finished PNG or WebP avatar ready for instant profile upload.'
+    ],
+    faqs: [
+      { q: 'Can I export an avatar with a transparent circular background?', a: 'Yes. Circular crop exports PNG with alpha transparency around the circular boundary.' },
+      { q: 'Is my photo private?', a: 'Yes. All avatar cropping runs 100% locally in your browser. Zero cloud transmission.' }
     ]
   },
   {
@@ -1112,7 +1128,7 @@ function generateHtmlPage(tool) {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     'name': tool.name,
-    'url': `https://zailograph.com/tools/${tool.id}.html`,
+    'url': `https://zailograph.com/${tool.id}.html`,
     'description': tool.description,
     'applicationCategory': 'MultimediaApplication',
     'operatingSystem': 'Any (Web Browser)',
@@ -1147,7 +1163,7 @@ function generateHtmlPage(tool) {
         '@type': 'ListItem',
         'position': 3,
         'name': tool.name,
-        'item': `https://zailograph.com/tools/${tool.id}.html`
+        'item': `https://zailograph.com/${tool.id}.html`
       }
     ]
   };
@@ -1173,11 +1189,11 @@ function generateHtmlPage(tool) {
   <title>${tool.title}</title>
   <meta name="description" content="${tool.description}" />
   <meta name="keywords" content="${tool.keywords}" />
-  <link rel="canonical" href="https://zailograph.com/tools/${tool.id}.html" />
+  <link rel="canonical" href="https://zailograph.com/${tool.id}.html" />
   
   <!-- Open Graph / Social Sharing -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://zailograph.com/tools/${tool.id}.html" />
+  <meta property="og:url" content="https://zailograph.com/${tool.id}.html" />
   <meta property="og:title" content="${tool.title}" />
   <meta property="og:description" content="${tool.description}" />
   <meta property="og:site_name" content="Zailo Graph" />
@@ -1313,13 +1329,13 @@ function generateHtmlPage(tool) {
     <!-- Explore All 60 Tools Grid -->
     <section class="space-y-4 pt-6 border-t border-neutral-200">
       <div class="flex items-center justify-between">
-        <h2 class="text-lg font-bold text-neutral-900 tracking-tight">Explore The 60 Browser Utilities</h2>
+        <h2 class="text-lg font-bold text-neutral-900 tracking-tight">Explore The 61 Browser Utilities</h2>
         <a href="/" class="text-xs font-semibold text-violet-600 hover:text-violet-700">Studio Hub &rarr;</a>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
         ${ALL_TOOLS_SEO.map(u => `
           <a 
-            href="/tools/${u.id}.html"
+            href="/${u.id}.html"
             class="p-2.5 rounded-xl bg-white hover:bg-neutral-50 border border-neutral-200/80 hover:border-violet-300 transition text-left group shadow-2xs"
           >
             <span class="block text-xs font-bold text-neutral-800 group-hover:text-violet-600 truncate">${u.name}</span>
@@ -1341,18 +1357,19 @@ function generateHtmlPage(tool) {
         <p class="text-xs text-neutral-500">100% Client-Side Image Workspace. No Cloud Transmission.</p>
       </div>
       <div class="text-center text-xs text-neutral-500">
-        <p>&copy; 2026 Zailo Graph by Coralgenz Global &amp; Zorquelz Technologies. All 60 browser utilities are 100% free forever.</p>
+        <p>&copy; 2026 Zailo Graph by Coralgenz Global &amp; Zorquelz Technologies. All 61 browser utilities are 100% free forever.</p>
       </div>
     </div>
   </footer>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>`;
 }
 
-function generateSitemap() {
+function generateSitemap(toolsList) {
   const urls = [
     'https://zailograph.com/',
-    ...ALL_TOOLS_SEO.map(u => `https://zailograph.com/tools/${u.id}.html`)
+    ...toolsList.map(u => `https://zailograph.com/${u.id}.html`)
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -1378,32 +1395,73 @@ Sitemap: https://zailograph.com/sitemap.xml
   console.log('Generated robots.txt.');
 }
 
-function cleanObsoleteFiles() {
-  const validIds = new Set(ALL_TOOLS_SEO.map(t => `${t.id}.html`));
-  [TOOLS_DIR, PUBLIC_TOOLS_DIR].forEach(dir => {
-    if (fs.existsSync(dir)) {
-      const files = fs.readdirSync(dir);
-      for (const file of files) {
-        if (file.endsWith('.html') && !validIds.has(file)) {
-          fs.unlinkSync(path.join(dir, file));
-          console.log(`  Removed obsolete: ${dir}/${file}`);
+function removeDeprecatedToolsDirs() {
+  const legacyToolsDir = path.join(ROOT_DIR, 'tools');
+  const legacyPublicToolsDir = path.join(ROOT_DIR, 'public', 'tools');
+  if (fs.existsSync(legacyToolsDir)) {
+    fs.rmSync(legacyToolsDir, { recursive: true, force: true });
+    console.log('Removed deprecated tools/ directory.');
+  }
+  if (fs.existsSync(legacyPublicToolsDir)) {
+    fs.rmSync(legacyPublicToolsDir, { recursive: true, force: true });
+    console.log('Removed deprecated public/tools/ directory.');
+  }
+}
+
+function cleanObsoleteFiles(toolsList) {
+  removeDeprecatedToolsDirs();
+  const validRootFiles = new Set([
+    'index.html',
+    ...toolsList.map(t => `${t.id}.html`)
+  ]);
+  const rootFiles = fs.readdirSync(ROOT_DIR);
+  for (const file of rootFiles) {
+    if (file.endsWith('.html') && !validRootFiles.has(file)) {
+      const isKnownTool = ALL_TOOLS_SEO.some(t => `${t.id}.html` === file);
+      if (isKnownTool) {
+        fs.unlinkSync(path.join(ROOT_DIR, file));
+        console.log(`  Removed obsolete root file: ${file}`);
+      }
+    }
+  }
+  if (fs.existsSync(PUBLIC_DIR)) {
+    const pubFiles = fs.readdirSync(PUBLIC_DIR);
+    for (const file of pubFiles) {
+      if (file.endsWith('.html') && !validRootFiles.has(file)) {
+        const isKnownTool = ALL_TOOLS_SEO.some(t => `${t.id}.html` === file);
+        if (isKnownTool) {
+          fs.unlinkSync(path.join(PUBLIC_DIR, file));
+          console.log(`  Removed obsolete public file: ${file}`);
         }
       }
     }
-  });
+  }
 }
 
 function run() {
-  console.log(`Generating ${ALL_TOOLS_SEO.length} SEO HTML pages in tools/ and public/tools/...`);
-  cleanObsoleteFiles();
-  for (const tool of ALL_TOOLS_SEO) {
-    const html = generateHtmlPage(tool);
-    fs.writeFileSync(path.join(TOOLS_DIR, `${tool.id}.html`), html, 'utf8');
-    fs.writeFileSync(path.join(PUBLIC_TOOLS_DIR, `${tool.id}.html`), html, 'utf8');
+  const phaseArg = process.env.PHASE || process.argv[2] || '1';
+  let targetTools = ALL_TOOLS_SEO;
+  if (phaseArg === '1') {
+    targetTools = ALL_TOOLS_SEO.slice(0, 30);
+    console.log(`[Phase 1] Generating first 30 tools (out of ${ALL_TOOLS_SEO.length})...`);
+  } else if (phaseArg === '2') {
+    targetTools = ALL_TOOLS_SEO;
+    console.log(`[Phase 2] Generating all ${ALL_TOOLS_SEO.length} tools...`);
+  } else {
+    targetTools = ALL_TOOLS_SEO;
   }
-  generateSitemap();
+
+  cleanObsoleteFiles(targetTools);
+
+  for (const tool of targetTools) {
+    const html = generateHtmlPage(tool);
+    fs.writeFileSync(path.join(ROOT_DIR, `${tool.id}.html`), html, 'utf8');
+    fs.writeFileSync(path.join(PUBLIC_DIR, `${tool.id}.html`), html, 'utf8');
+  }
+
+  generateSitemap(targetTools);
   generateRobots();
-  console.log(`All ${ALL_TOOLS_SEO.length} SEO tool pages generated successfully! Total site pages: ${ALL_TOOLS_SEO.length + 1} (including index.html).`);
+  console.log(`Successfully generated ${targetTools.length} tool HTML pages at root (${ROOT_DIR}) and public/! Total site pages: ${targetTools.length + 1} (including index.html).`);
 }
 
 run();

@@ -2,367 +2,187 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://zailograph.com/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/workflow-recipes.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/workflow-recipes.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/batch-resize.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/batch-resize.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/compression.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/compression.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/document-converter.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/document-converter.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/format-converter.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/format-converter.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/svg-to-png.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/svg-to-png.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/png-to-svg.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/png-to-svg.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/rotate-flip.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/rotate-flip.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/meme-generator.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/meme-generator.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/image-splitter.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/image-splitter.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/sharpen-enhance.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/sharpen-enhance.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/social-presets.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/avatar-crop.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/watermark.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/social-presets.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/collage-maker.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/watermark.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/color-palette.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/collage-maker.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/passport-photo.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/color-palette.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/favicon-studio.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/passport-photo.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/photo-metadata-editor.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/favicon-studio.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/video-metadata-editor.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/photo-metadata-editor.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/privacy-redact.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/video-metadata-editor.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/heic-converter.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/privacy-redact.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/webp-to-raster.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/heic-converter.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/raster-to-webp.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/webp-to-raster.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/word-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/raster-to-webp.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/pdf-to-word.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/word-to-pdf.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/word-doc-to-docx.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/pdf-to-word.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/docx-to-doc.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/word-doc-to-docx.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/txt-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/docx-to-doc.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/rtf-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/txt-to-pdf.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://zailograph.com/tools/pdf-to-rtf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/rtf-to-docx.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/docx-to-rtf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/odt-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/pdf-to-odt.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/odt-to-docx.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/pptx-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/ppt-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/pptx-to-images.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/ppt-to-images.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/pdf-to-pptx.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/ppt-to-pptx.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/xlsx-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/xls-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/xlsx-to-csv.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/xls-to-csv.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/csv-to-xlsx.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/xls-to-xlsx.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/xlsx-to-xls.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/csv-to-xls.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/xls-to-ods.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/ods-to-xls.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/images-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/jpg-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/png-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/webp-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/bmp-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/tiff-to-pdf.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/pdf-to-images.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/pdf-to-jpg.html</loc>
-    <lastmod>2026-11-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zailograph.com/tools/pdf-to-png.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <loc>https://zailograph.com/rtf-to-pdf.html</loc>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
