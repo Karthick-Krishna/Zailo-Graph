@@ -4,10 +4,14 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, '..');
+const TOOLS_DIR = path.join(ROOT_DIR, 'tools');
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
+const PUBLIC_TOOLS_DIR = path.join(PUBLIC_DIR, 'tools');
 const SITEMAP_FILE = path.join(PUBLIC_DIR, 'sitemap.xml');
 const ROBOTS_FILE = path.join(PUBLIC_DIR, 'robots.txt');
 
+if (!fs.existsSync(TOOLS_DIR)) { fs.mkdirSync(TOOLS_DIR, { recursive: true }); }
+if (!fs.existsSync(PUBLIC_TOOLS_DIR)) { fs.mkdirSync(PUBLIC_TOOLS_DIR, { recursive: true }); }
 if (!fs.existsSync(PUBLIC_DIR)) {
   fs.mkdirSync(PUBLIC_DIR, { recursive: true });
 }
@@ -1395,47 +1399,49 @@ Sitemap: https://zailograph.com/sitemap.xml
   console.log('Generated robots.txt.');
 }
 
-function removeDeprecatedToolsDirs() {
-  const legacyToolsDir = path.join(ROOT_DIR, 'tools');
-  const legacyPublicToolsDir = path.join(ROOT_DIR, 'public', 'tools');
-  if (fs.existsSync(legacyToolsDir)) {
-    fs.rmSync(legacyToolsDir, { recursive: true, force: true });
-    console.log('Removed deprecated tools/ directory.');
-  }
-  if (fs.existsSync(legacyPublicToolsDir)) {
-    fs.rmSync(legacyPublicToolsDir, { recursive: true, force: true });
-    console.log('Removed deprecated public/tools/ directory.');
-  }
-}
-
-function cleanObsoleteFiles(toolsList) {
-  removeDeprecatedToolsDirs();
-  const validRootFiles = new Set([
-    'index.html',
-    ...toolsList.map(t => `${t.id}.html`)
-  ]);
+function cleanRootLooseHtmlFiles() {
   const rootFiles = fs.readdirSync(ROOT_DIR);
   for (const file of rootFiles) {
-    if (file.endsWith('.html') && !validRootFiles.has(file)) {
-      const isKnownTool = ALL_TOOLS_SEO.some(t => `${t.id}.html` === file);
-      if (isKnownTool) {
+    if (file.endsWith('.html') && file !== 'index.html' && !file.includes('report')) {
+      const isTool = ALL_TOOLS_SEO.some(t => `${t.id}.html` === file);
+      if (isTool) {
         fs.unlinkSync(path.join(ROOT_DIR, file));
-        console.log(`  Removed obsolete root file: ${file}`);
+        console.log(`  Cleaned loose tool from root: ${file}`);
       }
     }
   }
+}
+
+function cleanPublicLooseHtmlFiles() {
   if (fs.existsSync(PUBLIC_DIR)) {
     const pubFiles = fs.readdirSync(PUBLIC_DIR);
     for (const file of pubFiles) {
-      if (file.endsWith('.html') && !validRootFiles.has(file)) {
-        const isKnownTool = ALL_TOOLS_SEO.some(t => `${t.id}.html` === file);
-        if (isKnownTool) {
+      if (file.endsWith('.html')) {
+        const isTool = ALL_TOOLS_SEO.some(t => `${t.id}.html` === file);
+        if (isTool) {
           fs.unlinkSync(path.join(PUBLIC_DIR, file));
-          console.log(`  Removed obsolete public file: ${file}`);
+          console.log(`  Cleaned loose tool from public/: ${file}`);
         }
       }
     }
   }
+}
+
+function cleanObsoleteFiles(toolsList) {
+  cleanRootLooseHtmlFiles();
+  cleanPublicLooseHtmlFiles();
+  const validIds = new Set(toolsList.map(t => `${t.id}.html`));
+  [TOOLS_DIR, PUBLIC_TOOLS_DIR].forEach(dir => {
+    if (fs.existsSync(dir)) {
+      const files = fs.readdirSync(dir);
+      for (const file of files) {
+        if (file.endsWith('.html') && !validIds.has(file)) {
+          fs.unlinkSync(path.join(dir, file));
+          console.log(`  Removed obsolete in ${path.basename(dir)}/: ${file}`);
+        }
+      }
+    }
+  });
 }
 
 function run() {
@@ -1443,25 +1449,23 @@ function run() {
   let targetTools = ALL_TOOLS_SEO;
   if (phaseArg === '1') {
     targetTools = ALL_TOOLS_SEO.slice(0, 30);
-    console.log(`[Phase 1] Generating first 30 tools (out of ${ALL_TOOLS_SEO.length})...`);
-  } else if (phaseArg === '2') {
-    targetTools = ALL_TOOLS_SEO;
-    console.log(`[Phase 2] Generating all ${ALL_TOOLS_SEO.length} tools...`);
+    console.log(`[Phase 1] Generating first 30 tools in tools/ folder (out of ${ALL_TOOLS_SEO.length})...`);
   } else {
     targetTools = ALL_TOOLS_SEO;
+    console.log(`Generating all ${ALL_TOOLS_SEO.length} tools neatly in tools/ folder...`);
   }
 
   cleanObsoleteFiles(targetTools);
 
   for (const tool of targetTools) {
     const html = generateHtmlPage(tool);
-    fs.writeFileSync(path.join(ROOT_DIR, `${tool.id}.html`), html, 'utf8');
-    fs.writeFileSync(path.join(PUBLIC_DIR, `${tool.id}.html`), html, 'utf8');
+    fs.writeFileSync(path.join(TOOLS_DIR, `${tool.id}.html`), html, 'utf8');
+    fs.writeFileSync(path.join(PUBLIC_TOOLS_DIR, `${tool.id}.html`), html, 'utf8');
   }
 
   generateSitemap(targetTools);
   generateRobots();
-  console.log(`Successfully generated ${targetTools.length} tool HTML pages at root (${ROOT_DIR}) and public/! Total site pages: ${targetTools.length + 1} (including index.html).`);
+  console.log(`Successfully organized all ${targetTools.length} tool HTML pages inside tools/ and public/tools/! Root directory is completely clean.`);
 }
 
 run();

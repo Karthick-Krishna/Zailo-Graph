@@ -6,20 +6,66 @@ import fs from 'fs';
 import path from 'path';
 
 function getMultiPageInputs() {
-  const rootDir = fileURLToPath(new URL('.', import.meta.url));
+  const toolsDir = fileURLToPath(new URL('./tools', import.meta.url));
   const inputs: Record<string, string> = {
-    main: path.resolve(rootDir, 'index.html'),
+    main: fileURLToPath(new URL('./index.html', import.meta.url)),
   };
-  if (fs.existsSync(rootDir)) {
-    const files = fs.readdirSync(rootDir);
+  if (fs.existsSync(toolsDir)) {
+    const files = fs.readdirSync(toolsDir);
     for (const f of files) {
-      if (f.endsWith('.html') && f !== 'index.html' && !f.includes('report')) {
-        const key = path.basename(f, '.html');
-        inputs[key] = path.resolve(rootDir, f);
+      if (f.endsWith('.html')) {
+        const key = `tools/${path.basename(f, '.html')}`;
+        inputs[key] = path.join(toolsDir, f);
       }
     }
   }
   return inputs;
+}
+
+function copyToolsToDistRootPlugin() {
+  return {
+    name: 'copy-tools-to-dist-root',
+    closeBundle() {
+      const distToolsDir = fileURLToPath(new URL('./dist/tools', import.meta.url));
+      const distDir = fileURLToPath(new URL('./dist', import.meta.url));
+      if (fs.existsSync(distToolsDir)) {
+        const files = fs.readdirSync(distToolsDir);
+        for (const file of files) {
+          if (file.endsWith('.html')) {
+            fs.copyFileSync(path.join(distToolsDir, file), path.join(distDir, file));
+          }
+        }
+      }
+    }
+  };
+}
+
+function toolDevRewritePlugin() {
+  return {
+    name: 'tool-dev-rewrite',
+    configureServer(server: any) {
+      server.middlewares.use((req: any, _res: any, next: any) => {
+        if (req.url) {
+          const match = req.url.match(/^\/([a-z0-9-]+)(\.html)?(\?.*)?$/i);
+          if (
+            match &&
+            match[1] !== 'index' &&
+            !match[1].startsWith('@') &&
+            !match[1].startsWith('src') &&
+            !match[1].startsWith('node_modules') &&
+            !match[1].startsWith('assets') &&
+            !match[1].startsWith('public')
+          ) {
+            const toolFile = fileURLToPath(new URL(`./tools/${match[1]}.html`, import.meta.url));
+            if (fs.existsSync(toolFile)) {
+              req.url = `/tools/${match[1]}.html${match[3] || ''}`;
+            }
+          }
+        }
+        next();
+      });
+    }
+  };
 }
 
 // https://vite.dev/config/
@@ -27,6 +73,8 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    toolDevRewritePlugin(),
+    copyToolsToDistRootPlugin(),
   ],
   resolve: {
     alias: {
