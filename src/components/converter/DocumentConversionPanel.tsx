@@ -148,6 +148,11 @@ export const DocumentConversionPanel: React.FC<DocumentConversionPanelProps> = (
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/tools/')) {
+      const cleanPath = window.location.pathname.replace(/^\/tools\//, '/');
+      window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
+    }
+
     const handlePopState = () => {
       if (typeof window !== 'undefined') {
         const match = window.location.pathname.match(/(?:\/tools\/|\/)([a-z0-9-]+)(?:\.html)?/i);

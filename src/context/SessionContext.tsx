@@ -257,6 +257,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
 
   useEffect(() => {
+    // Automatically strip legacy /tools/ prefix from URL address bar if user arrives via old bookmark
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/tools/')) {
+      const cleanPath = window.location.pathname.replace(/^\/tools\//, '/');
+      window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
+    }
+
     const handleUrlChange = () => {
       const pathMatch = window.location.pathname.match(/(?:\/tools\/|\/)([a-z0-9-]+)(?:\.html)?/i);
       if (pathMatch && pathMatch[1] && pathMatch[1] !== 'index') {
