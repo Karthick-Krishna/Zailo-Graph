@@ -2,13 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSession } from '../../context/SessionContext';
 import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
-import { Shield, Trash2, LogOut, ChevronDown, Keyboard, Undo2, Redo2, Layers, Settings, MessageSquare, Star } from 'lucide-react';
+import { Shield, Trash2, LogOut, ChevronDown, Keyboard, Undo2, Redo2, Layers, Settings, MessageSquare, Star, Search } from 'lucide-react';
 
 interface HeaderProps {
   onOpenShortcuts?: () => void;
+  onOpenCommandPalette?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts, onOpenCommandPalette }) => {
   const { user, logout, openAuthModal, openSettings } = useAuth();
   const { 
     images, 
@@ -82,16 +83,31 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
           >
             <Layers className="w-3.5 h-3.5 text-blue-600 shrink-0" />
             <span className="hidden min-[380px]:inline text-[11px]">All Tools </span>
-            <span className="font-mono text-[10px] text-blue-700 bg-blue-100 px-1 py-0.2 rounded font-bold">(20)</span>
+            <span className="font-mono text-[10px] text-blue-700 bg-blue-100 px-1 py-0.2 rounded font-bold">(61)</span>
           </button>
         </div>
 
-        {/* Center: Quiet Status Indicators */}
-        <div className="hidden md:flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-1.5 text-neutral-600">
+        {/* Center: Command Palette Trigger & Status */}
+        <div className="hidden md:flex items-center gap-3 text-xs">
+          {onOpenCommandPalette && (
+            <button
+              onClick={onOpenCommandPalette}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-100/90 hover:bg-neutral-100 active:bg-neutral-200 text-neutral-600 hover:text-neutral-900 border border-neutral-200 text-xs transition cursor-pointer shadow-2xs group"
+              title="Search all 61 tools & actions (Ctrl+K / Cmd+K)"
+              aria-label="Open command palette"
+            >
+              <Search className="w-3.5 h-3.5 text-neutral-400 group-hover:text-blue-600 transition-colors" />
+              <span className="text-[11px] font-medium text-neutral-600 group-hover:text-neutral-900">Search 61 tools...</span>
+              <kbd className="font-mono text-[9px] bg-white border border-neutral-200 px-1.5 py-0.5 rounded text-neutral-500 shadow-2xs group-hover:border-neutral-300">
+                ⌘K
+              </kbd>
+            </button>
+          )}
+
+          <div className="flex items-center gap-1.5 text-neutral-600 pl-1">
             <span className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 animate-pulse"></span>
             <Shield className="w-3.5 h-3.5 text-blue-600" />
-            <span className="font-medium text-neutral-700">100% Private • Zero Cloud Uploads</span>
+            <span className="font-medium text-neutral-700">100% Private</span>
           </div>
 
           {images.length > 0 && (
@@ -133,6 +149,18 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
                 </span>
               )}
             </div>
+          )}
+
+          {/* Mobile Command Palette Button */}
+          {onOpenCommandPalette && (
+            <button
+              onClick={onOpenCommandPalette}
+              className="md:hidden p-1.5 rounded-lg border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 transition cursor-pointer shadow-2xs min-h-[32px] min-w-[32px] flex items-center justify-center"
+              title="Search all 61 tools (⌘K)"
+              aria-label="Search all tools"
+            >
+              <Search className="w-4 h-4 text-neutral-600" />
+            </button>
           )}
 
           {/* Community Reviews & Feedback Hub Button */}

@@ -10,6 +10,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
   if (!isOpen) return null;
 
   const shortcuts = [
+    { key: '⌘ / Ctrl + K', desc: 'Open Command Palette (Search 61 tools & actions)' },
     { key: '⌘ / Ctrl + Z', desc: 'Undo last transformation step' },
     { key: '⌘ / Ctrl + Y', desc: 'Redo transformation step' },
     { key: 'Z', desc: 'Toggle Pixel Inspection Loupe (2× / 4×)' },

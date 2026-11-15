@@ -13,9 +13,11 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { FeedbackModal } from './components/feedback/FeedbackModal';
 import { FloatingFeedbackTrigger } from './components/feedback/FloatingFeedbackTrigger';
 import { FeedbackPage } from './components/feedback/FeedbackPage';
+import { CommandPalette } from './components/common/CommandPalette';
 
 const AppContent: React.FC = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const { closeAuthModal, closeSettings } = useAuth();
   const { 
     images, 
@@ -44,6 +46,13 @@ const AppContent: React.FC = () => {
         return;
       }
 
+      // Cmd/Ctrl + K: Open Command Palette
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => !prev);
+        return;
+      }
+
       // '?' or 'Shift + /' toggles Shortcuts HUD
       if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
         e.preventDefault();
@@ -51,11 +60,12 @@ const AppContent: React.FC = () => {
         return;
       }
 
-      // 'Escape' closes any open modal (Auth, Settings, Shortcuts)
+      // 'Escape' closes any open modal (Auth, Settings, Shortcuts, Command Palette)
       if (e.key === 'Escape') {
         closeAuthModal();
         closeSettings();
         setIsShortcutsOpen(false);
+        setIsCommandPaletteOpen(false);
         return;
       }
 
@@ -120,7 +130,10 @@ const AppContent: React.FC = () => {
       {/* Active Fluid Animated Aurora Gradient Background (Visible on all pages) */}
       <ActiveAuroraBackground />
 
-      <Header onOpenShortcuts={() => setIsShortcutsOpen(true)} />
+      <Header 
+        onOpenShortcuts={() => setIsShortcutsOpen(true)} 
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+      />
       {activeView === 'feedback' ? (
         <main className="flex-1 w-full py-4">
           <FeedbackPage 
@@ -138,6 +151,11 @@ const AppContent: React.FC = () => {
       <OnboardingModal />
       <SettingsModal />
       <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+      <CommandPalette 
+        isOpen={isCommandPaletteOpen} 
+        onClose={() => setIsCommandPaletteOpen(false)} 
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
+      />
       <ToastNotification />
       <FloatingFeedbackTrigger onClick={() => setIsFeedbackModalOpen(true)} />
       <FeedbackModal 
