@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, Star } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
 interface FloatingFeedbackTriggerProps {
   onClick: () => void;
@@ -18,27 +18,25 @@ export const FloatingFeedbackTrigger: React.FC<FloatingFeedbackTriggerProps> = (
       <button
         onClick={onClick}
         type="button"
-        className="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-white/95 hover:bg-white text-neutral-800 border border-neutral-200/90 shadow-lg hover:shadow-xl hover:shadow-blue-500/10 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-        title="Leave feedback or review any of the 61 studio tools"
-        aria-label="Open feedback and reviews popup"
+        className="flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-neutral-900/95 hover:bg-neutral-900 text-neutral-100 border border-neutral-700/80 shadow-xl backdrop-blur-md transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+        title="Quality verification & feedback console for all 61 tools"
+        aria-label="Open feedback console"
       >
-        <div className="relative flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-sky-500 text-white flex items-center justify-center shadow-xs">
-            <MessageSquare className="w-3.5 h-3.5" />
-          </div>
-          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-white animate-pulse" />
+        <div className="w-5 h-5 rounded-full bg-neutral-800 text-cyan-400 flex items-center justify-center shrink-0">
+          <MessageSquare className="w-3 h-3" />
         </div>
 
-        <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-800">
+        <div className="flex items-center gap-2 text-xs font-semibold tracking-tight">
           <span>Feedback</span>
-          {typeof reviewCount === 'number' && reviewCount > 0 && (
-            <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-200">
+          {typeof reviewCount === 'number' && reviewCount > 0 ? (
+            <span className="font-mono text-[10px] text-cyan-300 bg-neutral-800 px-1.5 py-0.5 rounded-full border border-neutral-700">
               {reviewCount}
             </span>
+          ) : (
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
           )}
         </div>
       </button>
     </aside>
   );
 };
-

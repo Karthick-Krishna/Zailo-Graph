@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   Star, 
-  MessageSquare, 
-  Bug, 
-  Lightbulb, 
-  HelpCircle, 
-  Cpu, 
-  ShieldCheck, 
   Send, 
   CheckCircle2, 
-  ExternalLink 
+  ExternalLink,
+  ShieldCheck,
+  Cpu,
+  Monitor,
+  Terminal,
+  FileCode,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { 
   getAllAvailableTools, 
@@ -18,6 +19,7 @@ import {
   submitFeedback 
 } from '../../services/feedbackService';
 import { FeedbackCategory, SystemDiagnostics } from '../../types/feedback';
+import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -25,6 +27,21 @@ interface FeedbackModalProps {
   activeToolId?: string;
   onOpenCommunityPage?: () => void;
 }
+
+const CATEGORY_TABS: { id: FeedbackCategory; label: string; icon: React.FC<{ className?: string }> }[] = [
+  { id: 'review', label: 'Review & Rating', icon: Star },
+  { id: 'bug', label: 'Defect Report', icon: FileCode },
+  { id: 'feature', label: 'Feature Proposal', icon: Sparkles },
+  { id: 'question', label: 'Technical Inquiry', icon: Layers },
+];
+
+const RATING_DESCRIPTIONS: Record<number, string> = {
+  5: '5.0 / 5.0 — Precision Benchmark (Production Ready)',
+  4: '4.0 / 5.0 — Stable Performance (Minor Edge Cases)',
+  3: '3.0 / 5.0 — Functional (Latency / Formatting Variance)',
+  2: '2.0 / 5.0 — Degraded Output Quality',
+  1: '1.0 / 5.0 — Critical Fault / Non-Functional',
+};
 
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   isOpen,
@@ -44,136 +61,187 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [diagnostics, setDiagnostics] = useState<SystemDiagnostics | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submittedRef, setSubmittedRef] = useState<string | null>(null);
 
   const availableTools = getAllAvailableTools();
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
-  // Reset or update active tool when modal opens
+  // Sync active tool and diagnostics when modal opens
   useEffect(() => {
     if (isOpen) {
       setToolId(activeToolId || 'general');
       setDiagnostics(getSystemDiagnostics(activeToolId));
       setIsSuccess(false);
+      setSubmittedRef(null);
+      // Auto focus title input
+      setTimeout(() => titleInputRef.current?.focus(), 100);
     }
   }, [isOpen, activeToolId]);
 
+  // Global key bindings: Escape to close, Ctrl/Cmd + Enter to submit
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (comment.trim() && !isSubmitting) {
+          triggerSubmit();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, comment, isSubmitting, title, rating, category, toolId, authorName, authorEmail, includeDiagnostics]);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const triggerSubmit = () => {
     if (!comment.trim()) return;
 
     setIsSubmitting(true);
     try {
+      const generatedRef = `REF-ZG-${Math.floor(1000 + Math.random() * 9000)}`;
       submitFeedback({
-        authorName: authorName.trim() || 'Anonymous User',
+        authorName: authorName.trim() || 'Verified Contributor',
         authorEmail: authorEmail.trim() || undefined,
         rating,
         category,
         toolId,
-        title: title.trim() || `${category.toUpperCase()}: ${toolId}`,
+        title: title.trim() || `${category.toUpperCase()} Benchmark: ${toolId}`,
         comment: comment.trim(),
         includeDiagnostics,
       });
 
+      setSubmittedRef(generatedRef);
       setIsSuccess(true);
       setTimeout(() => {
         setIsSuccess(false);
         onClose();
         setTitle('');
         setComment('');
-      }, 1600);
+      }, 1800);
     } catch (err) {
-      console.error('Failed to submit feedback:', err);
+      console.error('Failed to submit feedback telemetry:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    triggerSubmit();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-neutral-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
       <div 
-        className="w-full max-w-xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-neutral-200 flex flex-col overflow-hidden text-neutral-900 animate-in zoom-in-95 duration-200"
-        role="dialog"
-        aria-modal="true"
+        className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-neutral-200/90 overflow-hidden my-auto text-neutral-900 animate-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
-        <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between bg-gradient-to-r from-blue-50/50 via-white to-sky-50/30">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
-              <MessageSquare className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-sm sm:text-base font-bold text-neutral-900 flex items-center gap-2">
-                Zailograph Feedback &amp; Review
-                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                  QC Active
+        {/* Executive Corporate Header */}
+        <div className="p-4 sm:p-5 pb-3.5 border-b border-neutral-100 flex items-center justify-between gap-3 bg-neutral-50/80">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <ZailoGraphLogo size="sm" showText={false} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-neutral-900 tracking-tight">
+                  Quality Assurance &amp; Review Console
+                </h3>
+                <span className="hidden sm:inline-flex items-center gap-1 font-mono text-[10px] font-semibold px-2 py-0.5 rounded-md bg-neutral-900 text-white tracking-wide">
+                  QC PROTOCOL
                 </span>
-              </h2>
-              <p className="text-[11px] text-neutral-500">
-                Help us verify all 61 studio tools. 100% private, client-side only.
+              </div>
+              <p className="text-[11px] text-neutral-500 font-medium mt-0.5 truncate">
+                Direct telemetry and verification across all 61 WebAssembly engines
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition cursor-pointer"
-            aria-label="Close dialog"
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="shrink-0 p-2 text-neutral-400 hover:text-neutral-800 active:text-neutral-950 hover:bg-neutral-200/60 rounded-xl transition cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
+            aria-label="Close review dialog"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 pointer-events-none" />
           </button>
         </div>
 
-        {/* Modal Content */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 text-xs">
+        {/* Modal Body */}
+        <div className="p-4 sm:p-6 max-h-[82vh] overflow-y-auto space-y-5">
           {isSuccess ? (
-            <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center animate-bounce">
-                <CheckCircle2 className="w-7 h-7" />
+            <div className="py-12 flex flex-col items-center justify-center text-center space-y-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-neutral-900 text-cyan-400 flex items-center justify-center shadow-md">
+                <CheckCircle2 className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-neutral-900">Thank You! Your feedback was saved.</h3>
-              <p className="text-neutral-500 max-w-sm text-xs">
-                Your review has been added to the Community Discussion board and logged for quality control.
+              <div className="space-y-1">
+                <h4 className="text-base font-bold text-neutral-900 tracking-tight">
+                  Telemetry Successfully Logged
+                </h4>
+                <p className="font-mono text-xs text-neutral-500">
+                  Transaction Signature: <span className="text-neutral-900 font-semibold">{submittedRef || 'REF-ZG-OK'}</span>
+                </p>
+              </div>
+              <p className="text-xs text-neutral-600 max-w-sm leading-relaxed">
+                Your report has been committed to the public Quality Registry and routed to core maintainers.
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Category Pills */}
-              <div>
-                <label className="block font-semibold text-neutral-700 mb-1.5">Feedback Type</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                  {[
-                    { id: 'review', label: 'Review / Rating', icon: Star, color: 'text-amber-500' },
-                    { id: 'bug', label: 'Bug / Glitch', icon: Bug, color: 'text-rose-500' },
-                    { id: 'feature', label: 'Feature Request', icon: Lightbulb, color: 'text-indigo-500' },
-                    { id: 'question', label: 'Question / Help', icon: HelpCircle, color: 'text-emerald-500' },
-                  ].map(cat => {
-                    const Icon = cat.icon;
-                    const isSelected = category === cat.id;
+            <form onSubmit={handleSubmit} className="space-y-4.5">
+              {/* Segmented Category Rail */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                  Submission Classification
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-neutral-100/90 rounded-2xl border border-neutral-200/70">
+                  {CATEGORY_TABS.map(tab => {
+                    const Icon = tab.icon;
+                    const isSelected = category === tab.id;
                     return (
                       <button
                         type="button"
-                        key={cat.id}
-                        onClick={() => setCategory(cat.id as FeedbackCategory)}
-                        className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border text-[11px] font-semibold transition cursor-pointer ${
+                        key={tab.id}
+                        onClick={() => setCategory(tab.id)}
+                        className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
                           isSelected
-                            ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                            : 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-700'
+                            ? 'bg-white text-neutral-950 shadow-xs border border-neutral-200/60'
+                            : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/40'
                         }`}
                       >
-                        <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : cat.color}`} />
-                        <span>{cat.label}</span>
+                        <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-600' : 'text-neutral-400'}`} />
+                        <span className="truncate">{tab.label}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Star Rating (Show prominently on reviews) */}
-              <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 flex items-center justify-between">
+              {/* Quality & Performance Metric (Numerical Scale) */}
+              <div className="p-3.5 rounded-2xl bg-neutral-50/80 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div>
-                  <span className="font-semibold text-neutral-800 block">Experience Rating</span>
-                  <span className="text-[11px] text-neutral-500">
-                    {rating === 5 ? 'Exceptional ⚡' : rating === 4 ? 'Great 👍' : rating === 3 ? 'Average' : 'Needs Polish ⚠️'}
+                  <span className="text-xs font-bold text-neutral-900 block">
+                    Execution Precision Score
+                  </span>
+                  <span className="font-mono text-[11px] text-neutral-500 block mt-0.5">
+                    {RATING_DESCRIPTIONS[rating]}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -185,149 +253,206 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                       onMouseEnter={() => setHoverRating(star)}
                       onMouseLeave={() => setHoverRating(0)}
                       className="p-1 transition-transform hover:scale-110 cursor-pointer"
-                      title={`${star} Star`}
+                      title={`${star} Star Rating`}
                     >
                       <Star
-                        className={`w-5 h-5 ${
+                        className={`w-5 h-5 transition-colors ${
                           (hoverRating || rating) >= star
-                            ? 'text-amber-400 fill-amber-400'
-                            : 'text-neutral-300'
+                            ? 'text-amber-500 fill-amber-500'
+                            : 'text-neutral-200'
                         }`}
                       />
                     </button>
                   ))}
+                  <span className="ml-1.5 font-mono text-xs font-bold px-1.5 py-0.5 rounded-md bg-neutral-200/80 text-neutral-800">
+                    {rating}.0
+                  </span>
                 </div>
               </div>
 
-              {/* Tool Target Selector */}
-              <div>
-                <label className="block font-semibold text-neutral-700 mb-1">
-                  Associated Tool (61 available)
-                </label>
+              {/* Engine Scope Selector (All 61 tools) */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                    Target Engine Scope
+                  </label>
+                  <span className="font-mono text-[10px] text-neutral-400">
+                    61 Active Engines
+                  </span>
+                </div>
                 <select
                   value={toolId}
                   onChange={e => setToolId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs cursor-pointer"
+                  className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50/50 hover:bg-white text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 text-xs cursor-pointer transition font-mono"
                 >
                   {availableTools.map(t => (
                     <option key={t.id} value={t.id}>
-                      [{t.category}] {t.name}
+                      [{t.category.toUpperCase()}] {t.name} ({t.id})
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Title & Comment */}
-              <div className="space-y-2">
-                <div>
-                  <label className="block font-semibold text-neutral-700 mb-1">Title / Headline</label>
+              {/* Headline & Technical Observations */}
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                      Report Summary
+                    </label>
+                    <span className="font-mono text-[10px] text-neutral-400">
+                      {title.length}/100
+                    </span>
+                  </div>
                   <input
+                    ref={titleInputRef}
                     type="text"
                     value={title}
                     onChange={e => setTitle(e.target.value)}
-                    placeholder="e.g. Crisp vector conversion or Issue with 50MB PDF"
-                    className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
-                    maxLength={120}
+                    placeholder="e.g. Sub-pixel interpolation benchmark or Table alignment anomaly"
+                    className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 text-xs transition"
+                    maxLength={100}
                   />
                 </div>
-                <div>
-                  <label className="block font-semibold text-neutral-700 mb-1">
-                    Details &amp; Observations <span className="text-rose-500">*</span>
-                  </label>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                      Technical Observations &amp; Reproduction <span className="text-rose-500">*</span>
+                    </label>
+                    <span className="font-mono text-[10px] text-neutral-400">
+                      {comment.length} characters
+                    </span>
+                  </div>
                   <textarea
                     rows={4}
                     value={comment}
                     onChange={e => setComment(e.target.value)}
                     placeholder={
                       category === 'bug'
-                        ? 'Describe what happened, file type used, and the expected output...'
-                        : 'Share your thoughts, speed feedback, or ideas for improvement...'
+                        ? 'Detail the source file specifications, observed formatting/execution error, and expected RFC/OpenXML standard output...'
+                        : 'Detail engine throughput, visual precision, conversion fidelity, or architectural recommendations...'
                     }
-                    className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs resize-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 text-xs leading-relaxed resize-none transition"
                     required
                   />
                 </div>
               </div>
 
-              {/* Author & Optional Email */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-neutral-700 mb-1">Your Name / Handle</label>
+              {/* Reporter Credentials */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                    Contributor Identifier
+                  </label>
                   <input
                     type="text"
                     value={authorName}
                     onChange={e => setAuthorName(e.target.value)}
-                    placeholder="e.g. Alex or CreativePro"
-                    className="w-full px-3 py-1.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
+                    placeholder="Name or Organization"
+                    className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 text-xs transition"
                   />
                 </div>
-                <div>
-                  <label className="block font-semibold text-neutral-700 mb-1">Email (Optional, for replies)</label>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                    Work Email (Optional)
+                  </label>
                   <input
                     type="email"
                     value={authorEmail}
                     onChange={e => setAuthorEmail(e.target.value)}
-                    placeholder="you@domain.com"
-                    className="w-full px-3 py-1.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
+                    placeholder="corporate@domain.com"
+                    className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 text-xs transition"
                   />
                 </div>
               </div>
 
-              {/* Smart Technical Diagnostics Checkbox */}
-              <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200/60 space-y-1.5">
-                <label className="flex items-start gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={includeDiagnostics}
-                    onChange={e => setIncludeDiagnostics(e.target.checked)}
-                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500"
-                  />
-                  <div className="text-[11px] text-neutral-700">
-                    <span className="font-bold flex items-center gap-1.5 text-blue-950">
-                      <Cpu className="w-3.5 h-3.5 text-blue-600" />
-                      Include non-PII system diagnostics for bug isolation
-                    </span>
-                    <span className="text-neutral-500 block mt-0.5">
-                      Attaches: {diagnostics?.browser || 'Browser'} • {diagnostics?.os || 'OS'} • Wasm SIMD ({diagnostics?.simdSupported ? 'Supported' : 'No'}) • {diagnostics?.screenResolution}
+              {/* Hardware & Environment Telemetry Drawer */}
+              <div className="p-3.5 rounded-2xl bg-neutral-900 text-neutral-300 border border-neutral-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="font-mono text-xs font-bold text-neutral-100 uppercase tracking-wider">
+                      Client Sandbox Diagnostics
                     </span>
                   </div>
-                </label>
-                <div className="flex items-center gap-1 text-[10px] text-blue-800 font-medium pl-5">
-                  <ShieldCheck className="w-3 h-3 text-blue-600" />
-                  Zero files or image contents are ever shared or transmitted.
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[11px] select-none text-neutral-400 hover:text-neutral-200">
+                    <input
+                      type="checkbox"
+                      checked={includeDiagnostics}
+                      onChange={e => setIncludeDiagnostics(e.target.checked)}
+                      className="rounded bg-neutral-800 border-neutral-700 text-cyan-500 focus:ring-0 focus:ring-offset-0"
+                    />
+                    <span>Attach Telemetry</span>
+                  </label>
+                </div>
+
+                {includeDiagnostics && diagnostics && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 font-mono text-[10px] pt-1 border-t border-neutral-800/80 text-neutral-400">
+                    <div className="p-1.5 rounded-lg bg-neutral-800/70 border border-neutral-700/60 truncate">
+                      <span className="text-neutral-500 block">BROWSER</span>
+                      <span className="text-neutral-200 truncate block">{diagnostics.browser}</span>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-neutral-800/70 border border-neutral-700/60 truncate">
+                      <span className="text-neutral-500 block">OS</span>
+                      <span className="text-neutral-200 truncate block">{diagnostics.os}</span>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-neutral-800/70 border border-neutral-700/60 truncate">
+                      <span className="text-neutral-500 block">WASM SIMD</span>
+                      <span className={diagnostics.simdSupported ? 'text-emerald-400' : 'text-neutral-400'}>
+                        {diagnostics.simdSupported ? 'Active' : 'Fallback'}
+                      </span>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-neutral-800/70 border border-neutral-700/60 truncate">
+                      <span className="text-neutral-500 block">VIEWPORT</span>
+                      <span className="text-neutral-200 truncate block">{diagnostics.screenResolution}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-sans">
+                  <ShieldCheck className="w-3 h-3 text-cyan-400 shrink-0" />
+                  <span>Zero-knowledge client isolation. No document binaries or image buffers are transmitted.</span>
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <div className="pt-2 flex items-center justify-between gap-3">
-                {onOpenCommunityPage && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      onOpenCommunityPage();
-                    }}
-                    className="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 text-[11px] transition cursor-pointer"
-                  >
-                    <span>View Community Hub</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </button>
-                )}
-                <div className="flex items-center gap-2 ml-auto">
+              {/* Action Bar & Ergonomics */}
+              <div className="pt-2 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 border-t border-neutral-100">
+                <div className="flex items-center gap-2 text-[11px] text-neutral-400">
+                  {onOpenCommunityPage ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenCommunityPage();
+                      }}
+                      className="text-neutral-700 hover:text-neutral-950 font-semibold flex items-center gap-1 transition cursor-pointer"
+                    >
+                      <span>Public Registry</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </button>
+                  ) : (
+                    <span className="hidden sm:inline font-mono text-[10px]">
+                      Press <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 border border-neutral-200 text-neutral-700 font-mono text-[9px]">⌘+Enter</kbd> to submit
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 justify-end">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-3 py-1.5 rounded-xl border border-neutral-300 text-neutral-700 hover:bg-neutral-100 font-semibold transition cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl border border-neutral-200 text-neutral-700 hover:bg-neutral-100 font-semibold text-xs transition cursor-pointer"
                   >
-                    Cancel
+                    Dismiss
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting || !comment.trim()}
-                    className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-semibold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                    className="px-5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 disabled:opacity-40 text-white font-semibold text-xs flex items-center gap-2 shadow-sm transition cursor-pointer active:scale-98"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>{isSubmitting ? 'Submitting...' : 'Post Feedback'}</span>
+                    <span>{isSubmitting ? 'Transmitting...' : 'Submit Report'}</span>
                   </button>
                 </div>
               </div>
@@ -338,4 +463,3 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     </div>
   );
 };
-
