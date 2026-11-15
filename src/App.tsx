@@ -10,6 +10,9 @@ import { ShortcutsModal } from './components/common/ShortcutsModal';
 import { ToastNotification } from './components/common/ToastNotification';
 import { ActiveAuroraBackground } from './components/common/ActiveAuroraBackground';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { FeedbackModal } from './components/feedback/FeedbackModal';
+import { FloatingFeedbackTrigger } from './components/feedback/FloatingFeedbackTrigger';
+import { FeedbackPage } from './components/feedback/FeedbackPage';
 
 const AppContent: React.FC = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
@@ -21,10 +24,15 @@ const AppContent: React.FC = () => {
     downloadImage, 
     clearWorkspace, 
     setActiveUtilityId,
+    activeUtilityId,
     undo,
     redo,
     canUndo,
     canRedo,
+    activeView,
+    setActiveView,
+    isFeedbackModalOpen,
+    setIsFeedbackModalOpen,
   } = useSession();
 
   // Global Keyboard Shortcuts
@@ -113,12 +121,34 @@ const AppContent: React.FC = () => {
       <ActiveAuroraBackground />
 
       <Header onOpenShortcuts={() => setIsShortcutsOpen(true)} />
-      <Workspace />
+      {activeView === 'feedback' ? (
+        <main className="flex-1 w-full py-4">
+          <FeedbackPage 
+            onBackToStudio={() => setActiveView('studio')}
+            onSelectTool={(toolId) => {
+              setActiveUtilityId(toolId);
+              setActiveView('studio');
+            }}
+          />
+        </main>
+      ) : (
+        <Workspace />
+      )}
       <AuthModal />
       <OnboardingModal />
       <SettingsModal />
       <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
       <ToastNotification />
+      <FloatingFeedbackTrigger onClick={() => setIsFeedbackModalOpen(true)} />
+      <FeedbackModal 
+        isOpen={isFeedbackModalOpen} 
+        onClose={() => setIsFeedbackModalOpen(false)}
+        activeToolId={activeUtilityId}
+        onOpenCommunityPage={() => {
+          setIsFeedbackModalOpen(false);
+          setActiveView('feedback');
+        }}
+      />
     </div>
   );
 };

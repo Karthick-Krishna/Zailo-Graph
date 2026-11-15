@@ -51,6 +51,10 @@ interface SessionContextType {
   batchProgress: BatchProgressState;
   isMobileToolsOpen: boolean;
   setIsMobileToolsOpen: (open: boolean) => void;
+  isFeedbackModalOpen: boolean;
+  setIsFeedbackModalOpen: (open: boolean) => void;
+  activeView: 'studio' | 'feedback';
+  setActiveView: (view: 'studio' | 'feedback') => void;
   
   // Multi-step History Stack
   canUndo: boolean;
@@ -237,6 +241,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { validateFileSize, validateBatchCount, isUtilityUnlocked, openAuthModal } = useAuth();
   const [images, setImages] = useState<ImageItem[]>([]);
   const [activeImageId, setActiveImageId] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<'studio' | 'feedback'>(() => {
+    if (typeof window !== 'undefined') {
+      const p = window.location.pathname.toLowerCase();
+      if (p === '/feedback' || p === '/feedback.html' || p === '/reviews' || p === '/reviews.html' || p.startsWith('/tools/feedback')) {
+        return 'feedback';
+      }
+    }
+    return 'studio';
+  });
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState<boolean>(false);
   const [activeUtilityId, setActiveUtilityId] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       const match = window.location.hash.match(/tool=([a-z0-9-]+)/i);
@@ -264,6 +278,15 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     const handleUrlChange = () => {
+      if (typeof window !== 'undefined') {
+        const p = window.location.pathname.toLowerCase();
+        if (p === '/feedback' || p === '/feedback.html' || p === '/reviews' || p === '/reviews.html' || p.startsWith('/tools/feedback')) {
+          setActiveView('feedback');
+          return;
+        }
+        setActiveView('studio');
+      }
+
       const pathMatch = window.location.pathname.match(/(?:\/tools\/|\/)([a-z0-9-]+)(?:\.html)?/i);
       if (pathMatch && pathMatch[1] && pathMatch[1] !== 'index') {
         const id = pathMatch[1];
@@ -957,6 +980,22 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, 20);
   }, [activeImageId, activeImage]);
 
+  const switchView = useCallback((newView: 'studio' | 'feedback') => {
+    setActiveView(newView);
+    if (typeof window !== 'undefined') {
+      if (newView === 'feedback') {
+        if (window.location.pathname !== '/feedback') {
+          window.history.pushState({ view: 'feedback' }, '', '/feedback');
+        }
+      } else {
+        const targetUrl = activeUtilityId === 'workflow-recipes' ? '/' : `/${activeUtilityId}.html`;
+        if (window.location.pathname !== targetUrl) {
+          window.history.pushState({ tool: activeUtilityId }, '', targetUrl);
+        }
+      }
+    }
+  }, [activeUtilityId]);
+
   const sendToUtility = useCallback((targetUtilityId: string, imageId?: string) => {
     const targetId = imageId || activeImageId;
     if (!targetId) return;
@@ -1340,6 +1379,10 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         batchProgress,
         isMobileToolsOpen,
         setIsMobileToolsOpen,
+        isFeedbackModalOpen,
+        setIsFeedbackModalOpen,
+        activeView,
+        setActiveView: switchView,
         addImages,
         addBase64Image,
         removeImage,

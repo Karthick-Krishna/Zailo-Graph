@@ -1124,6 +1124,25 @@ export const ALL_TOOLS_SEO = [
     faqs: [
       { q: 'Why choose PNG over JPG for PDF extraction?', a: 'PNG avoids compression artifacts around text and line art, making it much sharper for reading.' }
     ]
+  },
+  {
+    id: 'feedback',
+    name: 'Community Reviews & Discussion Hub',
+    title: 'Zailo Graph Community Reviews, Quality Control & Discussion Hub',
+    description: 'Read community reviews, bug reports, and official developer replies across all 61 privacy-first client-side image and document conversion tools on Zailo Graph.',
+    keywords: 'zailograph reviews, zailograph feedback, document converter review, privacy image converter reviews, zailograph bugs, client side wasm converter',
+    category: 'community',
+    h1: 'Zailograph Community Reviews & Quality Control Hub',
+    howTo: [
+      'Browse user reviews, bug reports, and feature requests for all 61 studio tools.',
+      'Check official developer replies and status badges (Resolved, Planned, Verified).',
+      'Submit your own review, star rating, or bug report with optional system diagnostics.',
+      'Export community feedback to a clean spreadsheet CSV.'
+    ],
+    faqs: [
+      { q: 'Are user reviews public?', a: 'Yes. Reviews and feedback posted to the community hub help us monitor quality and keep all 61 conversion tools in top shape.' },
+      { q: 'Can I report a bug for a specific tool?', a: 'Yes. Use the tool dropdown to select any of the 61 converters and attach non-PII browser specs for fast debugging.' }
+    ]
   }
 ];
 

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSession } from '../../context/SessionContext';
 import { ZailoGraphLogo } from '../common/ZailoGraphLogo';
-import { Shield, Trash2, LogOut, ChevronDown, Keyboard, Undo2, Redo2, Layers, Settings } from 'lucide-react';
+import { Shield, Trash2, LogOut, ChevronDown, Keyboard, Undo2, Redo2, Layers, Settings, MessageSquare, Star } from 'lucide-react';
 
 interface HeaderProps {
   onOpenShortcuts?: () => void;
@@ -10,7 +10,22 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
   const { user, logout, openAuthModal, openSettings } = useAuth();
-  const { images, clearWorkspace, undo, redo, canUndo, canRedo, activeHistory, activeHistoryIndex, isMobileToolsOpen, setIsMobileToolsOpen, setActiveUtilityId } = useSession();
+  const { 
+    images, 
+    clearWorkspace, 
+    undo, 
+    redo, 
+    canUndo, 
+    canRedo, 
+    activeHistory, 
+    activeHistoryIndex, 
+    isMobileToolsOpen, 
+    setIsMobileToolsOpen, 
+    setActiveUtilityId,
+    activeView,
+    setActiveView,
+    setIsFeedbackModalOpen
+  } = useSession();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -119,6 +134,25 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
               )}
             </div>
           )}
+
+          {/* Community Reviews & Feedback Hub Button */}
+          <button
+            onClick={() => setActiveView(activeView === 'feedback' ? 'studio' : 'feedback')}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition cursor-pointer shadow-2xs ${
+              activeView === 'feedback'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-100 text-neutral-700'
+            }`}
+            title="Community Reviews, QC Logs & Discussion Hub"
+            aria-label="Open Community Reviews and Feedback"
+          >
+            <MessageSquare className={`w-3.5 h-3.5 ${activeView === 'feedback' ? 'text-white' : 'text-blue-600'}`} />
+            <span className="hidden min-[420px]:inline text-[11px]">Reviews</span>
+            <div className="hidden sm:flex items-center gap-0.5 text-amber-500 font-bold text-[10px]">
+              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+              <span>4.9</span>
+            </div>
+          </button>
 
           {onOpenShortcuts && (
             <button
@@ -256,6 +290,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
                       >
                         <Settings className="w-4 h-4 text-neutral-500" />
                         <span>Account Settings</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setActiveView('feedback');
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100/80 rounded-xl flex items-center gap-2.5 transition cursor-pointer font-medium"
+                      >
+                        <MessageSquare className="w-4 h-4 text-blue-600" />
+                        <span>Community Reviews &amp; QC</span>
                       </button>
 
                       {onOpenShortcuts && (
