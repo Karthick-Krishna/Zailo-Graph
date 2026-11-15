@@ -14,6 +14,8 @@ import {
   convertDocxToRtf,
   convertOdtToPdf,
   convertOdtToDocx,
+  convertPdfToRtf,
+  convertPdfToOdt,
 } from './documentConverter';
 import {
   convertPptxToPdf,
@@ -21,6 +23,7 @@ import {
   convertPptToPptx,
   convertPptxToPpt,
   convertPptxToImages,
+  convertPdfToPptx,
 } from './presentationConverter';
 import {
   convertXlsxToPdf,
@@ -88,6 +91,10 @@ export async function executeDocumentConversion(
         return await convertOdtToPdf(file, onProgress);
       case 'odt-to-docx':
         return await convertOdtToDocx(file, onProgress);
+      case 'pdf-to-rtf':
+        return await convertPdfToRtf(file, onProgress);
+      case 'pdf-to-odt':
+        return await convertPdfToOdt(file, onProgress);
 
       // B. Presentation Conversions
       case 'pptx-to-pdf':
@@ -102,6 +109,8 @@ export async function executeDocumentConversion(
         return await convertPptxToImages(file, 'png', onProgress);
       case 'ppt-to-images':
         return await convertPptxToImages(file, 'png', onProgress);
+      case 'pdf-to-pptx':
+        return await convertPdfToPptx(file, onProgress);
 
       // C. Spreadsheet Conversions
       case 'xlsx-to-pdf':
@@ -143,6 +152,8 @@ export async function executeDocumentConversion(
       case 'pdf-to-jpg':
         return await convertPdfToImages(file, 'jpg', onProgress);
       case 'pdf-to-png':
+        return await convertPdfToImages(file, 'png', onProgress);
+      case 'pdf-to-images':
         return await convertPdfToImages(file, 'png', onProgress);
 
       default:

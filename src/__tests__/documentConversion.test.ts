@@ -34,8 +34,8 @@ describe('Document Conversion System - Registry & Validation', () => {
     expect(categoryIds).toContain('pdf_to_images');
   });
 
-  it('contains all 37 specified conversion operations', () => {
-    expect(CONVERSIONS.length).toBe(37);
+  it('contains all 41 specified conversion operations', () => {
+    expect(CONVERSIONS.length).toBe(41);
 
     // Verify key operations exist
     expect(getConversionById('word-to-pdf')).toBeDefined();
@@ -57,14 +57,18 @@ describe('Document Conversion System - Registry & Validation', () => {
     expect(getConversionById('ods-to-xls')).toBeDefined();
     expect(getConversionById('images-to-pdf')).toBeDefined();
     expect(getConversionById('pdf-to-png')).toBeDefined();
+    expect(getConversionById('pdf-to-pptx')).toBeDefined();
+    expect(getConversionById('pdf-to-rtf')).toBeDefined();
+    expect(getConversionById('pdf-to-odt')).toBeDefined();
+    expect(getConversionById('pdf-to-images')).toBeDefined();
   });
 
   it('categorizes operations accurately', () => {
     const docs = getConversionsByCategory('documents');
-    expect(docs.length).toBe(10);
+    expect(docs.length).toBe(12);
 
     const presentations = getConversionsByCategory('presentations');
-    expect(presentations.length).toBe(6);
+    expect(presentations.length).toBe(7);
 
     const spreadsheets = getConversionsByCategory('spreadsheets');
     expect(spreadsheets.length).toBe(13);
@@ -73,7 +77,7 @@ describe('Document Conversion System - Registry & Validation', () => {
     expect(imagesToPdf.length).toBe(6);
 
     const pdfToImages = getConversionsByCategory('pdf_to_images');
-    expect(pdfToImages.length).toBe(2);
+    expect(pdfToImages.length).toBe(3);
   });
 
   it('validates file extensions and limits properly', () => {

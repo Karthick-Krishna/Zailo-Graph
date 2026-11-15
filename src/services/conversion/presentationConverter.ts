@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import JSZip from 'jszip';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { ConversionProgressState, ConversionResult, ConvertedOutputItem } from '../../types/conversion';
 
 type ProgressCallback = (state: ConversionProgressState) => void;
@@ -402,3 +403,96 @@ export async function convertPptxToImages(
   };
 }
 
+
+
+/**
+ * 6. PDF to PPTX (.pdf -> .pptx)
+ */
+export async function convertPdfToPptx(
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<ConversionResult> {
+  onProgress?.({ status: 'validating', phase: 'Analyzing PDF pages for presentation...', percent: 15 });
+  const arrayBuffer = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+  const pdf = await loadingTask.promise;
+  const numPages = pdf.numPages;
+
+  const slides: ExtractedSlide[] = [];
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+
+  for (let p = 1; p <= numPages; p++) {
+    onProgress?.({
+      status: 'processing',
+      phase: `Converting PDF page ${p} of ${numPages} into presentation slide...`,
+      percent: Math.min(80, Math.round(15 + (p / numPages) * 65))
+    });
+
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const items = (content.items as any[]).map(i => i.str).filter(s => s && s.trim());
+
+    let title = `Slide ${p}`;
+    const bullets: string[] = [];
+
+    if (items.length > 0) {
+      title = items[0].slice(0, 80);
+      bullets.push(...items.slice(1, 10));
+    }
+
+    slides.push({
+      slideNumber: p,
+      title,
+      bullets,
+      rawText: items.join(' '),
+      images: [],
+    });
+  }
+
+  onProgress?.({ status: 'generating', phase: 'Packaging OpenXML PPTX presentation...', percent: 85 });
+  const zip = new JSZip();
+
+  zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>
+  ${slides.map((_, i) => `<Override PartName="/ppt/slides/slide${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`).join('\n')}
+</Types>`);
+
+  zip.file('ppt/presentation.xml', `<p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+  <p:sldSz cx="12192000" cy="6858000"/>
+</p:presentation>`);
+
+  slides.forEach((slide, i) => {
+    const escapedTitle = slide.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const slideXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+  <p:cSld>
+    <p:spTree>
+      <p:sp>
+        <p:txBody>
+          <a:p><a:r><a:t>${escapedTitle}</a:t></a:r></a:p>
+          ${slide.bullets.map(b => {
+            const eb = b.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return `<a:p><a:r><a:t>${eb}</a:t></a:r></a:p>`;
+          }).join('\n')}
+        </p:txBody>
+      </p:sp>
+    </p:spTree>
+  </p:cSld>
+</p:sld>`;
+    zip.file(`ppt/slides/slide${i + 1}.xml`, slideXml);
+  });
+
+  const pptxBlob = await zip.generateAsync({ type: 'blob' });
+
+  onProgress?.({ status: 'done', phase: 'PDF to PPTX complete!', percent: 100 });
+  return {
+    primaryBlob: pptxBlob,
+    primaryFilename: `${baseName}.pptx`,
+    primaryMimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    primarySize: pptxBlob.size,
+    summary: `Converted ${numPages} PDF pages into modern OpenXML PPTX presentation (${(pptxBlob.size / 1024).toFixed(1)} KB).`,
+  };
+}

@@ -2,6 +2,13 @@ import { jsPDF } from 'jspdf';
 import { Document, Paragraph, TextRun, Packer, Table, TableRow, TableCell, WidthType, HeadingLevel } from 'docx';
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+
+function getMammothInput(arrayBuffer: ArrayBuffer) {
+  if (typeof Buffer !== 'undefined') {
+    return { buffer: Buffer.from(arrayBuffer), arrayBuffer } as any;
+  }
+  return { arrayBuffer } as any;
+}
 import JSZip from 'jszip';
 import { ConversionProgressState, ConversionResult } from '../../types/conversion';
 
@@ -171,11 +178,11 @@ export async function convertWordToPdf(
   let html = '';
 
   try {
-    const result = await mammoth.convertToHtml({ arrayBuffer });
+    const result = await mammoth.convertToHtml(getMammothInput(arrayBuffer));
     html = result.value;
   } catch (err) {
     // Fallback for raw text extraction
-    const rawResult = await mammoth.extractRawText({ arrayBuffer }).catch(() => ({ value: '' }));
+    const rawResult = await mammoth.extractRawText(getMammothInput(arrayBuffer)).catch(() => ({ value: '' }));
     html = rawResult.value 
       ? rawResult.value.split('\n\n').map(p => `<p>${p}</p>`).join('')
       : `<p>Document: ${file.name}</p>`;
@@ -379,7 +386,7 @@ export async function convertDocToDocx(
   onProgress?.({ status: 'processing', phase: 'Extracting text and modernizing structure...', percent: 50 });
   let text = '';
   try {
-    const raw = await mammoth.extractRawText({ arrayBuffer });
+    const raw = await mammoth.extractRawText(getMammothInput(arrayBuffer));
     text = raw.value;
   } catch {
     // Binary fallback: extract ASCII/UTF-16 text chunks
@@ -426,7 +433,7 @@ export async function convertDocxToDoc(
   const arrayBuffer = await file.arrayBuffer();
 
   onProgress?.({ status: 'processing', phase: 'Converting to Word compound document...', percent: 50 });
-  const result = await mammoth.convertToHtml({ arrayBuffer });
+  const result = await mammoth.convertToHtml(getMammothInput(arrayBuffer));
   const baseName = file.name.replace(/\.[^/.]+$/, '');
 
   // Microsoft Word natively opens HTML with Word namespace as a rich .doc file
@@ -633,7 +640,7 @@ export async function convertDocxToRtf(
 ): Promise<ConversionResult> {
   onProgress?.({ status: 'validating', phase: 'Reading DOCX paragraphs...', percent: 30 });
   const arrayBuffer = await file.arrayBuffer();
-  const raw = await mammoth.extractRawText({ arrayBuffer });
+  const raw = await mammoth.extractRawText(getMammothInput(arrayBuffer));
   const paragraphs = raw.value.split('\n').filter(Boolean);
 
   const baseName = file.name.replace(/\.[^/.]+$/, '');
@@ -745,6 +752,129 @@ export async function convertOdtToDocx(
     primaryMimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     primarySize: docxBlob.size,
     summary: `Converted OpenDocument Text (.odt) to Word DOCX (${(docxBlob.size / 1024).toFixed(1)} KB).`,
+  };
+}
+
+/**
+ * 12. PDF to RTF (.pdf -> .rtf)
+ */
+export async function convertPdfToRtf(
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<ConversionResult> {
+  onProgress?.({ status: 'validating', phase: 'Loading PDF for RTF extraction...', percent: 20 });
+  const arrayBuffer = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+  const pdf = await loadingTask.promise;
+  const numPages = pdf.numPages;
+
+  let rtfBody = '';
+  for (let p = 1; p <= numPages; p++) {
+    onProgress?.({
+      status: 'processing',
+      phase: `Extracting typography from page ${p} of ${numPages}...`,
+      percent: Math.min(85, Math.round(20 + (p / numPages) * 65))
+    });
+
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const pageText = (content.items as any[])
+      .map(i => i.str)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (numPages > 1) {
+      rtfBody += `\\b\\fs24 --- Page ${p} ---\\b0\\par\\par\n`;
+    }
+    const escaped = pageText.replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}');
+    rtfBody += `${escaped}\\par\\par\n`;
+  }
+
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0\\fswiss\\fcharset0 Calibri;}{\\f1\\froman\\fcharset0 Times New Roman;}}\n` +
+    `{\\colortbl ;\\red15\\green23\\blue42;\\red100\\green116\\blue139;}\n` +
+    `\\viewkind4\\uc1\\pard\\cf1\\b\\fs32 ${baseName}\\cf0\\b0\\par\n` +
+    `\\cf2\\i\\fs18 Converted from PDF (${numPages} pages) via Zailo Graph\\cf0\\i0\\par\\par\n` +
+    `${rtfBody}}`;
+
+  const rtfBlob = new Blob([rtfContent], { type: 'application/rtf' });
+
+  onProgress?.({ status: 'done', phase: 'PDF to RTF complete!', percent: 100 });
+  return {
+    primaryBlob: rtfBlob,
+    primaryFilename: `${baseName}.rtf`,
+    primaryMimeType: 'application/rtf',
+    primarySize: rtfBlob.size,
+    summary: `Extracted ${numPages} PDF pages into Rich Text Format .rtf (${(rtfBlob.size / 1024).toFixed(1)} KB).`,
+  };
+}
+
+/**
+ * 13. PDF to ODT (.pdf -> .odt)
+ */
+export async function convertPdfToOdt(
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<ConversionResult> {
+  onProgress?.({ status: 'validating', phase: 'Opening PDF for ODT package...', percent: 20 });
+  const arrayBuffer = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+  const pdf = await loadingTask.promise;
+  const numPages = pdf.numPages;
+
+  let textXml = '';
+  for (let p = 1; p <= numPages; p++) {
+    onProgress?.({
+      status: 'processing',
+      phase: `Reading page ${p} of ${numPages}...`,
+      percent: Math.min(85, Math.round(20 + (p / numPages) * 65))
+    });
+
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const pageText = (content.items as any[])
+      .map(i => i.str)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (numPages > 1) {
+      textXml += `<text:h text:outline-level="2">Page ${p}</text:h>`;
+    }
+    const escaped = pageText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    textXml += `<text:p>${escaped}</text:p>`;
+  }
+
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  const zip = new JSZip();
+
+  zip.file('mimetype', 'application/vnd.oasis.opendocument.text', { compression: 'STORE' });
+  zip.file('META-INF/manifest.xml', `<?xml version="1.0" encoding="UTF-8"?>
+<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2">
+  <manifest:file-entry manifest:full-path="/" manifest:version="1.2" manifest:media-type="application/vnd.oasis.opendocument.text"/>
+  <manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>
+</manifest:manifest>`);
+
+  zip.file('content.xml', `<?xml version="1.0" encoding="UTF-8"?>
+<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.2">
+  <office:body>
+    <office:text>
+      <text:h text:outline-level="1">${baseName}</text:h>
+      ${textXml}
+    </office:text>
+  </office:body>
+</office:document-content>`);
+
+  const odtBlob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.oasis.opendocument.text' });
+
+  onProgress?.({ status: 'done', phase: 'PDF to ODT complete!', percent: 100 });
+  return {
+    primaryBlob: odtBlob,
+    primaryFilename: `${baseName}.odt`,
+    primaryMimeType: 'application/vnd.oasis.opendocument.text',
+    primarySize: odtBlob.size,
+    summary: `Converted ${numPages} PDF pages to OpenDocument Text .odt (${(odtBlob.size / 1024).toFixed(1)} KB).`,
   };
 }
 
