@@ -106,133 +106,6 @@ export function getSystemDiagnostics(activeToolId?: string): SystemDiagnostics {
   };
 }
 
-/**
- * Default Seed Community Reviews showcasing Nexus Mods style discussion,
- * Developer replies, status badges, and 61-tool coverage.
- */
-const SEED_FEEDBACK: FeedbackItem[] = [
-  {
-    id: 'seed-1',
-    authorName: 'Marcus Vance',
-    authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-    rating: 5,
-    category: 'review',
-    toolId: 'svg-to-png',
-    toolName: 'SVG to PNG Converter',
-    title: 'Cleanest SVG rasterizer on the web — zero blur at 4x',
-    comment: 'Tested high-complexity vector logos with intricate clip paths and gradients. Rendered razor-sharp at 4000px without uploading a single byte to an external server. Truly private and blazing fast with Web Workers.',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3 days ago
-    helpfulCount: 38,
-    status: 'verified',
-    statusNote: 'Verified Conversion Flow',
-    diagnostics: {
-      browser: 'Chrome 131',
-      os: 'Windows 11',
-      screenResolution: '2560x1440',
-      wasmSupported: true,
-      simdSupported: true,
-      hardwareConcurrency: 16,
-    },
-    replies: [
-      {
-        id: 'reply-seed-1',
-        authorName: 'Karthick Krishna',
-        authorRole: 'Creator',
-        isOfficial: true,
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
-        comment: 'Thanks Marcus! We use a dedicated offscreen canvas renderer with sub-pixel anti-aliasing to make sure complex gradients preserve their vector fidelity. Appreciate your feedback!',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
-      }
-    ]
-  },
-  {
-    id: 'seed-2',
-    authorName: 'Elena Rostova',
-    authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-    rating: 5,
-    category: 'review',
-    toolId: 'pdf-to-word',
-    toolName: 'PDF to Word (DOCX)',
-    title: 'Actually outputs editable text, not dumb background images!',
-    comment: 'Every other converter online simply takes a screenshot of the PDF and pastes it into Word. Zailograph actually extracted the tabular data and paragraph structure into genuine OpenXML DOCX. Saved our legal team hours.',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
-    helpfulCount: 52,
-    status: 'verified',
-    replies: [
-      {
-        id: 'reply-seed-2',
-        authorName: 'Zailograph Core Team',
-        authorRole: 'Developer',
-        isOfficial: true,
-        comment: 'That was one of our non-negotiable core principles during development: genuine native DOCX paragraphs, font tables, and cells instead of lazy image embeds.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
-      }
-    ]
-  },
-  {
-    id: 'seed-3',
-    authorName: 'David K.',
-    rating: 4,
-    category: 'feature',
-    toolId: 'batch-resize',
-    toolName: 'Image Resolution Converter',
-    title: 'Would love custom filename prefixes in batch downloads',
-    comment: 'The multi-file aspect ratio scaling is super smooth, but when downloading 40 images in a ZIP, having an option to prepend a custom prefix like "web-optimized-" would be super convenient.',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
-    helpfulCount: 24,
-    status: 'planned',
-    statusNote: 'Scheduled for Next Minor Release',
-    replies: [
-      {
-        id: 'reply-seed-3',
-        authorName: 'Zailograph Team',
-        authorRole: 'Developer',
-        isOfficial: true,
-        comment: 'Great suggestion David! Adding custom prefix & suffix formatting rules for the ZIP packager in the upcoming batch release.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
-      }
-    ]
-  },
-  {
-    id: 'seed-4',
-    authorName: 'Hiroshi Tanaka',
-    rating: 5,
-    category: 'review',
-    toolId: 'compression',
-    toolName: 'Image Compression',
-    title: 'MozJPEG + OxiPNG client-side is mind-blowing',
-    comment: 'Reduced 12MB PNG assets down to 1.8MB with zero visual loss. It runs completely inside browser Web Workers so company NDA mockups never hit third party servers.',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9).toISOString(),
-    helpfulCount: 41,
-    status: 'verified',
-    replies: []
-  },
-  {
-    id: 'seed-5',
-    authorName: 'Sophie Bernard',
-    rating: 4,
-    category: 'question',
-    toolId: 'heic-converter',
-    toolName: 'HEIC / Apple Camera Converter',
-    title: 'Does this handle iPhone Live Photos and ProRAW?',
-    comment: 'Standard HEIC photos convert instantly to JPEG. Does it also unpack the motion MOV part or 48MP ProRAW DNG files?',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 11).toISOString(),
-    helpfulCount: 19,
-    status: 'resolved',
-    statusNote: 'Developer Answered',
-    replies: [
-      {
-        id: 'reply-seed-5',
-        authorName: 'Karthick Krishna',
-        authorRole: 'Creator',
-        isOfficial: true,
-        comment: 'Hi Sophie! For ProRAW DNG files, use our "Camera RAW Processor" tool which has custom tone-mapping. For Live Photos, our current HEIC tool extracts the full-resolution keyframe photo; animated motion extraction is planned for v2.5.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
-      }
-    ]
-  }
-];
-
 export const INITIAL_FAQS: FAQItem[] = [
   {
     id: 'faq-1',
@@ -261,26 +134,33 @@ export const INITIAL_FAQS: FAQItem[] = [
 ];
 
 /**
- * Load all community feedback items
+ * Load all community feedback items. Starts 100% clean with zero mock/placeholder data.
  */
 export function getCommunityFeedback(): FeedbackItem[] {
-  if (typeof window === 'undefined') return SEED_FEEDBACK;
+  if (typeof window === 'undefined') return [];
 
   try {
     const raw = localStorage.getItem(FEEDBACK_STORAGE_KEY);
     if (!raw) {
-      localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(SEED_FEEDBACK));
-      return SEED_FEEDBACK;
+      return [];
     }
     const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    // Purge any legacy placeholder seed items if stored previously
+    const cleanItems = parsed.filter((item: any) => item && typeof item.id === 'string' && !item.id.startsWith('seed-'));
+    if (cleanItems.length !== parsed.length) {
+      localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(cleanItems));
+    }
+
     const upvotedIds = getUpvotedFeedbackIds();
-    return parsed.map((item: FeedbackItem) => ({
+    return cleanItems.map((item: FeedbackItem) => ({
       ...item,
       hasUserUpvoted: upvotedIds.includes(item.id),
     }));
   } catch (e) {
     console.warn('Failed to parse feedback from localStorage', e);
-    return SEED_FEEDBACK;
+    return [];
   }
 }
 
@@ -375,16 +255,28 @@ export function toggleHelpfulUpvote(feedbackId: string): FeedbackItem[] {
  */
 export function addReplyToFeedback(params: {
   feedbackId: string;
-  authorName: string;
-  authorRole: 'Developer' | 'Core Team' | 'Community' | 'Creator';
+  authorName?: string;
+  authorRole: 'Founder' | 'Co-Founder & CTO' | 'Developer' | 'Community';
   comment: string;
 }): FeedbackItem[] {
   const allFeedback = getCommunityFeedback();
+
+  let resolvedName = params.authorName?.trim();
+  const isFounder = params.authorRole === 'Founder';
+  const isCto = params.authorRole === 'Co-Founder & CTO';
+  const isOfficial = isFounder || isCto || params.authorRole === 'Developer';
+
+  if (!resolvedName) {
+    if (isFounder) resolvedName = 'Karthick Krishna';
+    else if (isCto) resolvedName = 'Co-Founder & CTO';
+    else resolvedName = 'Community Member';
+  }
+
   const newReply: FeedbackReply = {
     id: `reply_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-    authorName: params.authorName.trim(),
+    authorName: resolvedName,
     authorRole: params.authorRole,
-    isOfficial: params.authorRole === 'Developer' || params.authorRole === 'Creator' || params.authorRole === 'Core Team',
+    isOfficial,
     comment: params.comment.trim(),
     createdAt: new Date().toISOString(),
   };

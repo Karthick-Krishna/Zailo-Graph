@@ -13,10 +13,12 @@ export interface SystemDiagnostics {
   activeToolId?: string;
 }
 
+export type OfficialRole = 'Founder' | 'Co-Founder & CTO' | 'Developer' | 'Community';
+
 export interface FeedbackReply {
   id: string;
   authorName: string;
-  authorRole: 'Developer' | 'Core Team' | 'Community' | 'Creator';
+  authorRole: OfficialRole;
   isOfficial: boolean;
   avatar?: string;
   comment: string;
@@ -57,3 +59,4 @@ export interface FAQItem {
   answer: string;
   category: 'privacy' | 'conversion' | 'performance' | 'tools';
 }
+

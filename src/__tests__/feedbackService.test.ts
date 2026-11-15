@@ -37,10 +37,9 @@ describe('Feedback & Quality Control Service', () => {
     expect(typeof diag.hardwareConcurrency).toBe('number');
   });
 
-  it('loads seed community feedback when storage is clean', () => {
+  it('starts with 0 placeholder/fake reviews when storage is clean', () => {
     const items = getCommunityFeedback();
-    expect(items.length).toBeGreaterThan(0);
-    expect(items.some(i => i.replies.some(r => r.isOfficial))).toBe(true);
+    expect(items.length).toBe(0);
   });
 
   it('submits a new feedback item and retrieves it', () => {
@@ -59,40 +58,69 @@ describe('Feedback & Quality Control Service', () => {
     expect(newItem.diagnostics).toBeDefined();
 
     const all = getCommunityFeedback();
+    expect(all.length).toBe(1);
     expect(all[0].id).toBe(newItem.id);
   });
 
-  it('toggles upvotes correctly', () => {
-    const items = getCommunityFeedback();
-    const firstId = items[0].id;
-    const initialCount = items[0].helpfulCount;
+  it('toggles upvotes correctly on real submitted feedback', () => {
+    const item = submitFeedback({
+      authorName: 'Tester',
+      rating: 4,
+      category: 'review',
+      toolId: 'compression',
+      title: 'Great compression',
+      comment: 'Reduced file size significantly.',
+      includeDiagnostics: false,
+    });
 
     // Upvote
-    const afterUpvote = toggleHelpfulUpvote(firstId);
-    const targetAfter = afterUpvote.find(i => i.id === firstId);
-    expect(targetAfter?.helpfulCount).toBe(initialCount + 1);
+    const afterUpvote = toggleHelpfulUpvote(item.id);
+    const targetAfter = afterUpvote.find(i => i.id === item.id);
+    expect(targetAfter?.helpfulCount).toBe(1);
     expect(targetAfter?.hasUserUpvoted).toBe(true);
 
     // Toggle off
-    const afterUndo = toggleHelpfulUpvote(firstId);
-    const targetUndo = afterUndo.find(i => i.id === firstId);
-    expect(targetUndo?.helpfulCount).toBe(initialCount);
+    const afterUndo = toggleHelpfulUpvote(item.id);
+    const targetUndo = afterUndo.find(i => i.id === item.id);
+    expect(targetUndo?.helpfulCount).toBe(0);
     expect(targetUndo?.hasUserUpvoted).toBe(false);
   });
 
-  it('adds an official developer reply to a thread', () => {
-    const items = getCommunityFeedback();
-    const targetId = items[0].id;
-
-    const updated = addReplyToFeedback({
-      feedbackId: targetId,
-      authorName: 'Karthick Krishna',
-      authorRole: 'Creator',
-      comment: 'Thanks for bringing this to our attention. Fixed in current build.',
+  it('adds Founder and Co-Founder & CTO official reply badges', () => {
+    const item = submitFeedback({
+      authorName: 'Tester',
+      rating: 5,
+      category: 'bug',
+      toolId: 'pdf-to-word',
+      title: 'Formatting question',
+      comment: 'Check table borders',
+      includeDiagnostics: false,
     });
 
-    const target = updated.find(i => i.id === targetId);
-    expect(target?.replies.some(r => r.comment.includes('Fixed in current build'))).toBe(true);
-    expect(target?.replies.some(r => r.isOfficial)).toBe(true);
+    // Founder reply
+    const founderReplyUpdate = addReplyToFeedback({
+      feedbackId: item.id,
+      authorRole: 'Founder',
+      comment: 'We verified and addressed this table border case.',
+    });
+
+    const targetFounder = founderReplyUpdate.find(i => i.id === item.id);
+    const founderReply = targetFounder?.replies.find(r => r.authorRole === 'Founder');
+    expect(founderReply).toBeDefined();
+    expect(founderReply?.authorName).toBe('Karthick Krishna');
+    expect(founderReply?.isOfficial).toBe(true);
+
+    // Co-Founder & CTO reply
+    const ctoReplyUpdate = addReplyToFeedback({
+      feedbackId: item.id,
+      authorRole: 'Co-Founder & CTO',
+      comment: 'Wasm multi-threading engine has been verified and deployed.',
+    });
+
+    const targetCto = ctoReplyUpdate.find(i => i.id === item.id);
+    const ctoReply = targetCto?.replies.find(r => r.authorRole === 'Co-Founder & CTO');
+    expect(ctoReply).toBeDefined();
+    expect(ctoReply?.authorName).toBe('Co-Founder & CTO');
+    expect(ctoReply?.isOfficial).toBe(true);
   });
 });

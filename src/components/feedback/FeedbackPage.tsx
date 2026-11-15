@@ -46,8 +46,8 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [replyOpenId, setReplyOpenId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
-  const [replyAuthor, setReplyAuthor] = useState('Zailograph Team');
-  const [replyRole, setReplyRole] = useState<'Developer' | 'Creator' | 'Community'>('Developer');
+  const [replyAuthor, setReplyAuthor] = useState('Karthick Krishna');
+  const [replyRole, setReplyRole] = useState<'Founder' | 'Co-Founder & CTO' | 'Community'>('Founder');
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>('faq-1');
 
   // Filters
@@ -76,9 +76,15 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({
 
   const handlePostReply = (feedbackId: string) => {
     if (!replyText.trim()) return;
+    const author = replyRole === 'Founder'
+      ? 'Karthick Krishna'
+      : replyRole === 'Co-Founder & CTO'
+        ? (replyAuthor.trim() || 'Co-Founder & CTO')
+        : (replyAuthor.trim() || 'Community Member');
+
     const updated = addReplyToFeedback({
       feedbackId,
-      authorName: replyAuthor.trim() || 'Zailograph Team',
+      authorName: author,
       authorRole: replyRole,
       comment: replyText.trim(),
     });
@@ -131,7 +137,7 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({
 
   // Metric Computations
   const averageRating = useMemo(() => {
-    if (items.length === 0) return '5.0';
+    if (items.length === 0) return null;
     const sum = items.reduce((acc, curr) => acc + curr.rating, 0);
     return (sum / items.length).toFixed(1);
   }, [items]);
@@ -195,9 +201,11 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({
             <div className="text-center px-2">
               <div className="flex items-center justify-center gap-1 text-amber-400">
                 <Star className="w-5 h-5 fill-amber-400" />
-                <span className="text-2xl font-black text-white">{averageRating}</span>
+                <span className="text-2xl font-black text-white">{averageRating ?? '—'}</span>
               </div>
-              <span className="text-[10px] text-neutral-400 font-medium">Average Score</span>
+              <span className="text-[10px] text-neutral-400 font-medium">
+                {averageRating ? 'Average Score' : 'Awaiting Reviews'}
+              </span>
             </div>
             <div className="w-px h-10 bg-white/10" />
             <div className="text-center px-2">
@@ -333,15 +341,19 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({
               <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
                 <MessageSquare className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-neutral-900">No entries match your filter.</h3>
+              <h3 className="text-sm font-bold text-neutral-900">
+                {items.length === 0 ? 'No reviews or community feedback yet.' : 'No entries match your filter.'}
+              </h3>
               <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-                Try selecting a different tool or clearing your search term, or be the first to leave a review!
+                {items.length === 0 
+                  ? 'Be the first to share your experience, report an issue, or rate any of the 61 studio tools!'
+                  : 'Try selecting a different tool or clearing your search term.'}
               </p>
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="px-4 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition cursor-pointer"
               >
-                Write First Review
+                {items.length === 0 ? 'Write First Review' : 'Create Entry'}
               </button>
             </div>
           ) : (
@@ -521,12 +533,22 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-neutral-900">{reply.authorName}</span>
-                                {reply.isOfficial && (
+                                {reply.authorRole === 'Founder' ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white font-black text-[9px] shadow-2xs border border-blue-400/40">
+                                    <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+                                    <span>Founder</span>
+                                  </span>
+                                ) : reply.authorRole === 'Co-Founder & CTO' ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-cyan-600 to-blue-700 text-white font-black text-[9px] shadow-2xs border border-cyan-400/40">
+                                    <Sparkles className="w-2.5 h-2.5 text-cyan-200" />
+                                    <span>Co-Founder &amp; CTO</span>
+                                  </span>
+                                ) : reply.isOfficial ? (
                                   <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full bg-blue-600 text-white font-bold text-[9px] shadow-2xs">
                                     <Sparkles className="w-2.5 h-2.5" />
-                                    {reply.authorRole}
+                                    <span>{reply.authorRole}</span>
                                   </span>
-                                )}
+                                ) : null}
                               </div>
                               <span className="text-[10px] text-neutral-400">
                                 {new Date(reply.createdAt).toLocaleDateString()}
@@ -545,22 +567,30 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({
                       <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 space-y-2 animate-in fade-in duration-150">
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={replyAuthor}
-                              onChange={e => setReplyAuthor(e.target.value)}
-                              placeholder="Your Name / Handle"
-                              className="px-2.5 py-1 rounded-lg border border-neutral-300 bg-white text-xs w-40"
-                            />
                             <select
                               value={replyRole}
-                              onChange={e => setReplyRole(e.target.value as any)}
-                              className="px-2 py-1 rounded-lg border border-neutral-300 bg-white text-xs cursor-pointer"
+                              onChange={e => {
+                                const role = e.target.value as any;
+                                setReplyRole(role);
+                                if (role === 'Founder') setReplyAuthor('Karthick Krishna');
+                                else if (role === 'Co-Founder & CTO') setReplyAuthor('Co-Founder & CTO');
+                                else setReplyAuthor('');
+                              }}
+                              className="px-2.5 py-1 rounded-lg border border-neutral-300 bg-white text-xs cursor-pointer font-bold text-neutral-800"
                             >
-                              <option value="Developer">Role: Developer (Official)</option>
-                              <option value="Creator">Role: Creator</option>
-                              <option value="Community">Role: Community Member</option>
+                              <option value="Founder">⚡ Founder (Karthick Krishna)</option>
+                              <option value="Co-Founder & CTO">⚡ Co-Founder &amp; CTO</option>
+                              <option value="Community">Community Member</option>
                             </select>
+                            {replyRole === 'Community' && (
+                              <input
+                                type="text"
+                                value={replyAuthor}
+                                onChange={e => setReplyAuthor(e.target.value)}
+                                placeholder="Your Name / Handle"
+                                className="px-2.5 py-1 rounded-lg border border-neutral-300 bg-white text-xs w-40"
+                              />
+                            )}
                           </div>
                           <button
                             type="button"
@@ -653,3 +683,4 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({
     </div>
   );
 };
+

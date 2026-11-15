@@ -31,12 +31,8 @@ export const FloatingFeedbackTrigger: React.FC<FloatingFeedbackTriggerProps> = (
 
         <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-800">
           <span>Feedback</span>
-          <div className="hidden sm:flex items-center gap-0.5 text-amber-500 text-[11px] font-semibold">
-            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-            <span>4.9</span>
-          </div>
           {typeof reviewCount === 'number' && reviewCount > 0 && (
-            <span className="text-[10px] font-mono text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded-full border border-neutral-200">
+            <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-200">
               {reviewCount}
             </span>
           )}
@@ -45,3 +41,4 @@ export const FloatingFeedbackTrigger: React.FC<FloatingFeedbackTriggerProps> = (
     </aside>
   );
 };
+

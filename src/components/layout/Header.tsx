@@ -147,11 +147,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShortcuts }) => {
             aria-label="Open Community Reviews and Feedback"
           >
             <MessageSquare className={`w-3.5 h-3.5 ${activeView === 'feedback' ? 'text-white' : 'text-blue-600'}`} />
-            <span className="hidden min-[420px]:inline text-[11px]">Reviews</span>
-            <div className="hidden sm:flex items-center gap-0.5 text-amber-500 font-bold text-[10px]">
-              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-              <span>4.9</span>
-            </div>
+            <span className="text-[11px]">Reviews</span>
           </button>
 
           {onOpenShortcuts && (
