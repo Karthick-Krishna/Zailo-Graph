@@ -46,3 +46,4 @@ if (problematic.length > 0) {
   console.log('Problematic tools:');
   console.table(problematic);
 }
+

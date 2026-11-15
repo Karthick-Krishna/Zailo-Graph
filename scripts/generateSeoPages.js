@@ -1247,143 +1247,148 @@ function generateHtmlPage(tool) {
   </style>
 </head>
 <body class="bg-[#FAFAFA] text-[#09090B] antialiased selection:bg-neutral-900 selection:text-white min-h-screen flex flex-col justify-between">
-  <!-- Interactive Standalone Tool Mount Root -->
-  <div id="root">
-    <!-- Static Fallback / Crawlable Container (immediately visible to search engines) -->
-    <header class="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-neutral-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2.5 text-neutral-900 font-bold tracking-tight text-base hover:opacity-90 transition">
-          <svg class="w-7 h-7 shrink-0 rounded-xl" viewBox="0 0 48 48" fill="none">
-            <rect width="48" height="48" rx="14" fill="#18181B" />
-            <path d="M14 16H34L20 32H34" stroke="url(#logo_grad_${tool.id})" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="logo_grad_${tool.id}" x1="14" y1="16" x2="34" y2="32" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#8B5CF6"/>
-                <stop offset="0.5" stop-color="#6366F1"/>
-                <stop offset="1" stop-color="#06B6D4"/>
-              </linearGradient>
-            </defs>
-          </svg>
-          <span class="font-extrabold text-lg tracking-tight">Zailo<span class="text-violet-600">Graph</span></span>
-        </a>
-
-        <div class="flex items-center gap-3">
-          <a href="/" class="text-xs font-semibold text-neutral-600 hover:text-neutral-900">Explore All Tools</a>
-          <a href="/" class="px-3.5 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition shadow-xs">
-            Open Studio Hub &rarr;
-          </a>
-        </div>
-      </div>
-    </header>
-
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 text-center">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50 border border-violet-200 text-violet-800 text-xs font-bold mb-4">
-        <span>100% Client-Side WebAssembly</span>
-        <span>•</span>
-        <span>Zero Server Uploads</span>
-      </div>
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight mb-3">
-        ${tool.h1}
-      </h1>
-      <p class="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed">
-        ${tool.description}
-      </p>
-    </div>
-  </div>
+  <!-- Interactive Standalone Tool Mount Root (Clean mount eliminates split-second FOUC flash) -->
+  <div id="root"></div>
 
   <!-- Vite React Module Mount -->
   <script type="module" src="/src/main.tsx"></script>
 
-  <!-- Static Crawlable SEO Body for Search Engines -->
-  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-10 w-full space-y-12 border-t border-neutral-200/80">
-    <!-- Breadcrumb -->
-    <nav class="flex items-center gap-2 text-xs text-neutral-400">
-      <a href="/" class="hover:text-neutral-700">Home</a>
-      <span>&rsaquo;</span>
-      <span class="text-neutral-500 capitalize">${tool.category}</span>
-      <span>&rsaquo;</span>
-      <span class="text-neutral-900 font-medium">${tool.name}</span>
-    </nav>
-
-    <!-- How-To Steps Section -->
-    <section class="bg-white rounded-3xl border border-neutral-200/80 p-6 sm:p-8 shadow-xs space-y-5">
-      <h2 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">How to Use ${tool.name}</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        ${tool.howTo.map((step, idx) => `
-          <div class="flex items-start gap-3 p-4 rounded-2xl bg-neutral-50 border border-neutral-100">
-            <span class="w-6 h-6 rounded-full bg-neutral-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-              ${idx + 1}
-            </span>
-            <p class="text-xs sm:text-sm text-neutral-700 leading-relaxed font-medium">${step}</p>
-          </div>
-        `).join('')}
-      </div>
-    </section>
-
-    <!-- Technical Architecture Highlights -->
-    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="p-5 bg-white rounded-2xl border border-neutral-200/80 shadow-2xs space-y-1.5">
-        <h3 class="text-xs font-bold text-neutral-900 uppercase tracking-wide">Zero Cloud Uploads</h3>
-        <p class="text-xs text-neutral-500 leading-relaxed">Your files never touch remote servers. All processing executes inside your browser memory via WebAssembly.</p>
-      </div>
-      <div class="p-5 bg-white rounded-2xl border border-neutral-200/80 shadow-2xs space-y-1.5">
-        <h3 class="text-xs font-bold text-neutral-900 uppercase tracking-wide">High-Fidelity Output</h3>
-        <p class="text-xs text-neutral-500 leading-relaxed">Master 4K and 8K visual fidelity without forced downsampling, compression artifacts, or added watermarks.</p>
-      </div>
-      <div class="p-5 bg-white rounded-2xl border border-neutral-200/80 shadow-2xs space-y-1.5">
-        <h3 class="text-xs font-bold text-neutral-900 uppercase tracking-wide">Connected Toolchain</h3>
-        <p class="text-xs text-neutral-500 leading-relaxed">Send processed results directly into other Zailo Graph utilities without re-uploading.</p>
-      </div>
-    </section>
-
-    <!-- FAQ Section for Rich Search Snippets -->
-    <section class="bg-white rounded-3xl border border-neutral-200/80 p-6 sm:p-8 shadow-xs space-y-5">
-      <h2 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">Frequently Asked Questions</h2>
-      <div class="space-y-3">
-        ${tool.faqs.map(f => `
-          <div class="p-4 rounded-2xl bg-neutral-50 border border-neutral-100 space-y-1">
-            <h3 class="text-xs sm:text-sm font-bold text-neutral-900">${f.q}</h3>
-            <p class="text-xs text-neutral-600 leading-relaxed">${f.a}</p>
-          </div>
-        `).join('')}
-      </div>
-    </section>
-
-    <!-- Explore All 60 Tools Grid -->
-    <section class="space-y-4 pt-6 border-t border-neutral-200">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-bold text-neutral-900 tracking-tight">Explore The 61 Browser Utilities</h2>
-        <a href="/" class="text-xs font-semibold text-violet-600 hover:text-violet-700">Studio Hub &rarr;</a>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
-        ${ALL_TOOLS_SEO.map(u => `
-          <a 
-            href="/${u.id}.html"
-            class="p-2.5 rounded-xl bg-white hover:bg-neutral-50 border border-neutral-200/80 hover:border-violet-300 transition text-left group shadow-2xs"
-          >
-            <span class="block text-xs font-bold text-neutral-800 group-hover:text-violet-600 truncate">${u.name}</span>
-            <span class="block text-[10px] text-neutral-400 capitalize mt-0.5">${u.category}</span>
+  <!-- Static Fallback for Search Engine Crawlers & Non-JS Browsers (Zero flash for real users) -->
+  <noscript>
+    <div class="static-seo-container">
+      <header class="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-neutral-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <a href="/" class="flex items-center gap-2.5 text-neutral-900 font-bold tracking-tight text-base hover:opacity-90 transition">
+            <svg class="w-7 h-7 shrink-0 rounded-xl" viewBox="0 0 48 48" fill="none">
+              <rect width="48" height="48" rx="14" fill="#18181B" />
+              <path d="M14 16H34L20 32H34" stroke="url(#logo_grad_${tool.id})" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <defs>
+                <linearGradient id="logo_grad_${tool.id}" x1="14" y1="16" x2="34" y2="32" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#8B5CF6"/>
+                  <stop offset="0.5" stop-color="#6366F1"/>
+                  <stop offset="1" stop-color="#06B6D4"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="font-extrabold text-lg tracking-tight">Zailo<span class="text-violet-600">Graph</span></span>
           </a>
-        `).join('')}
-      </div>
-    </section>
-  </main>
 
-  <!-- Static SEO Footer -->
-  <footer class="w-full bg-white text-neutral-600 pt-8 pb-6 border-t border-neutral-200 mt-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-neutral-200">
-        <div class="flex items-center gap-2">
-          <span class="font-extrabold text-base text-neutral-900">Zailo Graph</span>
-          <span class="text-xs text-neutral-500 font-medium">by Coralgenz Global &amp; Zorquelz Technologies</span>
+          <div class="flex items-center gap-3">
+            <a href="/" class="text-xs font-semibold text-neutral-600 hover:text-neutral-900">Explore All Tools</a>
+            <a href="/" class="px-3.5 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition shadow-xs">
+              Open Studio Hub &rarr;
+            </a>
+          </div>
         </div>
-        <p class="text-xs text-neutral-500">100% Client-Side Image Workspace. No Cloud Transmission.</p>
+      </header>
+
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50 border border-violet-200 text-violet-800 text-xs font-bold mb-4">
+          <span>100% Client-Side WebAssembly</span>
+          <span>•</span>
+          <span>Zero Server Uploads</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight mb-3">
+          ${tool.h1}
+        </h1>
+        <p class="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed">
+          ${tool.description}
+        </p>
       </div>
-      <div class="text-center text-xs text-neutral-500">
-        <p>&copy; 2026 Zailo Graph by Coralgenz Global &amp; Zorquelz Technologies. All 61 browser utilities are 100% free forever.</p>
-      </div>
+
+      <!-- Static Crawlable SEO Body for Search Engines -->
+      <main class="max-w-5xl mx-auto px-4 sm:px-6 py-10 w-full space-y-12 border-t border-neutral-200/80">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-xs text-neutral-400">
+          <a href="/" class="hover:text-neutral-700">Home</a>
+          <span>&rsaquo;</span>
+          <span class="text-neutral-500 capitalize">${tool.category}</span>
+          <span>&rsaquo;</span>
+          <span class="text-neutral-900 font-medium">${tool.name}</span>
+        </nav>
+
+        <!-- How-To Steps Section -->
+        <section class="bg-white rounded-3xl border border-neutral-200/80 p-6 sm:p-8 shadow-xs space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">How to Use ${tool.name}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            ${tool.howTo.map((step, idx) => `
+              <div class="flex items-start gap-3 p-4 rounded-2xl bg-neutral-50 border border-neutral-100">
+                <span class="w-6 h-6 rounded-full bg-neutral-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  ${idx + 1}
+                </span>
+                <p class="text-xs sm:text-sm text-neutral-700 leading-relaxed font-medium">${step}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+
+        <!-- Technical Architecture Highlights -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-5 bg-white rounded-2xl border border-neutral-200/80 shadow-2xs space-y-1.5">
+            <h3 class="text-xs font-bold text-neutral-900 uppercase tracking-wide">Zero Cloud Uploads</h3>
+            <p class="text-xs text-neutral-500 leading-relaxed">Your files never touch remote servers. All processing executes inside your browser memory via WebAssembly.</p>
+          </div>
+          <div class="p-5 bg-white rounded-2xl border border-neutral-200/80 shadow-2xs space-y-1.5">
+            <h3 class="text-xs font-bold text-neutral-900 uppercase tracking-wide">High-Fidelity Output</h3>
+            <p class="text-xs text-neutral-500 leading-relaxed">Master 4K and 8K visual fidelity without forced downsampling, compression artifacts, or added watermarks.</p>
+          </div>
+          <div class="p-5 bg-white rounded-2xl border border-neutral-200/80 shadow-2xs space-y-1.5">
+            <h3 class="text-xs font-bold text-neutral-900 uppercase tracking-wide">Connected Toolchain</h3>
+            <p class="text-xs text-neutral-500 leading-relaxed">Send processed results directly into other Zailo Graph utilities without re-uploading.</p>
+          </div>
+        </section>
+
+        <!-- FAQ Section for Rich Search Snippets -->
+        <section class="bg-white rounded-3xl border border-neutral-200/80 p-6 sm:p-8 shadow-xs space-y-5">
+          <h2 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">Frequently Asked Questions</h2>
+          <div class="space-y-3">
+            ${tool.faqs.map(f => `
+              <div class="p-4 rounded-2xl bg-neutral-50 border border-neutral-100 space-y-1">
+                <h3 class="text-xs sm:text-sm font-bold text-neutral-900">${f.q}</h3>
+                <p class="text-xs text-neutral-600 leading-relaxed">${f.a}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+
+        <!-- Explore All 60 Tools Grid -->
+        <section class="space-y-4 pt-6 border-t border-neutral-200">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-neutral-900 tracking-tight">Explore The 61 Browser Utilities</h2>
+            <a href="/" class="text-xs font-semibold text-violet-600 hover:text-violet-700">Studio Hub &rarr;</a>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+            ${ALL_TOOLS_SEO.map(u => `
+              <a 
+                href="/${u.id}.html"
+                class="p-2.5 rounded-xl bg-white hover:bg-neutral-50 border border-neutral-200/80 hover:border-violet-300 transition text-left group shadow-2xs"
+              >
+                <span class="block text-xs font-bold text-neutral-800 group-hover:text-violet-600 truncate">${u.name}</span>
+                <span class="block text-[10px] text-neutral-400 capitalize mt-0.5">${u.category}</span>
+              </a>
+            `).join('')}
+          </div>
+        </section>
+      </main>
+
+      <!-- Static SEO Footer -->
+      <footer class="w-full bg-white text-neutral-600 pt-8 pb-6 border-t border-neutral-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-neutral-200">
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-base text-neutral-900">Zailo Graph</span>
+              <span class="text-xs text-neutral-500 font-medium">by Coralgenz Global &amp; Zorquelz Technologies</span>
+            </div>
+            <p class="text-xs text-neutral-500">100% Client-Side Image Workspace. No Cloud Transmission.</p>
+          </div>
+          <div class="text-center text-xs text-neutral-500">
+            <p>&copy; 2026 Zailo Graph by Coralgenz Global &amp; Zorquelz Technologies. All 61 browser utilities are 100% free forever.</p>
+          </div>
+        </div>
+      </footer>
     </div>
-  </footer>
+  </noscript>
+</body>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>`;
